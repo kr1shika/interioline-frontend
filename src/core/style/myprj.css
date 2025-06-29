@@ -1,0 +1,508 @@
+.my-projects-page {
+    background-color: #FCFCEC;
+    color: #BE7B5D;
+    font-family: 'Arial', sans-serif;
+    min-height: 100vh;
+}
+
+.my-projects-page h2 {
+    font-size: 26px;
+    margin-bottom: 30px;
+}
+
+.page-content {
+    padding: 28px 50px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.profile-section {
+    padding-bottom: 15px;
+    margin-left: -5px;
+    margin-bottom: 10px;
+    max-width: 100px;
+}
+
+.profile-content {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.profile-avatar {
+    flex-shrink: 0;
+}
+
+.profile-image {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #F1D5BC;
+}
+
+.profile-info {
+    flex: 1;
+}
+
+.profile-name {
+    font-size: 20px;
+    font-weight: bold;
+    margin: 0 0 8px 0;
+    color: #BE7B5D;
+}
+
+.profile-email {
+    font-size: 14px;
+    color: #9d6a52;
+    margin: 0;
+}
+
+.profile-actions {
+    flex-shrink: 0;
+}
+
+.edit-profile-btn {
+    background-color: transparent;
+    border: 1px solid #BE7B5D;
+    color: #BE7B5D;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.edit-profile-btn:hover {
+    background-color: #BE7B5D;
+    color: white;
+}
+
+.start-banner {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(to bottom, rgba(252, 252, 236, 0.519), rgba(184, 127, 104, 0.303));
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border: 1px solid #b869457d;
+    border-radius: 16px;
+    padding: 12px 30px;
+    margin-bottom: 24px;
+    gap: 20px;
+}
+
+.start-banner img {
+    height: 140px;
+    flex-shrink: 0;
+}
+
+.banner-text h3 {
+    font-size: 24px;
+    font-weight: bold;
+    color: #a4502fdc;
+    margin-bottom: 5px;
+}
+
+.banner-text p {
+    font-size: 16px;
+    font-weight: 580;
+    margin-bottom: 10px;
+    color: #B87E68;
+}
+
+.start-btn {
+    background-color: #B86A45;
+    color: white;
+    border: none;
+    font-weight: 580;
+    padding: 7px 12px;
+    font-size: 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.start-btn:hover {
+    background-color: #9d6a52;
+}
+
+.section-heading {
+    font-size: 20px;
+    margin-bottom: 20px;
+}
+
+.project-list {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.project-card {
+    background-color: #f1e8d764;
+    border-radius: 12px;
+    padding: 16px 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border: 1px solid #b869457d;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: box-shadow 0.3s ease;
+}
+
+.project-card:hover {
+    box-shadow: 0 8px 20px rgba(144, 94, 71, 0.474);
+}
+
+.project-card-content {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    gap: 20px;
+}
+
+.project-card img {
+    min-height: 100px;
+    min-width: 130px;
+    flex-shrink: 0;
+    width: 100px;
+
+}
+
+.project-info {
+    flex: 1;
+}
+
+.project-info h4 {
+    font-size: 20px;
+    font-weight: bold;
+    margin-bottom: -10px;
+}
+
+.project-info p {
+    margin: 2px 0;
+    font-size: 10px;
+
+}
+
+.status-section {
+    margin: 15px 0;
+
+}
+
+.status-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 15px 0;
+}
+
+.status-dropdown {
+    background-color: #F1D5BC;
+    border: 1px solid #BE7B5D;
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-size: 14px;
+    color: #BE7B5D;
+    cursor: pointer;
+}
+
+.status-dropdown:focus {
+    outline: none;
+    border-color: #9d6a52;
+}
+
+.progress-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.progress-bar {
+    min-width: 90%;
+    height: 5px;
+    background-color: #EBD6C8;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #BE7B5D, #9d6a52);
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+.progress-text {
+    font-size: 12px;
+    font-weight: bold;
+    color: #9d6a5250;
+    min-width: 35px;
+    margin-top: -9px;
+}
+
+.created-at {
+    font-size: 0.5rem;
+    font-weight: 500;
+    color: #9c330266;
+}
+
+.project-actions {
+    flex-shrink: 0;
+}
+
+.action-btn {
+    background-color: transparent;
+    border: 1px solid #BE7B5D;
+    color: #BE7B5D;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    margin-right: 18px;
+    transition: all 0.3s ease;
+}
+
+.action-btn:hover {
+    background-color: #BE7B5D;
+    color: white;
+}
+
+.no-projects {
+    text-align: center;
+    padding: 40px 20px;
+    color: #9d6a52;
+    font-style: italic;
+}
+
+
+/* Large screens */
+@media (min-width: 1200px) {
+
+
+    .project-list {
+        gap: 20px;
+    }
+
+    .project-card {
+        padding: 20px 25px;
+    }
+
+    .project-card-content {
+        gap: 25px;
+    }
+
+    .project-card img {
+        height: 52px;
+    }
+
+    .progress-bar {
+        width: 150px;
+    }
+}
+
+@media (max-width: 900px) {
+    .page-content {
+        padding: 24px 40px;
+    }
+
+    .my-projects-page h2 {
+        font-size: 24px;
+        margin-bottom: 28px;
+    }
+
+    .profile-section {
+        padding-bottom: 14px;
+        margin-bottom: 9px;
+        max-width: 100%;
+    }
+
+    .profile-content {
+        gap: 18px;
+    }
+
+    .profile-image {
+        width: 70px;
+        height: 70px;
+        border: 2px solid #F1D5BC;
+    }
+
+    .profile-name {
+        font-size: 18px;
+        margin: 0 0 7px 0;
+    }
+
+    .profile-email {
+        font-size: 13px;
+    }
+
+    .edit-profile-btn {
+        padding: 9px 18px;
+        font-size: 13px;
+    }
+
+    .start-banner {
+        padding: 18px 25px;
+        margin-bottom: 22px;
+        gap: 18px;
+    }
+
+    .start-banner img {
+        height: 120px;
+    }
+
+    .banner-text h3 {
+        font-size: 22px;
+        margin-bottom: 4px;
+    }
+
+    .banner-text p {
+        font-size: 15px;
+        margin-bottom: 9px;
+    }
+
+    .start-btn {
+        padding: 6px 11px;
+        font-size: 14px;
+    }
+
+    .section-heading {
+        font-size: 19px;
+        margin-bottom: 18px;
+    }
+
+    .project-list {
+        gap: 16px;
+    }
+
+    .project-card {
+        padding: 15px 18px;
+    }
+
+    .project-card-content {
+        gap: 18px;
+    }
+
+    .project-card img {
+        /* min-height: 90px;
+        min-width: 115px; */
+        width: 100px;
+    }
+
+    .project-info h4 {
+        font-size: 18px;
+        margin-bottom: -9px;
+    }
+
+    .project-info p {
+        font-size: 9px;
+    }
+
+    .status-section {
+        margin: 14px 0;
+    }
+
+    .status-row {
+        margin: 14px 0;
+        gap: 7px;
+    }
+
+    .status-dropdown {
+        padding: 3px 7px;
+        font-size: 13px;
+    }
+
+    .progress-container {
+        gap: 9px;
+    }
+
+    .progress-bar {
+        min-width: 88%;
+        height: 4px;
+    }
+
+    .progress-text {
+        font-size: 11px;
+        margin-top: -8px;
+        min-width: 32px;
+    }
+
+    .created-at {
+        font-size: 0.47rem;
+    }
+
+    .action-btn {
+        padding: 7px 14px;
+        font-size: 13px;
+        margin-right: 16px;
+        margin-top: 9px;
+    }
+}
+
+/* Add this to your myprj.css file */
+
+/* Edit Profile Popup Overlay */
+.edit-profile-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 1rem;
+}
+
+/* Make sure the edit profile container appears above the overlay */
+.edit-profile-overlay .edit-profile-container {
+    position: relative;
+    z-index: 1001;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+/* Optional: Add some animation for smooth appearance */
+.edit-profile-overlay {
+    animation: fadeIn 0.2s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.edit-profile-overlay .edit-profile-container {
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Ensure the FiEdit icon is clickable */
+.profile-actions {
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 0.25rem;
+    transition: background-color 0.2s ease;
+}
+
+.profile-actions:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+}
