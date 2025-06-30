@@ -8,9 +8,10 @@ import {
     Lightbulb,
     Package,
     Sofa,
-    Table
+    Table,
+    X
 } from "lucide-react";
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { furnitureCatalog, getAllCategories, getCategoryStats, getStyleStats, searchFurniture } from "./furniture-Catalog";
 import './FurnitureCatalog.css';
 
@@ -48,6 +49,10 @@ const FurnitureCatalog = ({
     const [addingItemId, setAddingItemId] = useState(null);
     const [brokenImages, setBrokenImages] = useState(new Set());
     const [showFilters, setShowFilters] = useState(false);
+
+    // For floating card positioning
+    const [cardPosition, setCardPosition] = useState({ top: 0, left: 0 });
+    const containerRef = useRef(null);
 
     // Filter furniture items with multiple criteria
     const filteredFurniture = useMemo(() => {
@@ -143,167 +148,199 @@ const FurnitureCatalog = ({
         setPriceRange([0, 1500]);
     };
 
+    // Calculate card position when item is selected
+    useEffect(() => {
+        if (selectedItem && containerRef.current) {
+            const containerRect = containerRef.current.getBoundingClientRect();
+            const sidebarWidth = 450; // Width of sidebar
+
+            setCardPosition({
+                top: containerRect.top - 40, // Position from top of viewport
+                left: containerRect.left + sidebarWidth + 10, // Position to the right of sidebar with gap
+            });
+        }
+    }, [selectedItem]);
+
     return (
-        <div className="furniture-catalog-container">
-            {/* Header */}
-            <div className="catalog-header">
-                <div className="catalog-title-section">
-                    <Download className="catalog-icon" />
-                    <h2 className="catalog-title">3D Furniture Catalog</h2>
+        <>
+            <div className="furniture-catalog-container" ref={containerRef}>
+                {/* Header */}
+                <div className="catalog-header">
+                    <div className="catalog-title-section">
+                        <Download className="catalog-icon" />
+                        <h2 className="catalog-title">3D Furniture Catalog</h2>
+                    </div>
                 </div>
-            </div>
 
-            {/* Search */}
-            <div className="search-container">
-                <input
-                    type="text"
-                    placeholder="Search 3D furniture models..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="search-input"
-                />
-            </div>
+                {/* Search */}
+                <div className="search-container">
+                    <input
+                        type="text"
+                        placeholder="Search 3D furniture models..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="search-input"
+                    />
+                </div>
 
-            {/* Advanced Filters */}
-            {showFilters && (
-                <div className="advanced-filters">
-                    <div className="filters-header">
-                        <h3 className="filters-title">Advanced Filters</h3>
+                {/* Advanced Filters */}
+                {showFilters && (
+                    <div className="advanced-filters">
+                        <div className="filters-header">
+                            <h3 className="filters-title">Advanced Filters</h3>
+                            <button
+                                onClick={resetFilters}
+                                className="reset-filters-btn"
+                            >
+                                Reset All
+                            </button>
+                        </div>
+
+                        {/* Style Filter */}
+                        <div className="filter-group">
+                            <label className="filter-label">Style</label>
+                            <div className="filter-buttons">
+                                <button
+                                    onClick={() => setActiveStyle("all")}
+                                    className={`filter-btn ${activeStyle === "all" ? "active" : ""}`}
+                                >
+                                    All Styles
+                                </button>
+                                {Object.entries(styleStats).map(([style, stats]) => (
+                                    <button
+                                        key={style}
+                                        onClick={() => setActiveStyle(style)}
+                                        className={`filter-btn ${activeStyle === style ? "active" : ""}`}
+                                        title={`${stats.count} items, avg ${stats.avgPrice}`}
+                                    >
+                                        {style} ({stats.count})
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Category filters */}
+                <div className="category-section">
+                    <div className="category-buttons">
                         <button
-                            onClick={resetFilters}
-                            className="reset-filters-btn"
+                            onClick={() => setActiveCategory("all")}
+                            className={`category-btn all ${activeCategory === "all" ? "active" : ""}`}
                         >
-                            Reset All
+                            All ({furnitureCatalog.length})
+                        </button>
+                        {categories.map((category) => {
+                            const stats = categoryStats[category];
+                            return (
+                                <button
+                                    key={category}
+                                    onClick={() => setActiveCategory(category)}
+                                    className={`category-btn category ${activeCategory === category ? "active" : ""}`}
+                                    title={`${stats.count} items`}
+                                >
+                                    {categoryIcons[category]}
+                                    {category} ({stats.count})
+                                </button>
+                            );
+                        })}
+                    </div>
+                </div>
+
+                {/* Results summary */}
+                {(searchQuery || activeCategory !== "all" || activeStyle !== "all" || priceRange[0] > 0 || priceRange[1] < 1500) && (
+                    <div className="results-summary">
+                        <div className="results-info">
+                            <span className="results-text">
+                                Showing {filteredFurniture.length} of {furnitureCatalog.length} models
+                            </span>
+                        </div>
+                    </div>
+                )}
+
+                {/* Debug info for broken images */}
+                {brokenImages.size > 0 && (
+                    <div className="debug-info">
+                        {brokenImages.size} image(s) failed to load. Showing fallback previews.
+                    </div>
+                )}
+
+                {/* Furniture grid */}
+                <div className="furniture-grid">
+                    {filteredFurniture.map((item) => (
+                        <div
+                            key={item.id}
+                            className={`furniture-item-card ${selectedFurnitureItem === item.id ? "selected" : ""}`}
+                            onClick={() => setSelectedFurnitureItem(item.id)}
+                        >
+                            {/* Item image */}
+                            {renderFurnitureImage(item)}
+
+                            {/* Item info */}
+                            <div className="item-info">
+                                <h4 className="item-name">
+                                    {item.name}
+                                </h4>
+
+                                <div className="item-meta">
+                                    <span className={`item-badge ${categoryColors[item.category] || "default"}`}>
+                                        {item.type}
+                                    </span>
+                                    <span className="item-dimensions">
+                                        {item.dimensions.width}×{item.dimensions.depth}m
+                                    </span>
+                                </div>
+
+                                <div className="item-material">
+                                    {item.material}
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+
+                {filteredFurniture.length === 0 && (
+                    <div className="empty-state">
+                        <Package className="empty-state-icon" />
+                        <h3 className="empty-state-title">No 3D Models Found</h3>
+                        <p className="empty-state-text">
+                            No furniture models match your current search criteria.
+                        </p>
+                        <button
+                            onClick={() => {
+                                resetFilters();
+                            }}
+                            className="empty-state-btn"
+                        >
+                            Clear filters
+                        </button>
+                    </div>
+                )}
+            </div>
+
+            {/* Floating Item Details Card */}
+            {selectedItem && (
+                <div
+                    className="floating-item-card"
+                    style={{
+                        position: 'fixed',
+                        top: `${cardPosition.top}px`,
+                        left: `${cardPosition.left}px`,
+                        zIndex: 1000,
+                    }}
+                >
+                    <div className="floating-card-header">
+                        <h3 className="floating-card-title">{selectedItem.name}</h3>
+                        <button
+                            className="floating-card-close"
+                            onClick={() => setSelectedFurnitureItem("")}
+                        >
+                            <X className="w-4 h-4" />
                         </button>
                     </div>
 
-                    {/* Style Filter */}
-                    <div className="filter-group">
-                        <label className="filter-label">Style</label>
-                        <div className="filter-buttons">
-                            <button
-                                onClick={() => setActiveStyle("all")}
-                                className={`filter-btn ${activeStyle === "all" ? "active" : ""}`}
-                            >
-                                All Styles
-                            </button>
-                            {Object.entries(styleStats).map(([style, stats]) => (
-                                <button
-                                    key={style}
-                                    onClick={() => setActiveStyle(style)}
-                                    className={`filter-btn ${activeStyle === style ? "active" : ""}`}
-                                    title={`${stats.count} items, avg ${stats.avgPrice}`}
-                                >
-                                    {style} ({stats.count})
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            {/* Category filters */}
-            <div className="category-section">
-                <p className="category-label">Categories</p>
-                <div className="category-buttons">
-                    <button
-                        onClick={() => setActiveCategory("all")}
-                        className={`category-btn all ${activeCategory === "all" ? "active" : ""}`}
-                    >
-                        All ({furnitureCatalog.length})
-                    </button>
-                    {categories.map((category) => {
-                        const stats = categoryStats[category];
-                        return (
-                            <button
-                                key={category}
-                                onClick={() => setActiveCategory(category)}
-                                className={`category-btn category ${activeCategory === category ? "active" : ""}`}
-                                title={`${stats.count} items`}
-                            >
-                                {categoryIcons[category]}
-                                {category} ({stats.count})
-                            </button>
-                        );
-                    })}
-                </div>
-            </div>
-
-            {/* Results summary */}
-            {(searchQuery || activeCategory !== "all" || activeStyle !== "all" || priceRange[0] > 0 || priceRange[1] < 1500) && (
-                <div className="results-summary">
-                    <div className="results-info">
-                        <span className="results-text">
-                            Showing {filteredFurniture.length} of {furnitureCatalog.length} models
-                        </span>
-                    </div>
-                </div>
-            )}
-
-            {/* Debug info for broken images */}
-            {brokenImages.size > 0 && (
-                <div className="debug-info">
-                    {brokenImages.size} image(s) failed to load. Showing fallback previews.
-                </div>
-            )}
-
-            {/* Furniture grid */}
-            <div className="furniture-grid">
-                {filteredFurniture.map((item) => (
-                    <div
-                        key={item.id}
-                        className={`furniture-item-card ${selectedFurnitureItem === item.id ? "selected" : ""}`}
-                        onClick={() => setSelectedFurnitureItem(item.id)}
-                    >
-                        {/* Item image */}
-                        {renderFurnitureImage(item)}
-
-                        {/* Item info */}
-                        <div className="item-info">
-                            <h4 className="item-name">
-                                {item.name}
-                            </h4>
-
-                            <div className="item-meta">
-                                <span className={`item-badge ${categoryColors[item.category] || "default"}`}>
-                                    {item.type}
-                                </span>
-                                <span className="item-dimensions">
-                                    {item.dimensions.width}×{item.dimensions.depth}m
-                                </span>
-                            </div>
-
-                            <div className="item-material">
-                                {item.material}
-                            </div>
-                        </div>
-                    </div>
-                ))}
-            </div>
-
-            {filteredFurniture.length === 0 && (
-                <div className="empty-state">
-                    <Package className="empty-state-icon" />
-                    <h3 className="empty-state-title">No 3D Models Found</h3>
-                    <p className="empty-state-text">
-                        No furniture models match your current search criteria.
-                    </p>
-                    <button
-                        onClick={() => {
-                            resetFilters();
-                        }}
-                        className="empty-state-btn"
-                    >
-                        Clear filters
-                    </button>
-                </div>
-            )}
-
-            {/* Selected item details */}
-            {selectedItem && (
-                <div className="selected-item-details">
-                    <div className="selected-item-header">
-                        <div className="selected-item-image">
+                    <div className="floating-card-content">
+                        <div className="floating-item-image">
                             {!brokenImages.has(selectedItem.id) && selectedItem.imagePath ? (
                                 <img
                                     src={selectedItem.imagePath}
@@ -311,91 +348,70 @@ const FurnitureCatalog = ({
                                     onError={() => handleImageError(selectedItem.id)}
                                 />
                             ) : (
-                                <div className="selected-item-image-fallback">
+                                <div className="floating-image-fallback">
                                     <Package className="fallback-icon" />
                                 </div>
                             )}
                         </div>
 
-                        <div className="selected-item-content">
-                            <div className="selected-item-title-row">
-                                <h3 className="selected-item-title">
-                                    {selectedItem.name}
-                                </h3>
-                                {selectedItem.price && (
-                                    <div className="selected-item-price">
-                                        <DollarSign className="price-icon" />
-                                        {selectedItem.price}
-                                    </div>
-                                )}
-                            </div>
+                        <div className="floating-item-details">
+                            {selectedItem.price && (
+                                <div className="floating-item-price">
+                                    <DollarSign className="price-icon" />
+                                    {selectedItem.price}
+                                </div>
+                            )}
 
-                            <p className="selected-item-description">
+                            <p className="floating-item-description">
                                 {selectedItem.description}
                             </p>
 
-                            <div className="selected-item-specs">
-                                <div className="spec-item">
-                                    <span className="spec-label">Dimensions:</span>
-                                    <div className="spec-value">
+                            <div className="floating-item-specs">
+                                <div className="spec-row">
+                                    <span className="spec-label">Size:</span>
+                                    <span className="spec-value">
                                         {selectedItem.dimensions.width} × {selectedItem.dimensions.depth} × {selectedItem.dimensions.height}m
-                                    </div>
+                                    </span>
                                 </div>
-                                <div className="spec-item">
+                                <div className="spec-row">
                                     <span className="spec-label">Material:</span>
-                                    <div className="spec-value">{selectedItem.material}</div>
+                                    <span className="spec-value">{selectedItem.material}</span>
                                 </div>
-                                <div className="spec-item">
+                                <div className="spec-row">
                                     <span className="spec-label">Style:</span>
-                                    <div className="spec-value">{selectedItem.style}</div>
-                                </div>
-                                <div className="spec-item">
-                                    <span className="spec-label">Category:</span>
-                                    <div className="spec-value">{selectedItem.category}</div>
+                                    <span className="spec-value">{selectedItem.style}</span>
                                 </div>
                             </div>
+
+
+
+                            <button
+                                className="floating-add-btn"
+                                onClick={() => handleAddFurniture(selectedItem)}
+                                disabled={isLoading || addingItemId === selectedItem.id}
+                            >
+                                {addingItemId === selectedItem.id ? (
+                                    <>
+                                        <div className="loading-spinner" />
+                                        Loading 3D Model...
+                                    </>
+                                ) : isLoading ? (
+                                    <>
+                                        <div className="loading-spinner" />
+                                        Adding... {Math.round(loadingProgress)}%
+                                    </>
+                                ) : (
+                                    <>
+                                        <Download className="btn-icon" />
+                                        Add 3D Model to Room
+                                    </>
+                                )}
+                            </button>
                         </div>
                     </div>
-
-                    <div className="model-info">
-                        <div className="model-info-header">
-                            <Download className="model-info-icon" />
-                            <span className="model-info-title">Premium 3D Model</span>
-                        </div>
-                        <p className="model-info-description">
-                            This furniture will load as a detailed 3D model with realistic textures and lighting.
-                        </p>
-                        <p className="model-info-path">
-                            Model: {selectedItem.modelPath.split('/').pop()}
-                        </p>
-                    </div>
-
-                    <button
-                        className="add-furniture-btn"
-                        onClick={() => handleAddFurniture(selectedItem)}
-                        disabled={isLoading || addingItemId === selectedItem.id}
-                    >
-                        {addingItemId === selectedItem.id ? (
-                            <>
-                                <div className="loading-spinner" />
-                                Loading 3D Model...
-                            </>
-                        ) : isLoading ? (
-                            <>
-                                <div className="loading-spinner" />
-                                Adding... {Math.round(loadingProgress)}%
-                            </>
-                        ) : (
-                            <>
-                                <Download className="btn-icon" />
-                                Add 3D Model to Room
-                                {selectedItem.price && ` `}
-                            </>
-                        )}
-                    </button>
                 </div>
             )}
-        </div>
+        </>
     );
 };
 

@@ -49,6 +49,13 @@ const Sidebar = ({
     loadingProgress
 }) => {
     const [activeTab, setActiveTab] = useState('basic');
+
+    // Collapsible sections state
+    const [roomTypeOpen, setRoomTypeOpen] = useState(true);
+    const [dimensionsOpen, setDimensionsOpen] = useState(true);
+    const [colorsOpen, setColorsOpen] = useState(true);
+    const [doorsOpen, setDoorsOpen] = useState(true);
+    const [windowsOpen, setWindowsOpen] = useState(true);
     const [measurementsOpen, setMeasurementsOpen] = useState(false);
 
     const ROOM_PRESETS = [
@@ -77,6 +84,26 @@ const Sidebar = ({
         { name: "Dining Room", width: 4, length: 5, height: 2.7, type: "dining" },
     ];
 
+    const CollapsibleSection = ({ title, isOpen, onToggle, children, icon }) => (
+        <div className="collapsible-section">
+            <button
+                className="section-toggle"
+                onClick={onToggle}
+            >
+                <h3 className="section-title-collapsible">
+                    {icon && <span className="section-icon">{icon}</span>}
+                    {title}
+                </h3>
+                {isOpen ? <ChevronUp className="icon-sm" /> : <ChevronDown className="icon-sm" />}
+            </button>
+            {isOpen && (
+                <div className="section-content">
+                    {children}
+                </div>
+            )}
+        </div>
+    );
+
     return (
         <div className="sidebar">
             <Tabs
@@ -84,9 +111,23 @@ const Sidebar = ({
                 onSelectionChange={(key) => setActiveTab(key)}
                 variant="underlined"
                 classNames={{
-                    tabList: "gap-4 w-full",
-                    cursor: "bg-blue-500",
-                    tab: "px-0 h-12",
+                    tabList: "gap-2 w-full bg-gray-100 rounded-lg p-1",
+                    cursor: "bg-blue-500 rounded-md",
+                    tab: "px-3 py-2 h-auto rounded-md transition-all duration-200",
+                    tabContent: "text-sm font-medium"
+                }}
+                styles={{
+                    tabList: {
+                        backgroundColor: "#f3f4f6",
+                        borderRadius: "8px",
+                        padding: "4px",
+                        marginBottom: "16px"
+                    },
+                    tab: {
+                        borderRadius: "6px",
+                        transition: "all 0.2s ease",
+                        fontWeight: "500"
+                    }
                 }}
             >
                 <Tab
@@ -94,14 +135,20 @@ const Sidebar = ({
                     title={
                         <div className="flex items-center gap-2">
                             <Home className="icon-sm" />
-                            <span>Basic</span>
+                            <span>Room Design</span>
                         </div>
                     }
                 >
                     <div className="tab-content-spacing">
-                        <div>
+                        {/* Room Type & Size Section */}
+                        <CollapsibleSection
+                            title="Room Type & Size"
+                            isOpen={roomTypeOpen}
+                            onToggle={() => setRoomTypeOpen(!roomTypeOpen)}
+                            icon={<Home className="icon-sm" />}
+                        >
                             <label className="form-label">
-                                Room Type & Size
+                                Room Preset
                             </label>
                             <select
                                 value={ROOM_PRESETS.findIndex(
@@ -120,12 +167,15 @@ const Sidebar = ({
                                     </option>
                                 ))}
                             </select>
-                        </div>
+                        </CollapsibleSection>
 
-                        <div>
-                            <h3 className="section-title">
-                                Custom Dimensions
-                            </h3>
+                        {/* Custom Dimensions Section */}
+                        <CollapsibleSection
+                            title="Custom Dimensions"
+                            isOpen={dimensionsOpen}
+                            onToggle={() => setDimensionsOpen(!dimensionsOpen)}
+                            icon={<Ruler className="icon-sm" />}
+                        >
                             <div className="dimensions-grid">
                                 <div>
                                     <label className="input-label">
@@ -185,12 +235,15 @@ const Sidebar = ({
                                     />
                                 </div>
                             </div>
-                        </div>
+                        </CollapsibleSection>
 
-                        <div>
-                            <h3 className="section-title">
-                                Colors
-                            </h3>
+                        {/* Colors Section */}
+                        <CollapsibleSection
+                            title="Colors & Materials"
+                            isOpen={colorsOpen}
+                            onToggle={() => setColorsOpen(!colorsOpen)}
+                            icon={<div className="icon-sm color-palette-icon">🎨</div>}
+                        >
                             <div className="color-grid">
                                 <div>
                                     <label className="input-label">
@@ -215,86 +268,23 @@ const Sidebar = ({
                                     />
                                 </div>
                             </div>
-                        </div>
+                        </CollapsibleSection>
 
-                        {/* Room Stats */}
-                        <div className="stats-container">
-                            <button
-                                className="stats-toggle"
-                                onClick={() => setMeasurementsOpen(!measurementsOpen)}
-                            >
-                                <h3 className="stats-title">
-                                    <Ruler className="icon-sm stats-icon" />
-                                    Room Stats
-                                </h3>
-                                {measurementsOpen ? <ChevronUp className="icon-sm" /> : <ChevronDown className="icon-sm" />}
-                            </button>
-
-                            {measurementsOpen && (
-                                <div className="stats-content">
-                                    <div className="stat-item">
-                                        <span className="stat-label">Floor Area:</span>
-                                        <span className="stat-value">{(roomArea || 0).toFixed(2)} m²</span>
-                                    </div>
-                                    <div className="stat-item">
-                                        <span className="stat-label">Volume:</span>
-                                        <span className="stat-value">{(roomVolume || 0).toFixed(2)} m³</span>
-                                    </div>
-                                    <div className="stat-item">
-                                        <span className="stat-label">3D Models:</span>
-                                        <span className="stat-value highlight">{placedFurniture?.length || 0}</span>
-                                    </div>
-                                    <div className="stat-item">
-                                        <span className="stat-label">Furniture Coverage:</span>
-                                        <span className="stat-value">
-                                            {(furnitureAreaPercentage || 0).toFixed(1)}%
-                                        </span>
-                                    </div>
-                                    <div className="stat-item">
-                                        <span className="stat-label">Doors:</span>
-                                        <span className="stat-value">{doors?.length || 0}</span>
-                                    </div>
-                                    <div className="stat-item">
-                                        <span className="stat-label">Windows:</span>
-                                        <span className="stat-value">{windows?.length || 0}</span>
-                                    </div>
-                                    <div className="stat-item">
-                                        <span className="stat-label">Total Cost:</span>
-                                        <span className="stat-value highlight">${(totalCost || 0).toLocaleString()}</span>
-                                    </div>
-                                    {furnitureLoadingState?.cacheSize > 0 && (
-                                        <div className="stat-item">
-                                            <span className="stat-label">Cached Models:</span>
-                                            <span className="stat-value blue">{furnitureLoadingState.cacheSize}</span>
-                                        </div>
-                                    )}
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                </Tab>
-
-                <Tab
-                    key="openings"
-                    title={
-                        <div className="flex items-center gap-2">
-                            <SettingsIcon className="icon-sm" />
-                            <span>Doors & Windows</span>
-                        </div>
-                    }
-                >
-                    <div className="tab-content-spacing">
                         {/* Doors Section */}
-                        <div>
-                            <div className="section-header">
-                                <h3 className="section-title small">Doors</h3>
+                        <CollapsibleSection
+                            title={`Doors (${doors?.length || 0})`}
+                            isOpen={doorsOpen}
+                            onToggle={() => setDoorsOpen(!doorsOpen)}
+                            icon={<SettingsIcon className="icon-sm" />}
+                        >
+                            <div className="section-header-compact">
                                 <Button
                                     size="sm"
                                     color="primary"
                                     onPress={handleAddDoor}
-                                    startContent={<div className="icon-sm">+</div>}
+                                    className="add-element-btn"
                                 >
-                                    Add Door
+                                    <div className="h-80 flex w-full m-auto">+ Add Door</div>
                                 </Button>
                             </div>
 
@@ -399,21 +389,23 @@ const Sidebar = ({
                                     No doors added yet
                                 </p>
                             )}
-                        </div>
+                        </CollapsibleSection>
 
                         {/* Windows Section */}
-                        <div>
-                            <div className="section-header">
-                                <h3 className="section-title small">
-                                    Windows
-                                </h3>
+                        <CollapsibleSection
+                            title={`Windows (${windows?.length || 0})`}
+                            isOpen={windowsOpen}
+                            onToggle={() => setWindowsOpen(!windowsOpen)}
+                            icon={<SettingsIcon className="icon-sm" />}
+                        >
+                            <div className="section-header-compact">
                                 <Button
                                     size="sm"
                                     color="primary"
                                     onPress={handleAddWindow}
-                                    startContent={<div className="icon-sm">+</div>}
+                                    className="add-element-btn"
                                 >
-                                    Add Window
+                                    <div className="h-80 flex w-full m-auto">+ Add Window</div>
                                 </Button>
                             </div>
 
@@ -537,7 +529,54 @@ const Sidebar = ({
                                     No windows added yet
                                 </p>
                             )}
-                        </div>
+                        </CollapsibleSection>
+
+                        {/* Room Stats Section */}
+                        <CollapsibleSection
+                            title="Room Statistics"
+                            isOpen={measurementsOpen}
+                            onToggle={() => setMeasurementsOpen(!measurementsOpen)}
+                            icon={<Ruler className="icon-sm" />}
+                        >
+                            <div className="stats-content">
+                                <div className="stat-item">
+                                    <span className="stat-label">Floor Area:</span>
+                                    <span className="stat-value">{(roomArea || 0).toFixed(2)} m²</span>
+                                </div>
+                                <div className="stat-item">
+                                    <span className="stat-label">Volume:</span>
+                                    <span className="stat-value">{(roomVolume || 0).toFixed(2)} m³</span>
+                                </div>
+                                <div className="stat-item">
+                                    <span className="stat-label">3D Models:</span>
+                                    <span className="stat-value highlight">{placedFurniture?.length || 0}</span>
+                                </div>
+                                <div className="stat-item">
+                                    <span className="stat-label">Furniture Coverage:</span>
+                                    <span className="stat-value">
+                                        {(furnitureAreaPercentage || 0).toFixed(1)}%
+                                    </span>
+                                </div>
+                                <div className="stat-item">
+                                    <span className="stat-label">Doors:</span>
+                                    <span className="stat-value">{doors?.length || 0}</span>
+                                </div>
+                                <div className="stat-item">
+                                    <span className="stat-label">Windows:</span>
+                                    <span className="stat-value">{windows?.length || 0}</span>
+                                </div>
+                                <div className="stat-item">
+                                    <span className="stat-label">Total Cost:</span>
+                                    <span className="stat-value highlight">${(totalCost || 0).toLocaleString()}</span>
+                                </div>
+                                {furnitureLoadingState?.cacheSize > 0 && (
+                                    <div className="stat-item">
+                                        <span className="stat-label">Cached Models:</span>
+                                        <span className="stat-value blue">{furnitureLoadingState.cacheSize}</span>
+                                    </div>
+                                )}
+                            </div>
+                        </CollapsibleSection>
                     </div>
                 </Tab>
 

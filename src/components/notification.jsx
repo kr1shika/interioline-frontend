@@ -61,7 +61,7 @@ const NotificationComponent = ({ userId }) => {
         }
     };
 
-    // Test backend connection
+    // // Test backend connection
     const testConnection = async () => {
         try {
             const response = await fetch('http://localhost:2005/api/notifications/test-user-id', {
@@ -86,9 +86,7 @@ const NotificationComponent = ({ userId }) => {
     }, [isOpen, userId]);
 
     // Test connection on mount
-    useEffect(() => {
-        testConnection();
-    }, []);
+
 
     // Close dropdown when clicking outside
     useEffect(() => {

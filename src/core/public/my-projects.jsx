@@ -44,10 +44,11 @@ export default function MyProjectsPage() {
             fetchUserProfile();
         }
     }, [userId, userRole]);
+    const statusOptions = ["pending", "in_progress", "completed", "cancelled"];
 
     const updateProjectStatus = async (projectId, newStatus) => {
         try {
-            await axios.put(`http://localhost:2005/api/project/${projectId}/status`, {
+            await axios.patch(`http://localhost:2005/api/project/${projectId}/status`, {
                 status: newStatus
             });
 
@@ -65,14 +66,21 @@ export default function MyProjectsPage() {
     const getStatusProgress = (status) => {
         const statusMap = {
             'pending': 20,
-            'in-progress': 50,
-            'review': 75,
-            'completed': 100
+            'in_progress': 50,
+            'completed': 100,
+            'cancelled': 0
         };
-        return statusMap[status.toLowerCase()] || 0;
+        return statusMap[status] || 0;
     };
 
-    const statusOptions = ['Pending', 'In-Progress', 'Review', 'Completed'];
+
+    const statusLabelMap = {
+        "pending": "Pending",
+        "in_progress": "In Progress",
+        "completed": "Completed",
+        "cancelled": "Cancelled"
+    };
+
 
     const handleEditProfile = () => {
         setShowEditProfile(true);
@@ -113,6 +121,8 @@ export default function MyProjectsPage() {
             // You can navigate to a view-only version or show project details
         }
     };
+
+
 
     return (
         <div className="my-projects-page">
@@ -178,12 +188,13 @@ export default function MyProjectsPage() {
                                                 >
                                                     {statusOptions.map(status => (
                                                         <option key={status} value={status}>
-                                                            {status}
+                                                            {statusLabelMap[status]}
                                                         </option>
                                                     ))}
                                                 </select>
+
                                             ) : (
-                                                <strong>{project.status}</strong>
+                                                <strong>{statusLabelMap[project.status]}</strong>
                                             )}
                                         </div>
                                         <div className="progress-container">

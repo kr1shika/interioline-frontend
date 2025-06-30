@@ -14,8 +14,7 @@ import {
   FolderOpen,
   Package,
   Save,
-  Trash2,
-  Upload,
+  Trash2
 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
@@ -835,27 +834,23 @@ const CustomRoomDesigner = () => {
       )}
 
       <Header />
-      <div className="bg-[#FFFFF6] rounded-lg shadow-sm p-6 my-3 mx-6">
-        <div className="flex justify-between items-center">
+      {/* Project Section - Reduced vertical padding */}
+      <div className="bg-[#FFFFF6] rounded-lg shadow-sm p-4 my-2 mx-6">
+        <div className="flex justify-between items-center px-2">
           <div>
-            <h1 className="text-3xl font-bold mb-2 text-[#B86A45]">
+            <h1 className="text-2xl font-bold mb-1 text-[#B86A45]">
               {projectInfo.id ? `Project: ${projectInfo.title}` : "Room Designer"}
             </h1>
-            <p className="text-[#B86A45]">
-              {projectInfo.id
-                ? "Design and edit your project room"
-                : "Design your perfect space with doors, windows, and furniture"
-              }
+            <p className="text-[#B86A45] text-sm">
               {projectInfo.id && (
-                <span className="block text-sm mt-1 text-gray-600">
-                  Project ID: {projectInfo.id}
+                <span className="block text-xs mt-1 text-gray-600">
                   {hasProjectRoom && (
-                    <span className="ml-2 text-green-600">
-                      • {projectRoomLoaded ? "Room loaded" : "Room available"}
+                    <span className="text-green-600">
+                      {projectRoomLoaded ? "Room loaded" : "Room available"}
                     </span>
                   )}
                   {!hasProjectRoom && (
-                    <span className="ml-2 text-blue-600">• No room design yet</span>
+                    <span className="text-blue-600">No room design yet</span>
                   )}
                 </span>
               )}
@@ -869,7 +864,7 @@ const CustomRoomDesigner = () => {
                 variant="solid"
                 startContent={<FolderOpen className="w-4 h-4" />}
                 onPress={loadProjectRoom}
-                className="bg-green-600 text-white hover:bg-green-700"
+                className="bg-green-600 text-white hover:bg-green-700 flex rounded-md"
               >
                 Load Project Room
               </Button>
@@ -878,27 +873,18 @@ const CustomRoomDesigner = () => {
             <Button
               color="default"
               variant="solid"
-              startContent={<Save className="w-4 h-4" />}
               onPress={onSaveOpen}
-              className="bg-white text-black border border-gray-300 hover:bg-gray-50"
+              className="bg-[#3b82f6] text-white hover:bg-green-700 flex rounded-md"
             >
-              Save
-            </Button>
-            <Button
-              color="default"
-              variant="solid"
-              startContent={<Upload className="w-4 h-4" />}
-              onPress={onLoadOpen}
-              className="bg-white text-black border border-gray-300 hover:bg-gray-50"
-            >
-              Load Other Room
+              <Save className="w-4 h-4" />
+              <span>Save</span>
             </Button>
             <Button
               color="default"
               variant="solid"
               startContent={<Download className="w-4 h-4" />}
               onPress={exportCurrentRoom}
-              className="bg-white text-black border border-gray-300 hover:bg-gray-50"
+              className="bg-[#c19557] text-white hover:bg-green-700 flex rounded-md"
             >
               Export
             </Button>
@@ -916,8 +902,8 @@ const CustomRoomDesigner = () => {
         </div>
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-6 flex-1">
-        {/* Sidebar */}
+      <div className="flex flex-col lg:flex-row gap-6 flex-1 h-8">
+        {/* Sidebar - Made wider */}
         <Sidebar
           // Room Settings Props
           selectedRoomType={selectedRoomType}
@@ -958,8 +944,8 @@ const CustomRoomDesigner = () => {
           loadingProgress={loadingProgress}
         />
 
-        {/* 3D View */}
-        <div className="mt-2 flex-1 bg-white rounded-lg shadow-sm p-4">
+        {/* 3D View - Container stays within bounds */}
+        <div className="mt-2 flex-1 bg-white rounded-lg shadow-sm p-4 mr-6 min-w-0 overflow-hidden mb-6">
           <h2 className="text-xl font-semibold text-gray-800 mb-4">
             {selectedRoomType.name} - 3D Preview
             {projectInfo.id && (
@@ -971,7 +957,7 @@ const CustomRoomDesigner = () => {
 
           <div
             ref={mountRef}
-            className="relative w-full h-[600px] border-2 border-gray-200 rounded-lg overflow-hidden bg-gradient-to-b from-blue-50 to-gray-100"
+            className="relative w-full h-[400px] border-2 border-gray-200 rounded-lg overflow-hidden bg-gradient-to-b from-blue-50 to-gray-100"
           >
             {isLoading && (
               <div className="absolute inset-0 flex flex-col items-center justify-center bg-white bg-opacity-95 z-10 rounded-lg">
