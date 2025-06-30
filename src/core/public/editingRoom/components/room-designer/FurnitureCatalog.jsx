@@ -1,17 +1,15 @@
-import { Badge, Input, Slider, Spinner } from "@heroui/react";
+import { Badge, Input, Spinner } from "@heroui/react";
 import {
     Archive,
     Bed,
     DollarSign,
     Download,
-    Filter,
     Flower2,
     LampDesk,
     Lightbulb,
     Package,
-    Search,
     Sofa,
-    Table,
+    Table
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { furnitureCatalog, getAllCategories, getCategoryStats, getStyleStats, searchFurniture } from "./furniture-Catalog";
@@ -106,7 +104,7 @@ const FurnitureCatalog = ({
         }
 
         return (
-            <div className="relative w-full h-24 bg-white rounded-md overflow-hidden group border border-gray-200">
+            <div className="relative w-24 h-auto bg-white rounded-md overflow-hidden group ">
                 <img
                     src={item.imagePath}
                     alt={item.name}
@@ -115,12 +113,8 @@ const FurnitureCatalog = ({
                     loading="lazy"
                 />
 
-                {/* 3D Model indicator */}
-                <div className="absolute top-1 left-1 bg-green-500 text-white text-xs px-1.5 py-0.5 rounded-full flex items-center gap-1 shadow-sm">
-                    <Download className="w-2.5 h-2.5" />
-                    3D
-                </div>
             </div>
+
         );
     };
 
@@ -152,40 +146,28 @@ const FurnitureCatalog = ({
     };
 
     return (
-        <div className="m-6 border-t border-gray-200 pt-6">
+        <div className="m-0 border-gray-200 pt-2">
             {/* Header */}
             <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
                     <Download className="w-5 h-5 text-green-600" />
-                    <h2 className="text-lg font-semibold text-[#B86A45]">
+                    <h2 className="text-8 font-semibold text-[#B86A45]">
                         3D Furniture Catalog
                     </h2>
-                    <Badge variant="flat" color="primary">
-                        {furnitureCatalog.length} models
-                    </Badge>
                 </div>
-                <button
-                    onClick={() => setShowFilters(!showFilters)}
-                    className="flex items-center gap-1 px-3 py-1 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
-                >
-                    <Filter className="w-4 h-4" />
-                    Filters
-                </button>
+
             </div>
 
             {/* Search */}
             <div className="relative mb-4">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#B86A45] w-4 h-4" />
                 <Input
                     placeholder="Search 3D furniture models..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10"
+                    className="pl-0"
                     size="sm"
-                    radius="sm"
                 />
             </div>
-
             {/* Advanced Filters */}
             {showFilters && (
                 <div className="mb-4 p-4 bg-gray-50 rounded-lg border">
@@ -206,8 +188,8 @@ const FurnitureCatalog = ({
                             <button
                                 onClick={() => setActiveStyle("all")}
                                 className={`px-2 py-1 text-xs rounded transition-colors ${activeStyle === "all"
-                                        ? "bg-purple-500 text-white"
-                                        : "bg-white text-gray-700 hover:bg-gray-100 border"
+                                    ? "bg-purple-500 text-white"
+                                    : "bg-white text-gray-700 hover:bg-gray-100 border"
                                     }`}
                             >
                                 All Styles
@@ -217,8 +199,8 @@ const FurnitureCatalog = ({
                                     key={style}
                                     onClick={() => setActiveStyle(style)}
                                     className={`px-2 py-1 text-xs rounded transition-colors ${activeStyle === style
-                                            ? "bg-purple-500 text-white"
-                                            : "bg-white text-gray-700 hover:bg-gray-100 border"
+                                        ? "bg-purple-500 text-white"
+                                        : "bg-white text-gray-700 hover:bg-gray-100 border"
                                         }`}
                                     title={`${stats.count} items, avg ${stats.avgPrice}`}
                                 >
@@ -226,22 +208,6 @@ const FurnitureCatalog = ({
                                 </button>
                             ))}
                         </div>
-                    </div>
-
-                    {/* Price Range */}
-                    <div>
-                        <label className="block text-xs font-medium text-gray-600 mb-2">
-                            Price Range: ${priceRange[0]} - ${priceRange[1]}
-                        </label>
-                        <Slider
-                            step={50}
-                            minValue={0}
-                            maxValue={1500}
-                            value={priceRange}
-                            onChange={setPriceRange}
-                            className="max-w-md"
-                            color="primary"
-                        />
                     </div>
                 </div>
             )}
@@ -252,9 +218,9 @@ const FurnitureCatalog = ({
                 <div className="flex flex-wrap gap-1">
                     <button
                         onClick={() => setActiveCategory("all")}
-                        className={`px-3 py-1.5 text-xs rounded-lg transition-colors ${activeCategory === "all"
-                                ? "bg-blue-500 text-white shadow-sm"
-                                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                        className={`px-2 py-1.5 text-xs rounded-lg transition-colors ${activeCategory === "all"
+                            ? "bg-blue-500 text-white shadow-sm"
+                            : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                             }`}
                     >
                         All ({furnitureCatalog.length})
@@ -265,9 +231,9 @@ const FurnitureCatalog = ({
                             <button
                                 key={category}
                                 onClick={() => setActiveCategory(category)}
-                                className={`px-3 py-1.5 text-xs rounded-lg capitalize transition-colors flex items-center gap-1.5 ${activeCategory === category
-                                        ? "bg-blue-500 text-white shadow-sm"
-                                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                className={`px-2 py-1.5 text-xs rounded-lg capitalize transition-colors flex items-center gap-1.5 ${activeCategory === category
+                                    ? "bg-blue-500 text-white shadow-sm"
+                                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                                     }`}
                                 title={`${stats.count} items`}
                             >
@@ -290,17 +256,7 @@ const FurnitureCatalog = ({
                 </div>
             )}
 
-            {/* Debug info - REMOVE THIS AFTER TESTING */}
-            {process.env.NODE_ENV === 'development' && (
-                <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-sm">
-                    <strong>Debug Info:</strong>
-                    <div>Total catalog items: {furnitureCatalog.length}</div>
-                    <div>Filtered items: {filteredFurniture.length}</div>
-                    <div>Active category: {activeCategory}</div>
-                    <div>Categories available: {categories.join(', ')}</div>
-                    <div>Category stats: {JSON.stringify(categoryStats)}</div>
-                </div>
-            )}
+
 
             {/* Debug info for broken images */}
             {brokenImages.size > 0 && (
@@ -310,13 +266,13 @@ const FurnitureCatalog = ({
             )}
 
             {/* Furniture grid */}
-            <div className="grid grid-cols-2 gap-3 max-h-96 overflow-y-auto">
+            <div className="grid grid-cols-2 gap-3 max-h-96 w-70 overflow-y-auto">
                 {filteredFurniture.map((item) => (
                     <div
                         key={item.id}
-                        className={`bg-white border rounded-lg p-3 cursor-pointer transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 ${selectedFurnitureItem === item.id
-                                ? "ring-2 ring-blue-500 border-blue-500 shadow-lg"
-                                : "border-gray-200 hover:border-gray-300"
+                        className={`bg-white border rounded-lg p-2 cursor-pointer transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 ${selectedFurnitureItem === item.id
+                            ? "ring-2 ring-blue-500 border-blue-500 shadow-lg"
+                            : "border-gray-200 hover:border-gray-300"
                             }`}
                         onClick={() => setSelectedFurnitureItem(item.id)}
                     >
@@ -347,10 +303,7 @@ const FurnitureCatalog = ({
                                 <span className="text-xs text-gray-500">{item.material}</span>
                             </div>
 
-                            <div className="text-xs text-blue-600 font-medium flex items-center gap-1">
-                                <Download className="w-3 h-3" />
-                                3D Model Available
-                            </div>
+
                         </div>
                     </div>
                 ))}
@@ -437,7 +390,7 @@ const FurnitureCatalog = ({
                         <div className="flex items-center gap-2 mb-2">
                             <Download className="w-4 h-4 text-green-700" />
                             <span className="font-medium text-green-800">Premium 3D Model</span>
-                            <Badge variant="flat" color="success" size="sm">GLB Format</Badge>
+                            {/* <Badge variant="flat" color="success" size="sm">GLB Format</Badge> */}
                         </div>
                         <p className="text-sm text-green-700 mb-1">
                             This furniture will load as a detailed 3D model with realistic textures and lighting.
@@ -466,7 +419,7 @@ const FurnitureCatalog = ({
                             <>
                                 <Download className="w-4 h-4" />
                                 Add 3D Model to Room
-                                {selectedItem.price && ` - $${selectedItem.price}`}
+                                {selectedItem.price && ` `}
                             </>
                         )}
                     </button>

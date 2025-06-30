@@ -1,4 +1,3 @@
-
 import {
   Button,
   Input,
@@ -7,19 +6,14 @@ import {
   ModalContent,
   ModalFooter,
   ModalHeader,
-  Tab,
-  Tabs,
   useDisclosure,
 } from "@heroui/react";
 import {
   Download,
   FileText,
   FolderOpen,
-  Home,
   Package,
-  Plus,
   Save,
-  Settings,
   Trash2,
   Upload,
 } from "lucide-react";
@@ -27,7 +21,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
 import Header from "../../../../../components/header.jsx";
-import FurnitureCatalog from "./FurnitureCatalog";
+import Sidebar from "./sidebar.jsx";
+
 // Import components and hooks
 import { useFurniturePlacement } from "../hooks/useFurniturePlacement";
 import { useRoomMeasurements } from "../hooks/useRoomMeasurements";
@@ -42,35 +37,6 @@ import {
   sendRoomToBackend,
   serializeGLBData
 } from "./furniture-Catalog";
-import PlacedItemsList from "./PlacedItemsList";
-
-// Import furniture catalog functions
-
-const ROOM_PRESETS = [
-  {
-    name: "Small Bedroom",
-    width: 3,
-    length: 3.5,
-    height: 2.7,
-    type: "bedroom",
-  },
-  {
-    name: "Medium Living Room",
-    width: 5,
-    length: 6.5,
-    height: 3,
-    type: "living",
-  },
-  {
-    name: "Large Living Room",
-    width: 6,
-    length: 8,
-    height: 3.2,
-    type: "living",
-  },
-  { name: "Home Office", width: 3.5, length: 4, height: 2.7, type: "office" },
-  { name: "Dining Room", width: 4, length: 5, height: 2.7, type: "dining" },
-];
 
 const CustomRoomDesigner = () => {
   // Project state management
@@ -83,7 +49,13 @@ const CustomRoomDesigner = () => {
   const location = useLocation();
 
   // Room configuration state
-  const [selectedRoomType, setSelectedRoomType] = useState(ROOM_PRESETS[1]);
+  const [selectedRoomType, setSelectedRoomType] = useState({
+    name: "Medium Living Room",
+    width: 5,
+    length: 6.5,
+    height: 3,
+    type: "living",
+  });
   const [roomDimensions, setRoomDimensions] = useState({
     width: 5,
     length: 6.5,
@@ -137,7 +109,6 @@ const CustomRoomDesigner = () => {
   } = useDisclosure();
 
   // UI state
-  const [activeTab, setActiveTab] = useState("basic");
   const mountRef = useRef(null);
 
   // Scene and furniture hooks
@@ -166,10 +137,10 @@ const CustomRoomDesigner = () => {
     areaCoveredByFurniture,
     furnitureAreaPercentage,
     gltfLoader,
-    getLoadingState,        // NEW
-    clearModelCache,        // NEW
-    preloadModels,         // NEW
-    getModelInfo,          // NEW
+    getLoadingState,
+    clearModelCache,
+    preloadModels,
+    getModelInfo,
   } = useFurniturePlacement(scene, roomArea);
 
   const [furnitureLoadingState, setFurnitureLoadingState] = useState({
@@ -345,11 +316,11 @@ const CustomRoomDesigner = () => {
         color: item.color,
         material: item.material,
         style: item.style,
-        price: item.price,           // NEW
-        isGLB: true,                 // ALWAYS true now
-        modelPath: item.modelPath,   // NEW
-        imagePath: item.imagePath,   // NEW
-        appliedScale: item.appliedScale, // NEW
+        price: item.price,
+        isGLB: true,
+        modelPath: item.modelPath,
+        imagePath: item.imagePath,
+        appliedScale: item.appliedScale,
         glbData: item.object ? serializeGLBData(item.object, item) : null
       })),
       placedCarpets: [],
@@ -562,6 +533,7 @@ const CustomRoomDesigner = () => {
       )
     );
   };
+
   const handleAddFurnitureError = useCallback((error) => {
     console.error("Error adding 3D furniture:", error);
 
@@ -577,11 +549,37 @@ const CustomRoomDesigner = () => {
     alert(errorMessage);
   }, []);
 
+  // Enhanced furniture addition with better error handling
+  const handleAddFurnitureToRoom = useCallback(async (furnitureItem) => {
+    try {
+      console.log("Adding furniture to room:", furnitureItem.name);
+      console.log("Current scene state:", !!scene);
+      console.log("Current placedFurniture count:", placedFurniture?.length || 0);
+
+      const result = await addFurnitureToRoom(furnitureItem);
+
+      console.log("Add furniture result:", result);
+
+      if (result && result.success !== false) {
+        console.log("Furniture added successfully");
+      } else {
+        console.error("Failed to add furniture:", result);
+        handleAddFurnitureError(new Error("Failed to add furniture to scene"));
+      }
+
+      return result;
+    } catch (error) {
+      console.error("Error in handleAddFurnitureToRoom:", error);
+      handleAddFurnitureError(error);
+      throw error;
+    }
+  }, [addFurnitureToRoom, scene, placedFurniture, handleAddFurnitureError]);
+
   const handleRemoveWindow = (id) => {
     setWindows(windows.filter((window) => window.id !== id));
   };
-  // 4. UPDATE the loading state tracking effect
 
+  // Update the loading state tracking effect
   useEffect(() => {
     const updateLoadingState = () => {
       const state = getLoadingState();
@@ -776,6 +774,7 @@ const CustomRoomDesigner = () => {
     projectRoomLoaded,
     performAutoSave
   ]);
+
   useEffect(() => {
     return () => {
       // Clear model cache when component unmounts
@@ -786,7 +785,7 @@ const CustomRoomDesigner = () => {
   }, [clearModelCache]);
 
   const totalCost = calculateTotalCost(
-    placedFurniture.filter(item => item && item.id).map((item) => ({ furnitureId: item.id }))
+    placedFurniture?.filter(item => item && item.id)?.map((item) => ({ furnitureId: item.id })) || []
   );
 
   return (
@@ -918,484 +917,46 @@ const CustomRoomDesigner = () => {
       </div>
 
       <div className="flex flex-col lg:flex-row gap-6 flex-1">
-        <div className="w-full ml-6 mt-2 lg:w-80 text-[#B86A45] bg-[#FFFFF6] rounded-lg shadow-sm p-6 overflow-y-auto max-h-[calc(100vh-200px)]">
-          <Tabs
-            selectedKey={activeTab}
-            onSelectionChange={(key) => setActiveTab(key)}
-            variant="underlined"
-            classNames={{
-              tabList: "gap-4 w-full",
-              cursor: "bg-blue-500",
-              tab: "px-0 h-12",
-            }}
-          >
-            <Tab
-              key="basic"
-              title={
-                <div className="flex items-center gap-2">
-                  <Home className="w-4 h-4" />
-                  <span>Basic</span>
-                </div>
-              }
-            >
-              <div className="space-y-6 pt-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Room Type & Size
-                  </label>
-                  <select
-                    value={ROOM_PRESETS.findIndex(
-                      (room) => room === selectedRoomType
-                    )}
-                    onChange={(e) =>
-                      setSelectedRoomType(
-                        ROOM_PRESETS[parseInt(e.target.value)]
-                      )
-                    }
-                    className="w-full p-3 border border-gray-300 rounded-lg bg-white"
-                  >
-                    {ROOM_PRESETS.map((room, index) => (
-                      <option key={index} value={index}>
-                        {room.name} ({room.width}m × {room.length}m)
-                      </option>
-                    ))}
-                  </select>
-                </div>
+        {/* Sidebar */}
+        <Sidebar
+          // Room Settings Props
+          selectedRoomType={selectedRoomType}
+          setSelectedRoomType={setSelectedRoomType}
+          roomDimensions={roomDimensions}
+          setRoomDimensions={setRoomDimensions}
+          wallColor={wallColor}
+          setWallColor={setWallColor}
+          floorColor={floorColor}
+          setFloorColor={setFloorColor}
+          doors={doors}
+          windows={windows}
+          handleAddDoor={handleAddDoor}
+          handleUpdateDoor={handleUpdateDoor}
+          handleRemoveDoor={handleRemoveDoor}
+          handleAddWindow={handleAddWindow}
+          handleUpdateWindow={handleUpdateWindow}
+          handleRemoveWindow={handleRemoveWindow}
 
-                <div>
-                  <h3 className="text-sm font-medium text-[#B86A45] mb-3">
-                    Custom Dimensions
-                  </h3>
-                  <div className="grid grid-cols-3 gap-2">
-                    <div>
-                      <label className="block text-xs text-[#B86A45] mb-1">
-                        Width (m)
-                      </label>
-                      <input
-                        type="number"
-                        min="2"
-                        max="20"
-                        step="0.1"
-                        value={roomDimensions.width}
-                        onChange={(e) =>
-                          setRoomDimensions((prev) => ({
-                            ...prev,
-                            width: parseFloat(e.target.value),
-                          }))
-                        }
-                        className="w-full p-2 border border-gray-300 rounded text-sm"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs text-[#B86A45] mb-1">
-                        Length (m)
-                      </label>
-                      <input
-                        type="number"
-                        min="2"
-                        max="20"
-                        step="0.1"
-                        value={roomDimensions.length}
-                        onChange={(e) =>
-                          setRoomDimensions((prev) => ({
-                            ...prev,
-                            length: parseFloat(e.target.value),
-                          }))
-                        }
-                        className="w-full p-2 border border-gray-300 rounded text-sm"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs text-[#B86A45] mb-1">
-                        Height (m)
-                      </label>
-                      <input
-                        type="number"
-                        min="2"
-                        max="4"
-                        step="0.1"
-                        value={roomDimensions.height}
-                        onChange={(e) =>
-                          setRoomDimensions((prev) => ({
-                            ...prev,
-                            height: parseFloat(e.target.value),
-                          }))
-                        }
-                        className="w-full p-2 border text-[#B86A45] rounded text-sm"
-                      />
-                    </div>
-                  </div>
-                </div>
+          // Measurements Props
+          roomArea={roomArea}
+          roomVolume={roomVolume}
+          furnitureAreaPercentage={furnitureAreaPercentage}
+          totalCost={totalCost}
 
-                <div className="text-[#B86A45]">
-                  <h3 className="text-sm font-medium text-[#B86A45] mb-3">
-                    Colors
-                  </h3>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-xs text-[#B86A45] mb-1">
-                        Wall Color
-                      </label>
-                      <input
-                        type="color"
-                        value={wallColor}
-                        onChange={(e) => setWallColor(e.target.value)}
-                        className="w-full h-10 border border-gray-300 rounded cursor-pointer"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs text-gray-600 mb-1">
-                        Floor Color
-                      </label>
-                      <input
-                        type="color"
-                        value={floorColor}
-                        onChange={(e) => setFloorColor(e.target.value)}
-                        className="w-full h-10 border border-gray-300 rounded cursor-pointer"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </Tab>
+          // Furniture Props
+          selectedFurnitureItem={selectedFurnitureItem}
+          setSelectedFurnitureItem={setSelectedFurnitureItem}
+          addFurnitureToRoom={handleAddFurnitureToRoom}
+          placedFurniture={placedFurniture}
+          rotateFurnitureItem={rotateFurnitureItem}
+          removeFurnitureItem={removeFurnitureItem}
+          clearAllFurniture={clearAllFurniture}
+          furnitureLoadingState={furnitureLoadingState}
 
-            <Tab
-              key="openings"
-              title={
-                <div className="flex items-center gap-2">
-                  <Settings className="w-4 h-4" />
-                  <span>Doors & Windows</span>
-                </div>
-              }
-            >
-              <div className="space-y-6 pt-4">
-                <div>
-                  <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-sm font-medium text-gray-700">Doors</h3>
-                    <Button
-                      size="sm"
-                      color="primary"
-                      onPress={handleAddDoor}
-                      startContent={<Plus className="w-4 h-4" />}
-                    >
-                      Add Door
-                    </Button>
-                  </div>
-
-                  {doors.length > 0 ? (
-                    <div className="space-y-3">
-                      {doors.map((door) => (
-                        <div
-                          key={door.id}
-                          className="p-3 border border-gray-200 rounded-lg"
-                        >
-                          <div className="flex justify-between items-center mb-2">
-                            <h4 className="font-medium text-sm">
-                              Door {door.id.replace("door", "")}
-                            </h4>
-                            <button
-                              onClick={() => handleRemoveDoor(door.id)}
-                              className="text-red-500 hover:text-red-700 p-1 rounded hover:bg-red-50 transition-colors"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </div>
-
-                          <div className="grid grid-cols-2 gap-2 text-xs">
-                            <div>
-                              <label className="block text-gray-600 mb-1">
-                                Wall
-                              </label>
-                              <select
-                                value={door.wall}
-                                onChange={(e) =>
-                                  handleUpdateDoor(door.id, {
-                                    wall: e.target.value,
-                                  })
-                                }
-                                className="w-full p-1.5 border border-gray-300 rounded text-xs"
-                              >
-                                <option value="north">North</option>
-                                <option value="east">East</option>
-                                <option value="south">South</option>
-                                <option value="west">West</option>
-                              </select>
-                            </div>
-
-                            <div>
-                              <label className="block text-gray-600 mb-1">
-                                Position (m)
-                              </label>
-                              <input
-                                type="number"
-                                min="0"
-                                step="0.1"
-                                value={door.position}
-                                onChange={(e) =>
-                                  handleUpdateDoor(door.id, {
-                                    position: parseFloat(e.target.value),
-                                  })
-                                }
-                                className="w-full p-1.5 border border-gray-300 rounded text-xs"
-                              />
-                            </div>
-
-                            <div>
-                              <label className="block text-gray-600 mb-1">
-                                Width (m)
-                              </label>
-                              <input
-                                type="number"
-                                min="0.6"
-                                max="2"
-                                step="0.1"
-                                value={door.width}
-                                onChange={(e) =>
-                                  handleUpdateDoor(door.id, {
-                                    width: parseFloat(e.target.value),
-                                  })
-                                }
-                                className="w-full p-1.5 border border-gray-300 rounded text-xs"
-                              />
-                            </div>
-
-                            <div>
-                              <label className="block text-gray-600 mb-1">
-                                Height (m)
-                              </label>
-                              <input
-                                type="number"
-                                min="1.8"
-                                max="3"
-                                step="0.1"
-                                value={door.height}
-                                onChange={(e) =>
-                                  handleUpdateDoor(door.id, {
-                                    height: parseFloat(e.target.value),
-                                  })
-                                }
-                                className="w-full p-1.5 border border-gray-300 rounded text-xs"
-                              />
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-gray-500 text-center py-4 text-sm">
-                      No doors added yet
-                    </p>
-                  )}
-                </div>
-
-                <div>
-                  <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-sm font-medium text-gray-700">
-                      Windows
-                    </h3>
-                    <Button
-                      size="sm"
-                      color="primary"
-                      onPress={handleAddWindow}
-                      startContent={<Plus className="w-4 h-4" />}
-                    >
-                      Add Window
-                    </Button>
-                  </div>
-
-                  {windows.length > 0 ? (
-                    <div className="space-y-3">
-                      {windows.map((window) => (
-                        <div
-                          key={window.id}
-                          className="p-3 border border-gray-200 rounded-lg"
-                        >
-                          <div className="flex justify-between items-center mb-2">
-                            <h4 className="font-medium text-sm">
-                              Window {window.id.replace("window", "")}
-                            </h4>
-                            <button
-                              onClick={() => handleRemoveWindow(window.id)}
-                              className="text-red-500 hover:text-red-700 p-1 rounded hover:bg-red-50 transition-colors"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </div>
-
-                          <div className="grid grid-cols-2 gap-2 text-xs">
-                            <div>
-                              <label className="block text-gray-600 mb-1">
-                                Wall
-                              </label>
-                              <select
-                                value={window.wall}
-                                onChange={(e) =>
-                                  handleUpdateWindow(window.id, {
-                                    wall: e.target.value,
-                                  })
-                                }
-                                className="w-full p-1.5 border border-gray-300 rounded text-xs"
-                              >
-                                <option value="north">North</option>
-                                <option value="east">East</option>
-                                <option value="south">South</option>
-                                <option value="west">West</option>
-                              </select>
-                            </div>
-
-                            <div>
-                              <label className="block text-gray-600 mb-1">
-                                Position (m)
-                              </label>
-                              <input
-                                type="number"
-                                min="0"
-                                step="0.1"
-                                value={window.position}
-                                onChange={(e) =>
-                                  handleUpdateWindow(window.id, {
-                                    position: parseFloat(e.target.value),
-                                  })
-                                }
-                                className="w-full p-1.5 border border-gray-300 rounded text-xs"
-                              />
-                            </div>
-
-                            <div>
-                              <label className="block text-gray-600 mb-1">
-                                Width (m)
-                              </label>
-                              <input
-                                type="number"
-                                min="0.4"
-                                max="3"
-                                step="0.1"
-                                value={window.width}
-                                onChange={(e) =>
-                                  handleUpdateWindow(window.id, {
-                                    width: parseFloat(e.target.value),
-                                  })
-                                }
-                                className="w-full p-1.5 border border-gray-300 rounded text-xs"
-                              />
-                            </div>
-
-                            <div>
-                              <label className="block text-gray-600 mb-1">
-                                Height (m)
-                              </label>
-                              <input
-                                type="number"
-                                min="0.4"
-                                max="2.5"
-                                step="0.1"
-                                value={window.height}
-                                onChange={(e) =>
-                                  handleUpdateWindow(window.id, {
-                                    height: parseFloat(e.target.value),
-                                  })
-                                }
-                                className="w-full p-1.5 border border-gray-300 rounded text-xs"
-                              />
-                            </div>
-
-                            <div className="col-span-2">
-                              <label className="block text-gray-600 mb-1">
-                                Sill Height (m)
-                              </label>
-                              <input
-                                type="number"
-                                min="0.3"
-                                max="1.5"
-                                step="0.1"
-                                value={window.sillHeight}
-                                onChange={(e) =>
-                                  handleUpdateWindow(window.id, {
-                                    sillHeight: parseFloat(e.target.value),
-                                  })
-                                }
-                                className="w-full p-1.5 border border-gray-300 rounded text-xs"
-                              />
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-gray-500 text-center py-4 text-sm">
-                      No windows added yet
-                    </p>
-                  )}
-                </div>
-              </div>
-            </Tab>
-          </Tabs>
-
-          {/* Room Stats */}
-          <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-            <h3 className="font-semibold text-lg mb-3 text-gray-800">
-              Room Stats
-            </h3>
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span className="text-gray-600">Floor Area:</span>
-                <span className="font-medium">{roomArea.toFixed(2)} m²</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Volume:</span>
-                <span className="font-medium">{roomVolume.toFixed(2)} m³</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">3D Models:</span>
-                <span className="font-medium text-green-600">{placedFurniture.length}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Furniture Coverage:</span>
-                <span className="font-medium">
-                  {furnitureAreaPercentage.toFixed(1)}%
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Doors:</span>
-                <span className="font-medium">{doors.length}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Windows:</span>
-                <span className="font-medium">{windows.length}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-600">Total Cost:</span>
-                <span className="font-medium text-green-600">${totalCost.toLocaleString()}</span>
-              </div>
-              {furnitureLoadingState.cacheSize > 0 && (
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Cached Models:</span>
-                  <span className="font-medium text-blue-600">{furnitureLoadingState.cacheSize}</span>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Furniture Catalog */}
-          <FurnitureCatalog
-            selectedFurnitureItem={selectedFurnitureItem}
-            setSelectedFurnitureItem={setSelectedFurnitureItem}
-            addFurnitureToRoom={addFurnitureToRoom}
-            isLoading={furnitureLoadingState.isLoading}
-            loadingProgress={furnitureLoadingState.progress}
-          />
-
-          {/* Placed Furniture List */}
-          {placedFurniture.length > 0 && (
-            <PlacedItemsList
-              items={placedFurniture}
-              onRotate={rotateFurnitureItem}
-              onRemove={removeFurnitureItem}
-              onClearAll={clearAllFurniture}
-              loadingState={furnitureLoadingState}
-            />
-          )}
-        </div>
+          // Loading Props
+          isLoading={isLoading}
+          loadingProgress={loadingProgress}
+        />
 
         {/* 3D View */}
         <div className="mt-2 flex-1 bg-white rounded-lg shadow-sm p-4">
