@@ -1,4 +1,3 @@
-import { Badge, Input, Spinner } from "@heroui/react";
 import {
     Archive,
     Bed,
@@ -11,17 +10,18 @@ import {
     Sofa,
     Table
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useMemo, useState } from 'react';
 import { furnitureCatalog, getAllCategories, getCategoryStats, getStyleStats, searchFurniture } from "./furniture-Catalog";
+import './FurnitureCatalog.css';
 
 const categoryIcons = {
-    seating: <Sofa className="w-4 h-4" />,
-    tables: <Table className="w-4 h-4" />,
-    bedroom: <Bed className="w-4 h-4" />,
-    storage: <Archive className="w-4 h-4" />,
-    lighting: <Lightbulb className="w-4 h-4" />,
-    decoration: <Flower2 className="w-4 h-4" />,
-    office: <LampDesk className="w-4 h-4" />,
+    seating: <Sofa className="category-icon" />,
+    tables: <Table className="category-icon" />,
+    bedroom: <Bed className="category-icon" />,
+    storage: <Archive className="category-icon" />,
+    lighting: <Lightbulb className="category-icon" />,
+    decoration: <Flower2 className="category-icon" />,
+    office: <LampDesk className="category-icon" />,
 };
 
 const categoryColors = {
@@ -89,14 +89,14 @@ const FurnitureCatalog = ({
         // If image is broken, show fallback
         if (brokenImages.has(item.id)) {
             return (
-                <div className="relative w-full h-24 bg-gradient-to-br from-gray-100 to-gray-200 rounded-md overflow-hidden flex items-center justify-center">
-                    <div className="text-center">
-                        <Package className="w-8 h-8 mx-auto mb-1 text-gray-500" />
-                        <div className="text-xs text-gray-600 font-medium">{item.type}</div>
+                <div className="image-fallback">
+                    <div className="fallback-content">
+                        <Package className="fallback-icon" />
+                        <div className="fallback-text">{item.type}</div>
                     </div>
                     {/* 3D Model indicator */}
-                    <div className="absolute top-1 left-1 bg-green-500 text-white text-xs px-1.5 py-0.5 rounded-full flex items-center gap-1">
-                        <Download className="w-2.5 h-2.5" />
+                    <div className="model-indicator">
+                        <Download className="model-indicator-icon" />
                         3D
                     </div>
                 </div>
@@ -104,17 +104,15 @@ const FurnitureCatalog = ({
         }
 
         return (
-            <div className="relative w-24 h-auto bg-white rounded-md overflow-hidden group ">
+            <div className="item-image-container">
                 <img
                     src={item.imagePath}
                     alt={item.name}
-                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                    className="item-image"
                     onError={() => handleImageError(item.id)}
                     loading="lazy"
                 />
-
             </div>
-
         );
     };
 
@@ -146,51 +144,46 @@ const FurnitureCatalog = ({
     };
 
     return (
-        <div className="m-0 border-gray-200 pt-2">
+        <div className="furniture-catalog-container">
             {/* Header */}
-            <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                    <Download className="w-5 h-5 text-green-600" />
-                    <h2 className="text-8 font-semibold text-[#B86A45]">
-                        3D Furniture Catalog
-                    </h2>
+            <div className="catalog-header">
+                <div className="catalog-title-section">
+                    <Download className="catalog-icon" />
+                    <h2 className="catalog-title">3D Furniture Catalog</h2>
                 </div>
-
             </div>
 
             {/* Search */}
-            <div className="relative mb-4">
-                <Input
+            <div className="search-container">
+                <input
+                    type="text"
                     placeholder="Search 3D furniture models..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-0"
-                    size="sm"
+                    className="search-input"
                 />
             </div>
+
             {/* Advanced Filters */}
             {showFilters && (
-                <div className="mb-4 p-4 bg-gray-50 rounded-lg border">
-                    <div className="flex justify-between items-center mb-3">
-                        <h3 className="text-sm font-medium text-gray-700">Advanced Filters</h3>
+                <div className="advanced-filters">
+                    <div className="filters-header">
+                        <h3 className="filters-title">Advanced Filters</h3>
                         <button
                             onClick={resetFilters}
-                            className="text-xs text-blue-600 hover:text-blue-800"
+                            className="reset-filters-btn"
                         >
                             Reset All
                         </button>
                     </div>
 
                     {/* Style Filter */}
-                    <div className="mb-3">
-                        <label className="block text-xs font-medium text-gray-600 mb-2">Style</label>
-                        <div className="flex flex-wrap gap-1">
+                    <div className="filter-group">
+                        <label className="filter-label">Style</label>
+                        <div className="filter-buttons">
                             <button
                                 onClick={() => setActiveStyle("all")}
-                                className={`px-2 py-1 text-xs rounded transition-colors ${activeStyle === "all"
-                                    ? "bg-purple-500 text-white"
-                                    : "bg-white text-gray-700 hover:bg-gray-100 border"
-                                    }`}
+                                className={`filter-btn ${activeStyle === "all" ? "active" : ""}`}
                             >
                                 All Styles
                             </button>
@@ -198,10 +191,7 @@ const FurnitureCatalog = ({
                                 <button
                                     key={style}
                                     onClick={() => setActiveStyle(style)}
-                                    className={`px-2 py-1 text-xs rounded transition-colors ${activeStyle === style
-                                        ? "bg-purple-500 text-white"
-                                        : "bg-white text-gray-700 hover:bg-gray-100 border"
-                                        }`}
+                                    className={`filter-btn ${activeStyle === style ? "active" : ""}`}
                                     title={`${stats.count} items, avg ${stats.avgPrice}`}
                                 >
                                     {style} ({stats.count})
@@ -213,15 +203,12 @@ const FurnitureCatalog = ({
             )}
 
             {/* Category filters */}
-            <div className="mb-4 text-[#B86A45]">
-                <p className="text-xs font-medium mb-2">Categories</p>
-                <div className="flex flex-wrap gap-1">
+            <div className="category-section">
+                <p className="category-label">Categories</p>
+                <div className="category-buttons">
                     <button
                         onClick={() => setActiveCategory("all")}
-                        className={`px-2 py-1.5 text-xs rounded-lg transition-colors ${activeCategory === "all"
-                            ? "bg-blue-500 text-white shadow-sm"
-                            : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                            }`}
+                        className={`category-btn all ${activeCategory === "all" ? "active" : ""}`}
                     >
                         All ({furnitureCatalog.length})
                     </button>
@@ -231,10 +218,7 @@ const FurnitureCatalog = ({
                             <button
                                 key={category}
                                 onClick={() => setActiveCategory(category)}
-                                className={`px-2 py-1.5 text-xs rounded-lg capitalize transition-colors flex items-center gap-1.5 ${activeCategory === category
-                                    ? "bg-blue-500 text-white shadow-sm"
-                                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                                    }`}
+                                className={`category-btn category ${activeCategory === category ? "active" : ""}`}
                                 title={`${stats.count} items`}
                             >
                                 {categoryIcons[category]}
@@ -247,80 +231,68 @@ const FurnitureCatalog = ({
 
             {/* Results summary */}
             {(searchQuery || activeCategory !== "all" || activeStyle !== "all" || priceRange[0] > 0 || priceRange[1] < 1500) && (
-                <div className="mb-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
-                    <div className="flex items-center justify-between text-sm">
-                        <span className="text-blue-800">
+                <div className="results-summary">
+                    <div className="results-info">
+                        <span className="results-text">
                             Showing {filteredFurniture.length} of {furnitureCatalog.length} models
                         </span>
                     </div>
                 </div>
             )}
 
-
-
             {/* Debug info for broken images */}
             {brokenImages.size > 0 && (
-                <div className="mb-4 p-2 bg-yellow-50 border border-yellow-200 rounded text-sm text-yellow-800">
+                <div className="debug-info">
                     {brokenImages.size} image(s) failed to load. Showing fallback previews.
                 </div>
             )}
 
             {/* Furniture grid */}
-            <div className="grid grid-cols-2 gap-3 max-h-96 w-70 overflow-y-auto">
+            <div className="furniture-grid">
                 {filteredFurniture.map((item) => (
                     <div
                         key={item.id}
-                        className={`bg-white border rounded-lg p-2 cursor-pointer transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 ${selectedFurnitureItem === item.id
-                            ? "ring-2 ring-blue-500 border-blue-500 shadow-lg"
-                            : "border-gray-200 hover:border-gray-300"
-                            }`}
+                        className={`furniture-item-card ${selectedFurnitureItem === item.id ? "selected" : ""}`}
                         onClick={() => setSelectedFurnitureItem(item.id)}
                     >
                         {/* Item image */}
                         {renderFurnitureImage(item)}
 
                         {/* Item info */}
-                        <div className="mt-3">
-                            <h4 className="text-sm font-semibold text-gray-800 leading-tight mb-1">
+                        <div className="item-info">
+                            <h4 className="item-name">
                                 {item.name}
                             </h4>
 
-                            <div className="flex items-center justify-between mb-2">
-                                <Badge
-                                    size="sm"
-                                    variant="flat"
-                                    className="text-xs capitalize"
-                                    color={categoryColors[item.category] || "default"}
-                                >
+                            <div className="item-meta">
+                                <span className={`item-badge ${categoryColors[item.category] || "default"}`}>
                                     {item.type}
-                                </Badge>
-                                <span className="text-xs text-gray-500">
+                                </span>
+                                <span className="item-dimensions">
                                     {item.dimensions.width}×{item.dimensions.depth}m
                                 </span>
                             </div>
 
-                            <div className="flex items-center justify-between mb-1">
-                                <span className="text-xs text-gray-500">{item.material}</span>
+                            <div className="item-material">
+                                {item.material}
                             </div>
-
-
                         </div>
                     </div>
                 ))}
             </div>
 
             {filteredFurniture.length === 0 && (
-                <div className="text-center py-12 text-gray-500">
-                    <Package className="w-16 h-16 mx-auto mb-4 opacity-50" />
-                    <h3 className="text-lg font-medium mb-2">No 3D Models Found</h3>
-                    <p className="text-sm mb-4">
+                <div className="empty-state">
+                    <Package className="empty-state-icon" />
+                    <h3 className="empty-state-title">No 3D Models Found</h3>
+                    <p className="empty-state-text">
                         No furniture models match your current search criteria.
                     </p>
                     <button
                         onClick={() => {
                             resetFilters();
                         }}
-                        className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                        className="empty-state-btn"
                     >
                         Clear filters
                     </button>
@@ -329,95 +301,93 @@ const FurnitureCatalog = ({
 
             {/* Selected item details */}
             {selectedItem && (
-                <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200 shadow-sm">
-                    <div className="flex items-start gap-4 mb-4">
-                        <div className="w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden shadow-sm bg-white">
+                <div className="selected-item-details">
+                    <div className="selected-item-header">
+                        <div className="selected-item-image">
                             {!brokenImages.has(selectedItem.id) && selectedItem.imagePath ? (
                                 <img
                                     src={selectedItem.imagePath}
                                     alt={selectedItem.name}
-                                    className="w-full h-full object-cover"
                                     onError={() => handleImageError(selectedItem.id)}
                                 />
                             ) : (
-                                <div className="w-full h-full bg-gray-100 flex items-center justify-center">
-                                    <Package className="w-8 h-8 text-gray-500" />
+                                <div className="selected-item-image-fallback">
+                                    <Package className="fallback-icon" />
                                 </div>
                             )}
                         </div>
 
-                        <div className="flex-1">
-                            <div className="flex items-start justify-between mb-2">
-                                <h3 className="font-semibold text-lg text-blue-900">
+                        <div className="selected-item-content">
+                            <div className="selected-item-title-row">
+                                <h3 className="selected-item-title">
                                     {selectedItem.name}
                                 </h3>
                                 {selectedItem.price && (
-                                    <div className="flex items-center gap-1 text-xl font-bold text-green-600">
-                                        <DollarSign className="w-5 h-5" />
+                                    <div className="selected-item-price">
+                                        <DollarSign className="price-icon" />
                                         {selectedItem.price}
                                     </div>
                                 )}
                             </div>
 
-                            <p className="text-sm text-blue-800 mb-3 leading-relaxed">
+                            <p className="selected-item-description">
                                 {selectedItem.description}
                             </p>
 
-                            <div className="grid grid-cols-2 gap-3 text-sm mb-4">
-                                <div className="bg-white p-2 rounded">
-                                    <span className="font-medium text-gray-700">Dimensions:</span>
-                                    <div className="text-blue-700">
+                            <div className="selected-item-specs">
+                                <div className="spec-item">
+                                    <span className="spec-label">Dimensions:</span>
+                                    <div className="spec-value">
                                         {selectedItem.dimensions.width} × {selectedItem.dimensions.depth} × {selectedItem.dimensions.height}m
                                     </div>
                                 </div>
-                                <div className="bg-white p-2 rounded">
-                                    <span className="font-medium text-gray-700">Material:</span>
-                                    <div className="text-blue-700">{selectedItem.material}</div>
+                                <div className="spec-item">
+                                    <span className="spec-label">Material:</span>
+                                    <div className="spec-value">{selectedItem.material}</div>
                                 </div>
-                                <div className="bg-white p-2 rounded">
-                                    <span className="font-medium text-gray-700">Style:</span>
-                                    <div className="text-blue-700">{selectedItem.style}</div>
+                                <div className="spec-item">
+                                    <span className="spec-label">Style:</span>
+                                    <div className="spec-value">{selectedItem.style}</div>
                                 </div>
-                                <div className="bg-white p-2 rounded">
-                                    <span className="font-medium text-gray-700">Category:</span>
-                                    <div className="text-blue-700 capitalize">{selectedItem.category}</div>
+                                <div className="spec-item">
+                                    <span className="spec-label">Category:</span>
+                                    <div className="spec-value">{selectedItem.category}</div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <div className="mb-4 p-3 bg-green-100 rounded-lg border border-green-200">
-                        <div className="flex items-center gap-2 mb-2">
-                            <Download className="w-4 h-4 text-green-700" />
-                            <span className="font-medium text-green-800">Premium 3D Model</span>
-                            {/* <Badge variant="flat" color="success" size="sm">GLB Format</Badge> */}
+                    <div className="model-info">
+                        <div className="model-info-header">
+                            <Download className="model-info-icon" />
+                            <span className="model-info-title">Premium 3D Model</span>
                         </div>
-                        <p className="text-sm text-green-700 mb-1">
+                        <p className="model-info-description">
                             This furniture will load as a detailed 3D model with realistic textures and lighting.
                         </p>
-                        <p className="text-xs text-green-600">
+                        <p className="model-info-path">
                             Model: {selectedItem.modelPath.split('/').pop()}
                         </p>
                     </div>
 
                     <button
-                        className="w-full px-4 py-3 text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg hover:from-blue-700 hover:to-blue-800 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-all duration-200 shadow-sm hover:shadow-md"
+                        className="add-furniture-btn"
                         onClick={() => handleAddFurniture(selectedItem)}
                         disabled={isLoading || addingItemId === selectedItem.id}
                     >
                         {addingItemId === selectedItem.id ? (
                             <>
-                                <Spinner size="sm" color="white" />
+                                <div className="loading-spinner" />
                                 Loading 3D Model...
                             </>
                         ) : isLoading ? (
                             <>
-                                <Spinner size="sm" color="white" />
+                                <div className="loading-spinner" />
                                 Adding... {Math.round(loadingProgress)}%
                             </>
                         ) : (
                             <>
-                                <Download className="w-4 h-4" />
+                                <Download className="btn-icon" />
                                 Add 3D Model to Room
                                 {selectedItem.price && ` `}
                             </>
