@@ -14,10 +14,18 @@ const MyProjectsPage = lazy(() => import("./core/public/my-projects"));
 const PublicProfilePage = lazy(() => import("./core/public/PublicProfilePage"));
 const HelpCenter = lazy(() => import("./core/public/helpCenter"));
 const CustomRoomDesigner = lazy(() => import("./core/public/editingRoom/components/room-designer/CustomRoomDesigner"));
-
+const ViewOnlyRoomDesigner = lazy(() => import("./core/public/editingRoom/components/room-designer/ViewOnlyRoomDesigner"));
 function App() {
 
   const publicRoutes = [
+    {
+      path: "/room-view",
+      element: (
+        <Suspense fallback={<div>Loading...</div>}>
+          <ViewOnlyRoomDesigner />
+        </Suspense>
+      ),
+    },
     {
       path: "/room-edit",
       element: (

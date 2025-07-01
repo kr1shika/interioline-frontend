@@ -6,7 +6,7 @@ import img2 from "../../assets/images/meow.png";
 import img3 from "../../assets/images/meow101.png";
 import Header from "../../components/header.jsx";
 import "../style/initiatizeProject.css";
-import UploadRoomDataModal from "./../../components/project-detail-form.jsx"; // Import the modal
+import UploadRoomDataModal from "./../../components/project-detail-form.jsx"; 
 
 export default function InitialProjectPage() {
     const location = useLocation();
