@@ -24,14 +24,14 @@ export default function PortfolioPostViewer({ post, onClose }) {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                padding: '0.5rem'
+                padding: '0rem'
             }}
         >
             <div
                 style={{
                     position: 'relative',
                     backgroundColor: 'white',
-                    padding: '1.5rem',
+                    padding: '0.5rem',
                     borderRadius: '0.7rem',
                     width: '100%',
                     maxWidth: '30rem',
@@ -44,7 +44,7 @@ export default function PortfolioPostViewer({ post, onClose }) {
                     onClick={onClose}
                     style={{
                         position: 'absolute',
-                        top: '1.5rem',
+                        top: '0.3rem',
                         right: '1rem',
                         background: 'none',
                         border: 'none',
@@ -75,9 +75,10 @@ export default function PortfolioPostViewer({ post, onClose }) {
                     style={{
                         fontSize: '1rem',
                         fontWeight: '600',
-                        marginBottom: '1rem',
+                        marginBottom: '0.5rem',
                         color: '#111827',
-                        paddingRight: '3rem'
+                        paddingLeft: '1rem'
+
                     }}
                 >
                     {post.title}
@@ -97,7 +98,7 @@ export default function PortfolioPostViewer({ post, onClose }) {
                         <div
                             key={i}
                             style={{
-                                minWidth: '27rem',
+                                minWidth: '29rem',
                                 display: 'flex',
                                 justifyContent: 'center',
                                 alignItems: 'center'
@@ -108,7 +109,7 @@ export default function PortfolioPostViewer({ post, onClose }) {
                                 alt={img.caption || ""}
                                 style={{
                                     height: '21rem',
-                                    width: '24rem',
+                                    width: '27rem',
                                     borderRadius: '0.5rem',
                                     objectFit: 'cover',
                                     border: '1px solid #e5e7eb'

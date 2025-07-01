@@ -105,7 +105,6 @@ export default function MyProjectsPage() {
     const statusOptions = ["pending", "in_progress", "completed", "cancelled"];
 
     const updateProjectStatus = async (projectId, newStatus) => {
-        // 🔐 Security check
         if (!isUserIdAvailable()) {
             setError("Authentication required to update project status.");
             return;

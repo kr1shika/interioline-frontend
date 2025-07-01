@@ -3,7 +3,6 @@ import { createContext, useCallback, useContext, useEffect, useState } from "rea
 
 export const AuthContext = createContext();
 
-// 🔐 JWT Token utilities
 const decodeJWTToken = (token) => {
     try {
         if (!token) return null;

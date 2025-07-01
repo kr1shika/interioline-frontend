@@ -1,7 +1,9 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
+import { FaTrashAlt } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import AddPortfolioModal from "../../../components/addPost.jsx";
+import ConfirmationModal from "../../../components/ConfirmationModal.jsx"; // Add this import
 import Header from "../../../components/header.jsx";
 import PortfolioPostViewer from "../../../components/PortfolioPostViewer.jsx";
 import { useAuth } from "../../../provider/authcontext";
@@ -16,6 +18,11 @@ export default function ProfilePage() {
     const [activePost, setActivePost] = useState(null);
     const [error, setError] = useState(null);
     const [loadingProfile, setLoadingProfile] = useState(true);
+
+    // Add delete confirmation modal states
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [postToDelete, setPostToDelete] = useState(null);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     const { isLoggedIn, userId, userRole, loading, isUserIdAvailable, getToken } = useAuth();
     const navigate = useNavigate();
@@ -120,6 +127,49 @@ export default function ProfilePage() {
         }
     };
 
+    // Handle delete post
+    const handleDeletePost = async (postId) => {
+        setPostToDelete(postId);
+        setShowDeleteModal(true);
+    };
+
+    const confirmDeletePost = async () => {
+        if (!postToDelete) return;
+
+        setIsDeleting(true);
+        try {
+            const token = getToken();
+            const config = {
+                headers: { Authorization: `Bearer ${token}` }
+            };
+
+            await axios.delete(`http://localhost:2005/api/portfolio/posts/${postToDelete}`, config);
+
+            setPortfolioPosts(prevPosts => prevPosts.filter(post => post._id !== postToDelete));
+
+            console.log("✅ Portfolio post deleted successfully");
+            setShowDeleteModal(false);
+            setPostToDelete(null);
+        } catch (err) {
+            console.error("❌ Error deleting portfolio post:", err);
+
+            if (err.response?.status === 401) {
+                setError('Session expired. Please log in again.');
+            } else if (err.response?.status === 403) {
+                setError('You can only delete your own posts.');
+            } else {
+                setError('Failed to delete post. Please try again.');
+            }
+        } finally {
+            setIsDeleting(false);
+        }
+    };
+
+    const cancelDeletePost = () => {
+        setShowDeleteModal(false);
+        setPostToDelete(null);
+    };
+
     // Show loading while auth is being determined
     if (loading) {
         return (
@@ -219,7 +269,6 @@ export default function ProfilePage() {
                                 <h1>{designer.full_name}</h1>
                                 <p className="location">Kathmandu, Nepal</p>
                                 <p className="bio">{designer.bio}</p>
-
                             </div>
                         </div>
                     </div>
@@ -255,7 +304,16 @@ export default function ProfilePage() {
                                             src={`http://localhost:2005${primaryImage.url}`}
                                             alt={primaryImage.caption || post.title}
                                         />
-                                        <div className="post-overlay">{post.title}</div>
+                                        <div className="post-overlay">
+                                            <span className="post-title">{post.title}</span>
+                                            <FaTrashAlt
+                                                className="trash-icon"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleDeletePost(post._id);
+                                                }}
+                                            />
+                                        </div>
                                     </div>
                                 );
                             })
@@ -305,6 +363,18 @@ export default function ProfilePage() {
             {activePost && (
                 <PortfolioPostViewer post={activePost} onClose={() => setActivePost(null)} />
             )}
+
+            {/* Delete Confirmation Modal */}
+            <ConfirmationModal
+                isOpen={showDeleteModal}
+                onClose={cancelDeletePost}
+                onConfirm={confirmDeletePost}
+                title="Delete Portfolio Post"
+                message="Are you sure you want to delete this portfolio post? This action cannot be undone."
+                confirmText="Delete"
+                cancelText="Cancel"
+                isLoading={isDeleting}
+            />
         </div>
     );
 }
