@@ -10,57 +10,68 @@
 }
 
 .initial-project-page h2 {
-    font-size: 30px;
-    margin-bottom: 10px;
+    font-size: 25px;
+    font-weight: bold;
+    margin-top: 18px;
 }
 
 .project-title-input {
-    padding: 12px 16px;
+    padding: 5px 12px;
     border-radius: 10px;
     border: 1px solid #BE7B5D;
     width: 250px;
     font-size: 16px;
-    background-color: #fffaf7;
+    background-color: #b87f6819;
     color: #BE7B5D;
-    margin: 16px auto 20px;
+    margin: 1px 1px 2px;
+    margin-left: 8px;
+    margin-top: -6px;
     display: block;
 }
 
 .designer-avatar-wrapper {
     text-align: center;
-    margin-bottom: 24px;
+    margin-bottom: 25px;
 }
 
 .designer-avatar {
-    width: 60px;
-    height: 60px;
+
+    width: 70px;
+    height: 70px;
     border-radius: 50%;
     object-fit: cover;
     border: 2px solid #BE7B5D;
     display: block;
-    margin: 0 auto 10px;
+    margin: 18px auto 5px;
 }
 
 .selection-line {
+    margin-top: 20px;
     font-size: 16px;
-    margin-bottom: 10px;
+    display: flex;
 }
 
 .payment-cards {
+    flex-wrap: wrap;
     display: flex;
     justify-content: center;
-    gap: 24px;
-    margin: 40px 0 30px;
+    gap: 48px;
+    margin: 0px 0 25px;
 }
 
 .card {
-    background: white;
+    background: linear-gradient(to top, rgba(252, 252, 236, 0.519), #b87f683f);
     border: 1px solid #EBD6C8;
     border-radius: 16px;
-    width: 240px;
+    width: 320px;
+    height: 380px;
     padding: 20px;
     text-align: center;
     transition: transform 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
 
 .card:hover {
@@ -68,8 +79,11 @@
 }
 
 .card img {
-    height: 90px;
-    margin-bottom: 12px;
+    /* height: auto; */
+    min-width: 230px;
+    min-height: 135px;
+
+    margin-bottom: 28px;
 }
 
 .card h4 {

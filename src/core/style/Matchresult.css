@@ -17,7 +17,7 @@
 
 .hero-left {
     background-color: #ECDFCE;
-    padding: 1.8rem;
+    padding: 2rem;
     border-radius: 12px;
 }
 
@@ -29,7 +29,7 @@
 
 .hero-left p {
     font-size: 1rem;
-    margin-top: 0.5rem;
+    margin-top: 0rem;
 }
 
 .style-analysis {
@@ -50,6 +50,7 @@
     width: 100%;
     height: 260px;
     object-fit: cover;
+
 }
 
 .designer-info {
