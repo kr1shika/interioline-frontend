@@ -1,8 +1,7 @@
 import axios from "axios";
 import { useState } from "react";
+import { useAuth } from "../provider/authcontext";
 import "./addpost.css";
-
-
 
 export default function AddPortfolioModal({ onClose }) {
     const [newPost, setNewPost] = useState({
@@ -15,6 +14,10 @@ export default function AddPortfolioModal({ onClose }) {
 
     const [selectedImages, setSelectedImages] = useState([]);
     const [dragActive, setDragActive] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
+
+    const { userId, isUserIdAvailable, getToken } = useAuth();
 
     const handleImageChange = (e) => {
         const files = Array.from(e.target.files);
@@ -100,18 +103,26 @@ export default function AddPortfolioModal({ onClose }) {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setError("");
 
-        if (selectedImages.length === 0) {
-            alert("Please select at least one image.");
+        if (!isUserIdAvailable()) {
+            setError("Authentication error. Please log in again.");
             return;
         }
+
+        if (selectedImages.length === 0) {
+            setError("Please select at least one image.");
+            return;
+        }
+
+        setLoading(true);
 
         const formData = new FormData();
         formData.append("title", newPost.title);
         formData.append("room_type", newPost.room_type);
         formData.append("tags", newPost.tags);
         formData.append("primaryIndex", newPost.primaryIndex);
-        formData.append("designer", localStorage.getItem("userId"));
+        formData.append("designer", userId); // 🔐 Use userId from auth context
 
         newPost.captions.forEach((caption, index) => {
             formData.append(`captions[${index}]`, caption);
@@ -122,24 +133,94 @@ export default function AddPortfolioModal({ onClose }) {
         });
 
         try {
-            await axios.post("http://localhost:2005/api/portfolio/create", formData, {
-                headers: { "Content-Type": "multipart/form-data" },
-            });
+            // 🔐 Use secure API call with token
+            const token = getToken();
+            const config = {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                    ...(token && { Authorization: `Bearer ${token}` })
+                }
+            };
+
+            await axios.post("http://localhost:2005/api/portfolio/create", formData, config);
+
+            console.log("✅ Portfolio post uploaded successfully");
             alert("Portfolio post uploaded successfully!");
             onClose();
         } catch (error) {
-            console.error("Upload failed:", error);
-            alert("Failed to upload post. Please try again.");
+            console.error("❌ Upload failed:", error);
+
+            if (error.response?.status === 401) {
+                setError("Session expired. Please log in again.");
+            } else if (error.response?.status === 403) {
+                setError("Access denied. You don't have permission to create portfolio posts.");
+            } else {
+                setError(error.response?.data?.errors?.[0] || "Failed to upload post. Please try again.");
+            }
+        } finally {
+            setLoading(false);
         }
     };
+
+    // 🔐 Show error if userId not available
+    if (!isUserIdAvailable()) {
+        return (
+            <div className="portfolio-overlay">
+                <div className="portfolio-modal">
+                    <div className="portfolio-header">
+                        <h2 style={{ color: "#dc3545" }}>Authentication Required</h2>
+                        <button onClick={onClose} className="close-btn">&times;</button>
+                    </div>
+                    <div style={{
+                        padding: '20px',
+                        textAlign: 'center',
+                        color: '#666'
+                    }}>
+                        <p>Please log in to add portfolio posts.</p>
+                        <button onClick={onClose} className="btn btn-cancel-compact">
+                            Close
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="portfolio-overlay">
             <div className="portfolio-modal">
                 <div className="portfolio-header">
                     <h2>Add Portfolio Post</h2>
-                    <button onClick={onClose} className="close-btn">&times;</button>
+                    <button onClick={onClose} className="close-btn" disabled={loading}>
+                        &times;
+                    </button>
+
+                    {/* Debug info in development */}
+                    {process.env.NODE_ENV === 'development' && (
+                        <div style={{
+                            fontSize: '10px',
+                            color: '#999',
+                            marginTop: '4px',
+                            fontFamily: 'monospace'
+                        }}>
+                            🔐 Designer ID: {userId?.substring(0, 8)}...
+                        </div>
+                    )}
                 </div>
+
+                {/* Error message */}
+                {error && (
+                    <div style={{
+                        background: '#fee2e2',
+                        color: '#dc2626',
+                        padding: '12px',
+                        margin: '0 20px',
+                        borderRadius: '4px',
+                        fontSize: '14px'
+                    }}>
+                        {error}
+                    </div>
+                )}
 
                 <form onSubmit={handleSubmit} className="portfolio-form">
                     {/* Basic Info Grid */}
@@ -154,6 +235,7 @@ export default function AddPortfolioModal({ onClose }) {
                                     onChange={(e) => setNewPost({ ...newPost, title: e.target.value })}
                                     required
                                     className="form-input-compact"
+                                    disabled={loading}
                                 />
                             </div>
                             <div className="form-group-half">
@@ -165,6 +247,7 @@ export default function AddPortfolioModal({ onClose }) {
                                     onChange={(e) => setNewPost({ ...newPost, room_type: e.target.value })}
                                     required
                                     className="form-input-compact"
+                                    disabled={loading}
                                 />
                             </div>
                         </div>
@@ -177,6 +260,7 @@ export default function AddPortfolioModal({ onClose }) {
                                 value={newPost.tags}
                                 onChange={(e) => setNewPost({ ...newPost, tags: e.target.value })}
                                 className="form-input-compact"
+                                disabled={loading}
                             />
                         </div>
                     </div>
@@ -203,6 +287,7 @@ export default function AddPortfolioModal({ onClose }) {
                                         onChange={handleImageChange}
                                         className="file-input-hidden"
                                         id="image-upload"
+                                        disabled={loading}
                                     />
                                     <label htmlFor="image-upload" className="upload-button">
                                         Choose Images
@@ -223,6 +308,7 @@ export default function AddPortfolioModal({ onClose }) {
                                                     onClick={() => setPrimaryImage(index)}
                                                     className={`primary-btn ${index === newPost.primaryIndex ? 'active' : ''}`}
                                                     title="Set as primary image"
+                                                    disabled={loading}
                                                 >
                                                     {index === newPost.primaryIndex ? '★' : '☆'}
                                                 </button>
@@ -231,6 +317,7 @@ export default function AddPortfolioModal({ onClose }) {
                                                     onClick={() => removeImage(index)}
                                                     className="remove-btn"
                                                     title="Remove image"
+                                                    disabled={loading}
                                                 >
                                                     ×
                                                 </button>
@@ -241,6 +328,7 @@ export default function AddPortfolioModal({ onClose }) {
                                                 value={newPost.captions[index] || ""}
                                                 onChange={(e) => handleCaptionChange(index, e.target.value)}
                                                 className="caption-input"
+                                                disabled={loading}
                                             />
                                         </div>
                                     ))}
@@ -257,6 +345,7 @@ export default function AddPortfolioModal({ onClose }) {
                                             }}
                                             className="file-input-hidden"
                                             id="add-more-images"
+                                            disabled={loading}
                                         />
                                         <label htmlFor="add-more-images" className="add-more-label">
                                             <span className="add-icon">+</span>
@@ -279,15 +368,24 @@ export default function AddPortfolioModal({ onClose }) {
 
                     {/* Action Buttons */}
                     <div className="action-buttons">
-                        <button type="button" onClick={onClose} className="btn btn-cancel-compact">
+                        <button
+                            type="button"
+                            onClick={onClose}
+                            className="btn btn-cancel-compact"
+                            disabled={loading}
+                        >
                             Cancel
                         </button>
                         <button
                             type="submit"
                             className="btn btn-submit-compact"
-                            disabled={selectedImages.length === 0}
+                            disabled={loading || selectedImages.length === 0}
+                            style={{
+                                opacity: loading || selectedImages.length === 0 ? 0.6 : 1,
+                                cursor: loading || selectedImages.length === 0 ? 'not-allowed' : 'pointer'
+                            }}
                         >
-                            Upload Portfolio
+                            {loading ? 'Uploading...' : 'Upload Portfolio'}
                         </button>
                     </div>
                 </form>

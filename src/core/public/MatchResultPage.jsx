@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import match1 from "../../assets/images/MATCH.png";
 import Header from "../../components/header.jsx";
+import { useAuth } from "../../provider/authcontext";
 import "../style/Matchresult.css";
 
 export default function MatchResultPage() {
@@ -11,11 +12,14 @@ export default function MatchResultPage() {
     const [suggestions, setSuggestions] = useState([]);
     const { userName, match, styleAnalysis } = location.state || {};
 
+    const { isLoggedIn, userId, loading } = useAuth();
+
     useEffect(() => {
         if (!match) {
             navigate("/style-quiz");
             return;
         }
+
         const fetchSuggestions = async () => {
             try {
                 const res = await fetch("http://localhost:2005/api/user/getAllDesigners");
@@ -58,7 +62,7 @@ export default function MatchResultPage() {
                     post?.images[0]?.url ||
                     null;
 
-                match.primaryImage = image; // 🟡 Mutating match (OK for state passed via `location.state`)
+                match.primaryImage = image;
             } catch (err) {
                 console.error("Failed to fetch matched designer image", err);
             }
@@ -68,6 +72,24 @@ export default function MatchResultPage() {
         fetchSuggestions();
     }, [match, navigate]);
 
+    // Show loading while auth is being determined
+    if (loading) {
+        return <div>Loading...</div>;
+    }
+
+    const handleSelectDesigner = () => {
+        if (!isLoggedIn) {
+            setShowAuth(true);
+            return;
+        }
+
+        navigate("/initial-project", {
+            state: {
+                userId: userId, // Use userId from auth context
+                designerId: match?._id,
+            },
+        });
+    };
 
     return (
         <div className="match-page">
@@ -110,21 +132,13 @@ export default function MatchResultPage() {
                             <div>
                                 <h3>{match.full_name}</h3>
                                 <p className="specialization">{match.specialization}</p>
-                                {/* No match percentage shown here */}
                             </div>
                         </div>
                         <button
                             className="select-btn"
-                            onClick={() =>
-                                navigate("/initial-project", {
-                                    state: {
-                                        userId: localStorage.getItem("userId"),  // ✅ use logged-in user ID
-                                        designerId: match?._id,
-                                    },
-                                })
-                            }
+                            onClick={handleSelectDesigner}
                         >
-                            Select {match.full_name}
+                            {isLoggedIn ? `Select ${match.full_name}` : 'Login to Select'}
                         </button>
                     </div>
                 </div>
@@ -136,16 +150,46 @@ export default function MatchResultPage() {
                 <div className="suggestion-list">
                     {suggestions.map((designer, index) => (
                         <div key={index} className="suggestion-card">
-                            <img src="/sample2.jpg" alt="room" />
+                            <img
+                                src={
+                                    designer.primaryImage
+                                        ? `http://localhost:2005${designer.primaryImage}`
+                                        : "/sample2.jpg"
+                                }
+                                alt="room"
+                            />
                             <div className="suggestion-info">
                                 <div className="suggestion-meta">
-                                    <img src={designer.profilepic || "/default-avatar.png"} />
+                                    <img
+                                        src={
+                                            designer.profilepic
+                                                ? `http://localhost:2005${designer.profilepic}`
+                                                : "/default-avatar.png"
+                                        }
+                                        alt="profile"
+                                    />
                                     <div>
                                         <h5>{designer.full_name}</h5>
                                         <p className="specialization">{designer.specialization}</p>
-                                        {/* No percentage shown */}
                                     </div>
                                 </div>
+                                <button
+                                    className="suggestion-select-btn"
+                                    onClick={() => {
+                                        if (!isLoggedIn) {
+                                            setShowAuth(true);
+                                            return;
+                                        }
+                                        navigate("/initial-project", {
+                                            state: {
+                                                userId: userId,
+                                                designerId: designer._id,
+                                            },
+                                        });
+                                    }}
+                                >
+                                    {isLoggedIn ? 'Select' : 'Login to Select'}
+                                </button>
                             </div>
                         </div>
                     ))}

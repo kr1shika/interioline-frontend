@@ -1,5 +1,6 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
+import { useAuth } from "../../../provider/authcontext";
 import "../../style/EditProfileForm.css";
 import PreferenceQuiz from "./PreferenceQuiz";
 
@@ -14,9 +15,10 @@ export default function EditProfileForm({ designer, onClose }) {
   const [approach, setApproach] = useState("Balanced");
   const [showQuiz, setShowQuiz] = useState(false);
   const [quizCompleted, setQuizCompleted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  // Get user role from localStorage
-  const userRole = localStorage.getItem('userRole');
+  const { userId, userRole, updateUserProfile, isUserIdAvailable, getToken } = useAuth();
   const isClient = userRole === 'client';
   const isDesigner = userRole === 'designer';
 
@@ -56,6 +58,15 @@ export default function EditProfileForm({ designer, onClose }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!isUserIdAvailable()) {
+      setError("Authentication error. Please log in again.");
+      return;
+    }
+
+    setLoading(true);
+    setError("");
+
     const data = new FormData();
     data.append("full_name", full_name);
 
@@ -72,22 +83,65 @@ export default function EditProfileForm({ designer, onClose }) {
     if (file) data.append("profilepic", file);
 
     try {
-      await axios.put(`http://localhost:2005/api/user/${designer._id}`, data, {
+      const token = getToken();
+      const response = await axios.put(`http://localhost:2005/api/user/${userId}`, data, {
         headers: {
           "Content-Type": "multipart/form-data",
+          ...(token && { Authorization: `Bearer ${token}` })
         },
       });
+
+      // Update auth context with new data
+      updateUserProfile(response.data);
+
+      console.log("✅ Profile updated successfully");
       onClose();
     } catch (err) {
-      console.error("Error updating profile:", err);
+      console.error("❌ Error updating profile:", err);
+
+      if (err.response?.status === 401) {
+        setError("Session expired. Please log in again.");
+      } else if (err.response?.status === 403) {
+        setError("Access denied. You can only edit your own profile.");
+      } else {
+        setError(err.response?.data?.errors?.[0] || "Failed to update profile");
+      }
+    } finally {
+      setLoading(false);
     }
   };
+
+  if (!isUserIdAvailable()) {
+    return (
+      <div className="edit-profile-container">
+        <div className="profile-header">
+          <h2 style={{ color: "#dc3545" }}>Authentication Error</h2>
+          <p>Unable to access user information. Please log in again.</p>
+          <button onClick={onClose} className="btn btn-cancel-compact">
+            Close
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
       <div className="edit-profile-container">
         <div className="profile-header">
           <h2 style={{ color: "#A4502F " }}>Edit {isClient ? 'Client' : 'Designer'} Profile</h2>
+          {error && (
+            <div style={{
+              background: '#fee2e2',
+              color: '#dc2626',
+              padding: '8px 12px',
+              borderRadius: '4px',
+              marginTop: '8px',
+              fontSize: '14px'
+            }}>
+              {error}
+            </div>
+          )}
         </div>
 
         <form onSubmit={handleSubmit} className="edit-profile-form-compact">
@@ -100,6 +154,7 @@ export default function EditProfileForm({ designer, onClose }) {
                 onChange={(e) => setFile(e.target.files[0])}
                 className="file-input-hidden"
                 id="profile-pic-input"
+                disabled={loading}
               />
               <label htmlFor="profile-pic-input" className="pic-upload-label">
                 {file ? (
@@ -116,6 +171,7 @@ export default function EditProfileForm({ designer, onClose }) {
             </div>
           </div>
 
+
           {/* Form Grid */}
           <div className="form-grid">
             <div className="form-row">
@@ -126,6 +182,7 @@ export default function EditProfileForm({ designer, onClose }) {
                   onChange={(e) => setFullName(e.target.value)}
                   className="form-input-compact"
                   required
+                  disabled={loading}
                 />
               </div>
               {isDesigner && (
@@ -138,6 +195,7 @@ export default function EditProfileForm({ designer, onClose }) {
                     className="form-input-compact"
                     min="0"
                     placeholder="5"
+                    disabled={loading}
                   />
                 </div>
               )}
@@ -152,6 +210,7 @@ export default function EditProfileForm({ designer, onClose }) {
                   rows={2}
                   className="form-textarea-compact"
                   placeholder="Brief description of your design philosophy..."
+                  disabled={loading}
                 />
               </div>
             ) : (
@@ -164,6 +223,7 @@ export default function EditProfileForm({ designer, onClose }) {
                   className="form-input-compact"
                   placeholder="your.email@example.com"
                   required
+                  disabled={loading}
                 />
               </div>
             )}
@@ -189,6 +249,7 @@ export default function EditProfileForm({ designer, onClose }) {
                     type="button"
                     onClick={() => setShowQuiz(true)}
                     className="btn-edit-preferences"
+                    disabled={loading}
                   >
                     Edit
                   </button>
@@ -200,6 +261,7 @@ export default function EditProfileForm({ designer, onClose }) {
                     type="button"
                     onClick={() => setShowQuiz(true)}
                     className="btn-take-quiz"
+                    disabled={loading}
                   >
                     Take Quiz
                   </button>
@@ -210,15 +272,24 @@ export default function EditProfileForm({ designer, onClose }) {
 
           {/* Action Buttons */}
           <div className="action-buttons">
-            <button type="button" onClick={onClose} className="btn btn-cancel-compact">
+            <button
+              type="button"
+              onClick={onClose}
+              className="btn btn-cancel-compact"
+              disabled={loading}
+            >
               Cancel
             </button>
             <button
               type="submit"
               className="btn btn-submit-compact"
-              disabled={isDesigner && !quizCompleted}
+              disabled={loading || (isDesigner && !quizCompleted)}
+              style={{
+                opacity: loading || (isDesigner && !quizCompleted) ? 0.6 : 1,
+                cursor: loading || (isDesigner && !quizCompleted) ? 'not-allowed' : 'pointer'
+              }}
             >
-              Save Profile
+              {loading ? 'Saving...' : 'Save Profile'}
             </button>
           </div>
         </form>

@@ -5,9 +5,32 @@ import "./landingHeader.css";
 import NotificationComponent from "./notification";
 import ProfileMenu from "./ProfileMenu";
 
-const landingHeader = ({ onGetStartedClick }) => {
-    const { isLoggedIn } = useAuth();
-    const userId = localStorage.getItem('userId');
+const LandingHeader = ({ onGetStartedClick }) => {
+    const { isLoggedIn, userId, loading, isUserIdAvailable } = useAuth();
+
+    // Show loading state while auth is being determined
+    if (loading) {
+        return (
+            <div className="landnavbar">
+                <div className="landnavbar-left landnavbar-title">
+                    <Link to="/Home">
+                        <span>InterioLine</span>
+                    </Link>
+                </div>
+                <div className="landnavbar-right">
+                    <div style={{
+                        color: '#C2805A',
+                        fontSize: '14px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        padding: '0 16px'
+                    }}>
+                        Loading...
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="landnavbar">
@@ -17,7 +40,7 @@ const landingHeader = ({ onGetStartedClick }) => {
                 </Link>
             </div>
 
-            {isLoggedIn ? (
+            {isLoggedIn && isUserIdAvailable() ? (
                 <div className="landnavbar-right">
                     <Link to="/about" className="landnav-link">
                         About
@@ -25,6 +48,7 @@ const landingHeader = ({ onGetStartedClick }) => {
                     <NotificationComponent userId={userId} />
                     <ChatIconWithWidget />
                     <ProfileMenu />
+
                 </div>
             ) : (
                 <div className="landnavbar-right">
@@ -43,4 +67,4 @@ const landingHeader = ({ onGetStartedClick }) => {
     );
 };
 
-export default landingHeader;
+export default LandingHeader;

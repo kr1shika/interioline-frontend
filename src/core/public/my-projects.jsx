@@ -1,307 +1,128 @@
-// import axios from "axios";
-// import { useEffect, useState } from "react";
-// import { FiEdit } from "react-icons/fi";
-// import { useNavigate } from "react-router-dom"; // Add this import
-// import bannerArt from "../../assets/images/art.png";
-// import profile from "../../assets/images/profile.jpg";
-// import room from "../../assets/images/room.png";
-// import Header from "../../components/header.jsx";
-// import EditProfileForm from "../private/designer/EditProfileForm.jsx";
-// import "../style/myprj.css";
-
-// export default function MyProjectsPage() {
-//     const [projects, setProjects] = useState([]);
-//     const [userProfile, setUserProfile] = useState(null);
-//     const [showAuth, setShowAuth] = useState(false);
-//     const [showEditProfile, setShowEditProfile] = useState(false);
-//     const navigate = useNavigate(); // Add this hook
-//     const userId = localStorage.getItem("userId");
-//     const userRole = localStorage.getItem("userRole");
-
-//     useEffect(() => {
-//         const fetchProjects = async () => {
-//             try {
-//                 const res = await axios.get(`http://localhost:2005/api/project/user/${userId}`);
-//                 setProjects(res.data);
-//             } catch (err) {
-//                 console.error("Error fetching projects:", err);
-//             }
-//         };
-
-//         const fetchUserProfile = async () => {
-//             try {
-//                 const res = await axios.get(`http://localhost:2005/api/user/${userId}`);
-//                 setUserProfile(res.data);
-//             } catch (err) {
-//                 console.error("Error fetching user profile:", err);
-//             }
-//         };
-
-//         fetchProjects();
-
-//         // Only fetch profile if user is a client
-//         if (userRole === 'client') {
-//             fetchUserProfile();
-//         }
-//     }, [userId, userRole]);
-//     const statusOptions = ["pending", "in_progress", "completed", "cancelled"];
-
-//     const updateProjectStatus = async (projectId, newStatus) => {
-//         try {
-//             await axios.patch(`http://localhost:2005/api/project/${projectId}/status`, {
-//                 status: newStatus
-//             });
-
-//             // Update local state
-//             setProjects(projects.map(project =>
-//                 project._id === projectId
-//                     ? { ...project, status: newStatus }
-//                     : project
-//             ));
-//         } catch (err) {
-//             console.error("Error updating project status:", err);
-//         }
-//     };
-
-//     const getStatusProgress = (status) => {
-//         const statusMap = {
-//             'pending': 20,
-//             'in_progress': 50,
-//             'completed': 100,
-//             'cancelled': 0
-//         };
-//         return statusMap[status] || 0;
-//     };
-
-
-//     const statusLabelMap = {
-//         "pending": "Pending",
-//         "in_progress": "In Progress",
-//         "completed": "Completed",
-//         "cancelled": "Cancelled"
-//     };
-
-
-//     const handleEditProfile = () => {
-//         setShowEditProfile(true);
-//     };
-
-//     const handleCloseEditProfile = () => {
-//         setShowEditProfile(false);
-//         // Refresh user profile to reflect changes
-//         if (userRole === 'client') {
-//             fetchUserProfile();
-//         }
-//     };
-
-//     // Function to fetch updated user profile
-//     const fetchUserProfile = async () => {
-//         try {
-//             const res = await axios.get(`http://localhost:2005/api/user/${userId}`);
-//             setUserProfile(res.data);
-//         } catch (err) {
-//             console.error("Error fetching user profile:", err);
-//         }
-//     };
-
-//     // Add this function to handle edit/view button click
-//     const handleProjectAction = (project) => {
-//         if (userRole === 'designer') {
-//             // Navigate to room editor with project data
-//             navigate('/room-edit', {
-//                 state: {
-//                     projectId: project._id,
-//                     projectTitle: project.title,
-//                     projectData: project
-//                 }
-//             });
-//         } else {
-//             // For clients, just view the project (you can implement view logic here)
-//             console.log("Viewing project:", project);
-//             // You can navigate to a view-only version or show project details
-//         }
-//     };
-
-
-
-//     return (
-//         <div className="my-projects-page">
-//             <Header onGetStartedClick={() => setShowAuth(true)} />
-
-//             <div className="page-content">
-//                 {/* Profile Section - Only for clients */}
-//                 {userRole === 'client' && userProfile && (
-//                     <div className="profile-section">
-//                         <div className="profile-content">
-//                             <div className="profile-avatar">
-//                                 <img
-//                                     src={userProfile.profilepic ? `http://localhost:2005${userProfile.profilepic}` : profile}
-//                                     alt="Profile"
-//                                     className="profile-image"
-//                                 />
-//                             </div>
-//                             <div className="profile-info">
-//                                 <h3 className="profile-name">{userProfile.full_name || 'Unknown User'}</h3>
-//                                 <p className="profile-email">{userProfile.email || 'No email provided'}</p>
-//                             </div>
-//                             <div className="profile-actions">
-//                                 <FiEdit
-//                                     onClick={handleEditProfile}
-//                                     style={{ cursor: 'pointer' }}
-//                                 />
-//                             </div>
-//                         </div>
-//                     </div>
-//                 )}
-
-//                 {/* Show banner only for clients */}
-//                 {userRole === 'client' && (
-//                     <div className="start-banner">
-//                         <div className="banner-text">
-//                             <h3>Your dream interior is just a step away!</h3>
-//                             <p>Don't wait any longer to create the perfect space that reflects your style and personality.</p>
-//                             <button className="start-btn">Start New Project</button>
-//                         </div>
-//                         <img src={bannerArt} alt="banner art" />
-//                     </div>
-//                 )}
-
-//                 <h3 className="section-heading">
-//                     {userRole === 'designer' ? 'Your Projects' : 'Ongoing Projects'}
-//                 </h3>
-
-//                 <div className="project-list">
-//                     {projects.map((project) => (
-//                         <div className="project-card" key={project._id}>
-//                             <div className="project-card-content">
-//                                 <img src={room} alt="project icon" />
-//                                 <div className="project-info">
-//                                     <h4>{project.title}</h4>
-//                                     <div className="status-section">
-//                                         <div className="status-row">
-//                                             <span>Status: </span>
-//                                             {userRole === 'designer' ? (
-//                                                 <select
-//                                                     value={project.status}
-//                                                     onChange={(e) => updateProjectStatus(project._id, e.target.value)}
-//                                                     className="status-dropdown"
-//                                                 >
-//                                                     {statusOptions.map(status => (
-//                                                         <option key={status} value={status}>
-//                                                             {statusLabelMap[status]}
-//                                                         </option>
-//                                                     ))}
-//                                                 </select>
-
-//                                             ) : (
-//                                                 <strong>{statusLabelMap[project.status]}</strong>
-//                                             )}
-//                                         </div>
-//                                         <div className="progress-container">
-//                                             <div className="progress-bar">
-//                                                 <div
-//                                                     className="progress-fill"
-//                                                     style={{ width: `${getStatusProgress(project.status)}%` }}
-//                                                 ></div>
-//                                             </div>
-//                                             <span className="progress-text">
-//                                                 {getStatusProgress(project.status)}%
-//                                             </span>
-//                                         </div>
-//                                     </div>
-//                                     <p>Payment: <strong>{project.payment}</strong></p>
-//                                     <p className="created-at">Created {new Date(project.createdAt).toLocaleString()}</p>
-//                                 </div>
-//                             </div>
-//                             <div className="project-actions">
-//                                 <button
-//                                     className="action-btn"
-//                                     onClick={() => handleProjectAction(project)}
-//                                 >
-//                                     {userRole === 'designer' ? 'Edit' : 'View'}
-//                                 </button>
-//                             </div>
-//                         </div>
-//                     ))}
-//                 </div>
-
-//                 {projects.length === 0 && (
-//                     <div className="no-projects">
-//                         <p>No projects found. {userRole === 'client' ? 'Start your first project!' : 'You haven\'t been assigned any projects yet.'}</p>
-//                     </div>
-//                 )}
-//             </div>
-
-//             {/* Edit Profile Popup */}
-//             {showEditProfile && (
-//                 <div className="edit-profile-overlay">
-//                     <EditProfileForm
-//                         designer={userProfile}
-//                         onClose={handleCloseEditProfile}
-//                     />
-//                 </div>
-//             )}
-//         </div>
-//     );
-// }
-
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { FiEdit } from "react-icons/fi";
-import { useNavigate } from "react-router-dom"; // Add this import
+import { useNavigate } from "react-router-dom";
 import bannerArt from "../../assets/images/art.png";
 import profile from "../../assets/images/profile.jpg";
 import room from "../../assets/images/room.png";
 import Header from "../../components/header.jsx";
-import Toast from "../../components/toastMessage.jsx"; // Import the toast component
+import Toast from "../../components/toastMessage.jsx";
+import { useAuth } from "../../provider/authcontext";
 import EditProfileForm from "../private/designer/EditProfileForm.jsx";
 import "../style/myprj.css";
-import { getRoomConfigurationByProjectId } from "./editingRoom/components/room-designer/furniture-Catalog"; // Import the function
+import { getRoomConfigurationByProjectId } from "./editingRoom/components/room-designer/furniture-Catalog";
 
 export default function MyProjectsPage() {
     const [projects, setProjects] = useState([]);
     const [userProfile, setUserProfile] = useState(null);
     const [showAuth, setShowAuth] = useState(false);
     const [showEditProfile, setShowEditProfile] = useState(false);
-    const [toast, setToast] = useState(null); // Add toast state
-    const navigate = useNavigate(); // Add this hook
-    const userId = localStorage.getItem("userId");
-    const userRole = localStorage.getItem("userRole");
+    const [toast, setToast] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState("");
+
+    const navigate = useNavigate();
+    const {
+        userId,
+        userRole,
+        isLoggedIn,
+        isUserIdAvailable,
+        getToken,
+        loading: authLoading
+    } = useAuth();
 
     useEffect(() => {
+        // Wait for auth to finish loading
+        if (authLoading) return;
+
+        // 🔐 Security checks
+        if (!isLoggedIn || !isUserIdAvailable()) {
+            console.log("🔒 Not authenticated, redirecting to home");
+            navigate('/');
+            return;
+        }
+
         const fetchProjects = async () => {
             try {
-                const res = await axios.get(`http://localhost:2005/api/project/user/${userId}`);
-                setProjects(res.data);
+                const token = getToken();
+                const config = {
+                    ...(token && {
+                        headers: { Authorization: `Bearer ${token}` }
+                    })
+                };
+
+                const res = await axios.get(`http://localhost:2005/api/project/user/${userId}`, config);
+                setProjects(res.data || []);
+                console.log("✅ Projects loaded:", res.data?.length || 0);
             } catch (err) {
-                console.error("Error fetching projects:", err);
+                console.error("❌ Error fetching projects:", err);
+
+                if (err.response?.status === 401) {
+                    setError("Session expired. Please log in again.");
+                } else {
+                    setError("Failed to load projects. Please try again.");
+                }
             }
         };
 
         const fetchUserProfile = async () => {
             try {
-                const res = await axios.get(`http://localhost:2005/api/user/${userId}`);
+                const token = getToken();
+                const config = {
+                    ...(token && {
+                        headers: { Authorization: `Bearer ${token}` }
+                    })
+                };
+
+                const res = await axios.get(`http://localhost:2005/api/user/${userId}`, config);
                 setUserProfile(res.data);
+                console.log("✅ User profile loaded:", res.data.full_name);
             } catch (err) {
-                console.error("Error fetching user profile:", err);
+                console.error("❌ Error fetching user profile:", err);
+
+                if (err.response?.status === 401) {
+                    console.log("🔒 Unauthorized access to profile");
+                }
             }
         };
 
-        fetchProjects();
+        const loadData = async () => {
+            setLoading(true);
 
-        // Only fetch profile if user is a client
-        if (userRole === 'client') {
-            fetchUserProfile();
-        }
-    }, [userId, userRole]);
+            await fetchProjects();
+
+            // Only fetch profile if user is a client
+            if (userRole === 'client') {
+                await fetchUserProfile();
+            }
+
+            setLoading(false);
+        };
+
+        loadData();
+    }, [userId, userRole, isLoggedIn, authLoading, navigate, isUserIdAvailable, getToken]);
 
     const statusOptions = ["pending", "in_progress", "completed", "cancelled"];
 
     const updateProjectStatus = async (projectId, newStatus) => {
+        // 🔐 Security check
+        if (!isUserIdAvailable()) {
+            setError("Authentication required to update project status.");
+            return;
+        }
+
         try {
-            await axios.patch(`http://localhost:2005/api/project/${projectId}/status`, {
-                status: newStatus
-            });
+            const token = getToken();
+            const config = {
+                ...(token && {
+                    headers: { Authorization: `Bearer ${token}` }
+                })
+            };
+
+            await axios.patch(`http://localhost:2005/api/project/${projectId}/status`,
+                { status: newStatus },
+                config
+            );
 
             // Update local state
             setProjects(projects.map(project =>
@@ -309,8 +130,16 @@ export default function MyProjectsPage() {
                     ? { ...project, status: newStatus }
                     : project
             ));
+
+            console.log("✅ Project status updated:", newStatus);
         } catch (err) {
-            console.error("Error updating project status:", err);
+            console.error("❌ Error updating project status:", err);
+
+            if (err.response?.status === 401) {
+                setError("Session expired. Please log in again.");
+            } else {
+                setError("Failed to update project status.");
+            }
         }
     };
 
@@ -345,11 +174,20 @@ export default function MyProjectsPage() {
 
     // Function to fetch updated user profile
     const fetchUserProfile = async () => {
+        if (!isUserIdAvailable()) return;
+
         try {
-            const res = await axios.get(`http://localhost:2005/api/user/${userId}`);
+            const token = getToken();
+            const config = {
+                ...(token && {
+                    headers: { Authorization: `Bearer ${token}` }
+                })
+            };
+
+            const res = await axios.get(`http://localhost:2005/api/user/${userId}`, config);
             setUserProfile(res.data);
         } catch (err) {
-            console.error("Error fetching user profile:", err);
+            console.error("❌ Error fetching user profile:", err);
         }
     };
 
@@ -358,9 +196,8 @@ export default function MyProjectsPage() {
         setToast({ message, type });
         setTimeout(() => {
             setToast(null);
-        }, 4000); // Hide toast after 4 seconds
+        }, 4000);
     };
-
 
     // Modified function to handle edit/view button click
     const handleProjectAction = async (project) => {
@@ -386,7 +223,7 @@ export default function MyProjectsPage() {
                 if (projectRoom) {
                     console.log("Room found, navigating to view-only mode");
                     // Navigate to view-only room designer
-                    navigate('/room-view', {  // Change this to a different route
+                    navigate('/room-view', {
                         state: {
                             projectId: project._id,
                             projectTitle: project.title,
@@ -405,6 +242,56 @@ export default function MyProjectsPage() {
         }
     };
 
+    // Show loading while auth is being determined
+    if (authLoading) {
+        return (
+            <div className="my-projects-page">
+                <Header />
+                <div style={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    height: '400px',
+                    fontSize: '16px',
+                    color: '#C2805A'
+                }}>
+                    🔐 Verifying authentication...
+                </div>
+            </div>
+        );
+    }
+
+    // Show error if access denied
+    if (error) {
+        return (
+            <div className="my-projects-page">
+                <Header />
+                <div style={{
+                    textAlign: 'center',
+                    padding: '40px',
+                    fontSize: '16px'
+                }}>
+                    <h2 style={{ color: '#dc3545' }}>Error</h2>
+                    <p>{error}</p>
+                    <button
+                        onClick={() => navigate('/')}
+                        style={{
+                            background: '#C2805A',
+                            color: 'white',
+                            border: 'none',
+                            padding: '8px 16px',
+                            borderRadius: '4px',
+                            cursor: 'pointer',
+                            marginTop: '16px'
+                        }}
+                    >
+                        Go Home
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="my-projects-page">
             <Header onGetStartedClick={() => setShowAuth(true)} />
@@ -418,6 +305,8 @@ export default function MyProjectsPage() {
             )}
 
             <div className="page-content">
+
+
                 {/* Profile Section - Only for clients */}
                 {userRole === 'client' && userProfile && (
                     <div className="profile-section">
@@ -459,62 +348,71 @@ export default function MyProjectsPage() {
                     {userRole === 'designer' ? 'Your Projects' : 'Ongoing Projects'}
                 </h3>
 
-                <div className="project-list">
-                    {projects.map((project) => (
-                        <div className="project-card" key={project._id}>
-                            <div className="project-card-content">
-                                <img src={room} alt="project icon" />
-                                <div className="project-info">
-                                    <h4>{project.title}</h4>
-                                    <div className="status-section">
-                                        <div className="status-row">
-                                            <span>Status: </span>
-                                            {userRole === 'designer' ? (
-                                                <select
-                                                    value={project.status}
-                                                    onChange={(e) => updateProjectStatus(project._id, e.target.value)}
-                                                    className="status-dropdown"
-                                                >
-                                                    {statusOptions.map(status => (
-                                                        <option key={status} value={status}>
-                                                            {statusLabelMap[status]}
-                                                        </option>
-                                                    ))}
-                                                </select>
-
-                                            ) : (
-                                                <strong>{statusLabelMap[project.status]}</strong>
-                                            )}
-                                        </div>
-                                        <div className="progress-container">
-                                            <div className="progress-bar">
-                                                <div
-                                                    className="progress-fill"
-                                                    style={{ width: `${getStatusProgress(project.status)}%` }}
-                                                ></div>
+                {loading ? (
+                    <div style={{
+                        textAlign: 'center',
+                        padding: '40px',
+                        color: '#C2805A'
+                    }}>
+                        Loading projects...
+                    </div>
+                ) : (
+                    <div className="project-list">
+                        {projects.map((project) => (
+                            <div className="project-card" key={project._id}>
+                                <div className="project-card-content">
+                                    <img src={room} alt="project icon" />
+                                    <div className="project-info">
+                                        <h4>{project.title}</h4>
+                                        <div className="status-section">
+                                            <div className="status-row">
+                                                <span>Status: </span>
+                                                {userRole === 'designer' ? (
+                                                    <select
+                                                        value={project.status}
+                                                        onChange={(e) => updateProjectStatus(project._id, e.target.value)}
+                                                        className="status-dropdown"
+                                                    >
+                                                        {statusOptions.map(status => (
+                                                            <option key={status} value={status}>
+                                                                {statusLabelMap[status]}
+                                                            </option>
+                                                        ))}
+                                                    </select>
+                                                ) : (
+                                                    <strong>{statusLabelMap[project.status]}</strong>
+                                                )}
                                             </div>
-                                            <span className="progress-text">
-                                                {getStatusProgress(project.status)}%
-                                            </span>
+                                            <div className="progress-container">
+                                                <div className="progress-bar">
+                                                    <div
+                                                        className="progress-fill"
+                                                        style={{ width: `${getStatusProgress(project.status)}%` }}
+                                                    ></div>
+                                                </div>
+                                                <span className="progress-text">
+                                                    {getStatusProgress(project.status)}%
+                                                </span>
+                                            </div>
                                         </div>
+                                        <p>Payment: <strong>{project.payment}</strong></p>
+                                        <p className="created-at">Created {new Date(project.createdAt).toLocaleString()}</p>
                                     </div>
-                                    <p>Payment: <strong>{project.payment}</strong></p>
-                                    <p className="created-at">Created {new Date(project.createdAt).toLocaleString()}</p>
+                                </div>
+                                <div className="project-actions">
+                                    <button
+                                        className="action-btn"
+                                        onClick={() => handleProjectAction(project)}
+                                    >
+                                        {userRole === 'designer' ? 'Edit' : 'View'}
+                                    </button>
                                 </div>
                             </div>
-                            <div className="project-actions">
-                                <button
-                                    className="action-btn"
-                                    onClick={() => handleProjectAction(project)}
-                                >
-                                    {userRole === 'designer' ? 'Edit' : 'View'}
-                                </button>
-                            </div>
-                        </div>
-                    ))}
-                </div>
+                        ))}
+                    </div>
+                )}
 
-                {projects.length === 0 && (
+                {!loading && projects.length === 0 && (
                     <div className="no-projects">
                         <p>No projects found. {userRole === 'client' ? 'Start your first project!' : 'You haven\'t been assigned any projects yet.'}</p>
                     </div>
@@ -522,7 +420,7 @@ export default function MyProjectsPage() {
             </div>
 
             {/* Edit Profile Popup */}
-            {showEditProfile && (
+            {showEditProfile && userProfile && (
                 <div className="edit-profile-overlay">
                     <EditProfileForm
                         designer={userProfile}

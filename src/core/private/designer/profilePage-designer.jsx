@@ -1,8 +1,10 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import AddPortfolioModal from "../../../components/addPost.jsx";
 import Header from "../../../components/header.jsx";
 import PortfolioPostViewer from "../../../components/PortfolioPostViewer.jsx";
+import { useAuth } from "../../../provider/authcontext";
 import "../../style/profile.css";
 import EditProfileForm from "./EditProfileForm.jsx";
 
@@ -12,35 +14,180 @@ export default function ProfilePage() {
     const [showAddForm, setShowAddForm] = useState(false);
     const [portfolioPosts, setPortfolioPosts] = useState([]);
     const [activePost, setActivePost] = useState(null);
+    const [error, setError] = useState(null);
+    const [loadingProfile, setLoadingProfile] = useState(true);
 
-    const userId = localStorage.getItem("userId");
+    const { isLoggedIn, userId, userRole, loading, isUserIdAvailable, getToken } = useAuth();
+    const navigate = useNavigate();
 
     useEffect(() => {
+        // Wait for auth to finish loading
+        if (loading) return;
+
+        if (!isLoggedIn) {
+            console.log(" Not logged in, redirecting to home");
+            navigate('/');
+            return;
+        }
+
+        if (!isUserIdAvailable()) {
+            setError('Authentication error. Unable to access user information.');
+            setLoadingProfile(false);
+            return;
+        }
+
+        // Optional: Check if user has designer role
+        if (userRole && userRole !== 'designer') {
+            setError('Access denied. Designer account required.');
+            setLoadingProfile(false);
+            return;
+        }
+
+        // Fetch data functions
         const fetchDesigner = async () => {
             try {
-                const res = await axios.get(`http://localhost:2005/api/user/${userId}`);
+                const token = getToken();
+                const config = {
+                    ...(token && {
+                        headers: { Authorization: `Bearer ${token}` }
+                    })
+                };
+
+                const res = await axios.get(`http://localhost:2005/api/user/${userId}`, config);
                 setDesigner(res.data);
+                console.log("✅ Designer profile loaded:", res.data.full_name);
             } catch (err) {
-                console.error("Error fetching designer profile", err);
+                console.error("❌ Error fetching designer profile:", err);
+
+                if (err.response?.status === 401) {
+                    setError('Session expired. Please log in again.');
+                } else if (err.response?.status === 403) {
+                    setError('Access denied. You can only view your own profile.');
+                } else {
+                    setError('Failed to load profile. Please try again.');
+                }
+            } finally {
+                setLoadingProfile(false);
             }
         };
 
         const fetchPortfolioPosts = async () => {
             try {
-                const res = await axios.get(`http://localhost:2005/api/portfolio/posts/${userId}`);
-                setPortfolioPosts(res.data.posts);
+                const token = getToken();
+                const config = {
+                    ...(token && {
+                        headers: { Authorization: `Bearer ${token}` }
+                    })
+                };
+
+                const res = await axios.get(`http://localhost:2005/api/portfolio/posts/${userId}`, config);
+                setPortfolioPosts(res.data.posts || []);
+                console.log("✅ Portfolio posts loaded:", res.data.posts?.length || 0);
             } catch (err) {
-                console.error("Error fetching portfolio posts", err);
+                console.error("❌ Error fetching portfolio posts:", err);
+
+                if (err.response?.status === 401) {
+                    console.log("🔒 Unauthorized access to portfolio");
+                } else {
+                    console.log("⚠️ Portfolio posts unavailable");
+                }
             }
         };
 
-        if (userId) {
-            fetchDesigner();
-            fetchPortfolioPosts();
-        }
-    }, [userId, showAddForm]);
+        // Load data
+        fetchDesigner();
+        fetchPortfolioPosts();
 
-    if (!designer) return <div>Loading...</div>;
+    }, [userId, isLoggedIn, userRole, loading, navigate, showAddForm, isUserIdAvailable, getToken]);
+
+    // Handle profile update callback
+    const handleProfileUpdate = async () => {
+        if (!isUserIdAvailable()) return;
+
+        try {
+            const token = getToken();
+            const config = {
+                ...(token && {
+                    headers: { Authorization: `Bearer ${token}` }
+                })
+            };
+
+            const res = await axios.get(`http://localhost:2005/api/user/${userId}`, config);
+            setDesigner(res.data);
+            console.log("✅ Profile refreshed after update");
+        } catch (err) {
+            console.error("❌ Error refreshing profile:", err);
+        }
+    };
+
+    // Show loading while auth is being determined
+    if (loading) {
+        return (
+            <div className="profile-page">
+                <Header />
+                <div style={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    height: '400px',
+                    fontSize: '16px',
+                    color: '#C2805A'
+                }}>
+                    🔐 Verifying authentication...
+                </div>
+            </div>
+        );
+    }
+
+    // Show error if access denied or other errors
+    if (error) {
+        return (
+            <div className="profile-page">
+                <Header />
+                <div style={{
+                    textAlign: 'center',
+                    padding: '40px',
+                    fontSize: '16px'
+                }}>
+                    <h2 style={{ color: '#dc3545' }}>Error</h2>
+                    <p>{error}</p>
+                    <button
+                        onClick={() => navigate('/')}
+                        style={{
+                            background: '#C2805A',
+                            color: 'white',
+                            border: 'none',
+                            padding: '8px 16px',
+                            borderRadius: '4px',
+                            cursor: 'pointer',
+                            marginTop: '16px'
+                        }}
+                    >
+                        Go Home
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
+    // Show loading while profile data is being fetched
+    if (loadingProfile || !designer) {
+        return (
+            <div className="profile-page">
+                <Header onGetStartedClick={() => setIsEditing(true)} />
+                <div style={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    height: '400px',
+                    fontSize: '16px',
+                    color: '#C2805A'
+                }}>
+                    Loading profile...
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="profile-page">
@@ -72,6 +219,7 @@ export default function ProfilePage() {
                                 <h1>{designer.full_name}</h1>
                                 <p className="location">Kathmandu, Nepal</p>
                                 <p className="bio">{designer.bio}</p>
+
                             </div>
                         </div>
                     </div>
@@ -138,7 +286,13 @@ export default function ProfilePage() {
             {/* Edit Modal */}
             {isEditing && (
                 <div className="modal-overlay">
-                    <EditProfileForm designer={designer} onClose={() => setIsEditing(false)} />
+                    <EditProfileForm
+                        designer={designer}
+                        onClose={() => {
+                            setIsEditing(false);
+                            handleProfileUpdate();
+                        }}
+                    />
                 </div>
             )}
 
