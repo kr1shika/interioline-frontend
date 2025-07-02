@@ -200,12 +200,15 @@ export default function MyProjectsPage() {
 
     // Modified function to handle edit/view button click
     const handleProjectAction = async (project) => {
+        console.log("Project action clicked for:", project.title, "Status:", project.status);
+
         if (userRole === 'designer') {
-            // Navigate to room editor with project data
+            // Navigate to room editor with project data including status
             navigate('/room-edit', {
                 state: {
                     projectId: project._id,
                     projectTitle: project.title,
+                    projectStatus: project.status,
                     projectData: project
                 }
             });
@@ -220,12 +223,13 @@ export default function MyProjectsPage() {
                 console.log("Found project room:", projectRoom);
 
                 if (projectRoom) {
-                    console.log("Room found, navigating to view-only mode");
-                    // Navigate to view-only room designer
+                    console.log("Room found, navigating to view-only mode with status:", project.status);
+                    // Navigate to view-only room designer with all project data including status
                     navigate('/room-view', {
                         state: {
                             projectId: project._id,
                             projectTitle: project.title,
+                            projectStatus: project.status, // Make sure status is passed
                             projectData: project
                         }
                     });

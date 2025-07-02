@@ -1,19 +1,17 @@
 import {
-    Button
-} from "@heroui/react";
-import {
     ArrowLeft,
     Eye,
     FolderOpen,
-    Package
+    Package,
+    Star
 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Header from "../../../../../components/header.jsx";
 import Toast from "../../../../../components/toastMessage.jsx";
+import "./ViewOnlyRoomDesigner.css";
 import ViewOnlySidebar from "./ViewOnlySidebar.jsx";
 
-// Import components and hooks
 import { useFurniturePlacement } from "../hooks/useFurniturePlacement";
 import { useRoomMeasurements } from "../hooks/useRoomMeasurements";
 import { useRoomScene } from "../hooks/useRoomScene";
@@ -23,10 +21,10 @@ import {
 } from "./furniture-Catalog";
 
 const ViewOnlyRoomDesigner = () => {
-    // Project state management
     const [projectInfo, setProjectInfo] = useState({
         id: null,
         title: "Room View",
+        status: null,
         data: null
     });
 
@@ -111,6 +109,39 @@ const ViewOnlyRoomDesigner = () => {
         }, 4000);
     };
 
+    // Get status display class
+    const getStatusClass = (status) => {
+        switch (status) {
+            case 'pending':
+                return 'status-pending';
+            case 'in_progress':
+                return 'status-in-progress';
+            case 'completed':
+                return 'status-completed';
+            case 'cancelled':
+                return 'status-cancelled';
+            default:
+                return 'status-pending';
+        }
+    };
+
+    // Format status for display
+    const formatStatus = (status) => {
+        if (!status) return 'Unknown';
+        return status.replace('_', ' ');
+    };
+
+    // Handle add review
+    const handleAddReview = () => {
+        // Navigate to review page or open review modal
+        navigate(`/add-review/${projectInfo.id}`, {
+            state: {
+                projectTitle: projectInfo.title,
+                projectId: projectInfo.id
+            }
+        });
+    };
+
     // Process project information from location state - ONCE ONLY
     useEffect(() => {
         if (location.state?.projectId && !projectProcessed) {
@@ -119,8 +150,11 @@ const ViewOnlyRoomDesigner = () => {
             const projectData = {
                 id: location.state.projectId,
                 title: location.state.projectTitle || "Project View",
+                status: location.state.projectStatus || location.state.projectData?.status || null,
                 data: location.state.projectData || null
             };
+
+            console.log("Project data processed:", projectData);
 
             setProjectInfo(projectData);
             setRoomName(location.state.projectTitle || "");
@@ -147,7 +181,6 @@ const ViewOnlyRoomDesigner = () => {
         }
     }, []); // Empty dependency array - run only once
 
-    // Initialize scene without auto-loading project room
     useEffect(() => {
         if (scene && !roomInitialized && projectProcessed) {
             setRoomInitialized(true);
@@ -378,7 +411,7 @@ const ViewOnlyRoomDesigner = () => {
     );
 
     return (
-        <div className="flex flex-col w-100vw mx-auto bg-[#FCFCEC]">
+        <div className="view-only-container">
             {/* Toast Message */}
             {toast && (
                 <Toast
@@ -389,15 +422,15 @@ const ViewOnlyRoomDesigner = () => {
 
             {/* Loading Screen */}
             {isLoading && (
-                <div className="fixed inset-0 bg-white bg-opacity-95 z-50 flex flex-col items-center justify-center">
-                    <div className="text-center">
-                        <div className="mb-6">
-                            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#B86A45] mx-auto"></div>
+                <div className="loading-screen">
+                    <div className="loading-screen-content">
+                        <div className="loading-spinner">
+                            <div className="spinner"></div>
                         </div>
-                        <h2 className="text-2xl font-semibold text-[#B86A45] mb-2">
+                        <h2>
                             {furnitureLoadingState.isLoading ? "Loading 3D Model..." : "Loading Room..."}
                         </h2>
-                        <p className="text-gray-600 mb-4">
+                        <p>
                             {furnitureLoadingState.isLoading
                                 ? `Loading: ${furnitureLoadingState.currentItem || "3D Model"}`
                                 : projectInfo.title
@@ -405,10 +438,10 @@ const ViewOnlyRoomDesigner = () => {
                                     : "Please wait while we prepare your room"
                             }
                         </p>
-                        <div className="w-80 mx-auto">
-                            <div className="bg-gray-200 rounded-full h-2 overflow-hidden">
+                        <div className="loading-progress-large">
+                            <div className="loading-progress">
                                 <div
-                                    className="bg-[#B86A45] h-full transition-all duration-500 ease-out"
+                                    className="loading-progress-bar"
                                     style={{
                                         width: `${furnitureLoadingState.isLoading
                                             ? furnitureLoadingState.progress
@@ -416,13 +449,13 @@ const ViewOnlyRoomDesigner = () => {
                                     }}
                                 ></div>
                             </div>
-                            <p className="text-sm text-gray-500 mt-2">
+                            <p className="loading-percentage">
                                 {Math.round(furnitureLoadingState.isLoading
                                     ? furnitureLoadingState.progress
                                     : loadingProgress)}% complete
                             </p>
                             {furnitureLoadingState.totalItems > 0 && (
-                                <p className="text-xs text-gray-400 mt-1">
+                                <p className="loading-items-info">
                                     {furnitureLoadingState.completedItems}/{furnitureLoadingState.totalItems} models processed
                                 </p>
                             )}
@@ -432,61 +465,69 @@ const ViewOnlyRoomDesigner = () => {
             )}
 
             <Header />
-
-            {/* Project Section */}
-            <div className="bg-[#FFFFF6] rounded-lg shadow-sm p-3 my-2 mx-6">
-                <div className="flex justify-between items-center px-1">
-                    <div>
-                        <h1 className="text-2xl font-bold mb-1 text-[#B86A45]">
-                            <Eye className="w-6 h-6 inline mr-2 text-blue-600" />
+            <div className="header-section">
+                <div className="header-content">
+                    <div className="header-info">
+                        <h1>
+                            <Eye className="eye-icon" />
                             Viewing: {projectInfo.title}
                         </h1>
-                        <p className="text-[#B86A45] text-sm">
-                            <span className="text-blue-600 font-medium">View-Only Mode</span>
-
+                        <p>
+                            <span className="view-mode-badge">View-Only Mode</span>
+                            {projectInfo.status && (
+                                <span className={`project-status ${getStatusClass(projectInfo.status)}`}>
+                                    {formatStatus(projectInfo.status)}
+                                </span>
+                            )}
                         </p>
                     </div>
-                    <div className="flex gap-2 text-black">
+                    <div className="header-buttons">
                         {/* Project Room Load Button */}
                         {projectInfo.id && hasProjectRoom && !projectRoomLoaded && (
-                            <Button
-                                color="primary"
-                                variant="solid"
-                                startContent={<FolderOpen className="w-4 h-4" />}
-                                onPress={loadProjectRoom}
-                                className="bg-green-600 text-white hover:bg-green-700 flex rounded-md"
+                            <button
+                                className="btn btn-primary"
+                                onClick={loadProjectRoom}
                             >
+                                <FolderOpen className="btn-icon" />
                                 Load Project Room
-                            </Button>
+                            </button>
+                        )}
+
+                        {/* Add Review Button - only show if project is completed */}
+                        {projectInfo.status === 'completed' && (
+                            <button
+                                className="btn btn-success"
+                                onClick={handleAddReview}
+                            >
+                                <Star className="btn-icon" />
+                                Add Review
+                            </button>
                         )}
 
                         {/* Back button */}
-                        <Button
-                            color="default"
-                            variant="bordered"
-                            startContent={<ArrowLeft className="w-4 h-4" />}
-                            onPress={() => navigate(-1)}
-                            className="border-gray-300 text-gray-700 hover:bg-gray-50"
+                        <button
+                            className="btn btn-secondary"
+                            onClick={() => navigate(-1)}
                         >
+                            <ArrowLeft className="btn-icon" />
                             Back to Projects
-                        </Button>
+                        </button>
 
                         {/* Load 3D Models button */}
                         {pendingGLBLoad && pendingGLBLoad.length > 0 && (
-                            <Button
-                                color="warning"
-                                startContent={<Package className="w-4 h-4" />}
-                                onPress={loadPendingGLBModels}
-                                className="animate-pulse bg-orange-500 text-white"
+                            <button
+                                className="btn btn-warning"
+                                onClick={loadPendingGLBModels}
                             >
+                                <Package className="btn-icon" />
                                 Load 3D Models ({pendingGLBLoad.length})
-                            </Button>
+                            </button>
                         )}
                     </div>
                 </div>
             </div>
 
-            <div className="flex flex-col lg:flex-row gap-6 flex-1 h-8">
+            <div className="main-content">
                 {/* View-Only Sidebar */}
                 <ViewOnlySidebar
                     placedFurniture={placedFurniture}
@@ -504,64 +545,64 @@ const ViewOnlyRoomDesigner = () => {
                 />
 
                 {/* 3D View */}
-                <div style={{ height: "590px" }} className=" mt-2 flex-1 bg-white rounded-lg shadow-sm p-4 mr-6 min-w-0 overflow-hidden mb-6">
-                    <h2 className="text-xl font-semibold text-gray-800 mb-4">
+                <div className="room-view-container">
+                    <h2 className="room-view-header">
                         3D Room View - {roomName || projectInfo.title}
-                        <span className="text-sm font-normal text-blue-600 ml-2">
+                        <span className="view-only-indicator">
                             • View Only
                         </span>
                     </h2>
 
                     <div
                         ref={mountRef}
-                        className="relative w-full h-[600px] border-2 border-gray-200 rounded-lg overflow-hidden bg-gradient-to-b from-blue-50 to-gray-100"
+                        className="three-d-container"
                     >
                         {isLoading && (
-                            <div className="absolute inset-0 flex flex-col items-center justify-center bg-white bg-opacity-95 z-10 rounded-lg">
-                                <div className="text-gray-800 text-lg mb-4 font-medium">
+                            <div className="loading-overlay">
+                                <div className="loading-text">
                                     Loading Room...
                                 </div>
-                                <div className="w-64 h-3 bg-gray-200 rounded-full overflow-hidden">
+                                <div className="loading-progress">
                                     <div
-                                        className="h-full bg-blue-500 transition-all duration-300 ease-out rounded-full"
+                                        className="loading-progress-bar"
                                         style={{ width: `${loadingProgress}%` }}
                                     ></div>
                                 </div>
-                                <div className="text-sm text-gray-600 mt-2">
+                                <div className="loading-percentage">
                                     {Math.round(loadingProgress)}%
                                 </div>
                             </div>
                         )}
                     </div>
 
-                    <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-                        <div className="text-sm text-gray-600 space-y-1">
+                    <div className="room-status">
+                        <div className="room-status-text">
                             <p>
                                 <strong>Room Status:</strong>
-                                <span className="text-green-600 font-medium">
+                                <span className="status-doors">
                                     {" "}Doors: {doors.length}
                                 </span>{" "}
                                 |
-                                <span className="text-blue-600 font-medium">
+                                <span className="status-windows">
                                     {" "}Windows: {windows.length}
                                 </span>{" "}
                                 |
-                                <span className="text-purple-600 font-medium">
+                                <span className="status-models">
                                     {" "}3D Models: {placedFurniture.length} items
                                 </span>
                                 {furnitureLoadingState.isLoading && (
                                     <>
                                         {" "}|
-                                        <span className="text-orange-600 font-medium">
+                                        <span className="status-loading">
                                             {" "}Loading: {furnitureLoadingState.currentItem || "Processing..."}
                                         </span>
                                     </>
                                 )}
-                                <span className="text-blue-600 font-medium">
+                                <span className="status-view-mode">
                                     {" "}| View-Only Mode
                                 </span>
                             </p>
-                            <p className="text-blue-600 text-xs mt-2">
+                            <p className="room-tip">
                                 💡 You are viewing this room design in read-only mode. Contact your designer for modifications.
                             </p>
                         </div>

@@ -1155,5 +1155,3 @@ const CustomRoomDesigner = () => {
 };
 
 export default CustomRoomDesigner;
-
-

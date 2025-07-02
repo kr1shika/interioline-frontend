@@ -195,17 +195,6 @@ export default function AddPortfolioModal({ onClose }) {
                         &times;
                     </button>
 
-                    {/* Debug info in development */}
-                    {process.env.NODE_ENV === 'development' && (
-                        <div style={{
-                            fontSize: '10px',
-                            color: '#999',
-                            marginTop: '4px',
-                            fontFamily: 'monospace'
-                        }}>
-                            🔐 Designer ID: {userId?.substring(0, 8)}...
-                        </div>
-                    )}
                 </div>
 
                 {/* Error message */}

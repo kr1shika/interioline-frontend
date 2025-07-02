@@ -13,7 +13,6 @@ const NotificationComponent = ({ userId }) => {
 
     useEffect(() => {
         console.log('NotificationComponent mounted with userId:', userId);
-        // Fetch notifications when component mounts to check for unread notifications
         if (userId) {
             fetchNotifications();
         }
@@ -58,7 +57,6 @@ const NotificationComponent = ({ userId }) => {
 
             setNotifications(data);
 
-            // Check for unread notifications
             const unreadCount = data.filter(n => !n.is_read).length;
             setHasUnreadNotifications(unreadCount > 0);
 
@@ -71,7 +69,6 @@ const NotificationComponent = ({ userId }) => {
         }
     };
 
-    // Test backend connection
     const testConnection = async () => {
         try {
             const response = await fetch('http://localhost:2005/api/notifications/test-user-id', {
@@ -112,7 +109,6 @@ const NotificationComponent = ({ userId }) => {
         };
     }, [isOpen]);
 
-    // Get icon for notification type
     const getNotificationIcon = (type) => {
         switch (type) {
             case 'project_update':
@@ -185,7 +181,6 @@ const NotificationComponent = ({ userId }) => {
             });
         } catch (err) {
             console.error('Error marking notification as read:', err);
-            // Still update local state for better UX
             setNotifications(prev => {
                 const updated = prev.map(notif =>
                     notif._id === notificationId
@@ -309,7 +304,6 @@ const NotificationComponent = ({ userId }) => {
                         }}
                     ></span>
                 )}
-                {/* Show count badge only when dropdown is open and there are unread notifications */}
                 {isOpen && unreadCount > 0 && (
                     <span
                         style={{
@@ -411,7 +405,6 @@ const NotificationComponent = ({ userId }) => {
                             </button>
                         </div>
                     </div>
-
                     {/* Content */}
                     <div style={{ maxHeight: '320px', overflowY: 'auto' }}>
                         {loading ? (
