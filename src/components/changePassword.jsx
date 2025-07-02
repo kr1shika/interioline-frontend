@@ -1,10 +1,11 @@
 // components/ChangePasswordModal.jsx
-import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useEffect, useState } from 'react';
 import { useAuth } from '../provider/authcontext';
-import './changepassword.css'; // Assuming you have a CSS file for styling
+import './changepassword.css';
+
 const ChangePasswordModal = ({ isOpen, onClose }) => {
-    const [step, setStep] = useState(1); // 1: Request OTP, 2: Verify OTP & Change Password
+    const [step, setStep] = useState(1); // 1: Request OTP, 2: Verify OTP, 3: Change Password
     const [formData, setFormData] = useState({
         email: '',
         otp: '',
@@ -17,6 +18,7 @@ const ChangePasswordModal = ({ isOpen, onClose }) => {
     const [otpTimer, setOtpTimer] = useState(0);
     const [canResend, setCanResend] = useState(true);
     const [passwordStrength, setPasswordStrength] = useState('');
+    const [otpVerified, setOtpVerified] = useState(false);
 
     const { user } = useAuth();
 
@@ -40,6 +42,17 @@ const ChangePasswordModal = ({ isOpen, onClose }) => {
         return () => clearInterval(interval);
     }, [otpTimer, canResend]);
 
+    // Clear messages after 5 seconds
+    useEffect(() => {
+        if (error || success) {
+            const timer = setTimeout(() => {
+                setError('');
+                setSuccess('');
+            }, 5000);
+            return () => clearTimeout(timer);
+        }
+    }, [error, success]);
+
     // Password strength checker
     const checkPasswordStrength = (password) => {
         const minLength = password.length >= 8;
@@ -59,7 +72,10 @@ const ChangePasswordModal = ({ isOpen, onClose }) => {
     const handleInputChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
+
+        // Clear previous messages when user starts typing
         setError('');
+        setSuccess('');
 
         // Real-time password strength check
         if (name === 'newPassword') {
@@ -75,6 +91,7 @@ const ChangePasswordModal = ({ isOpen, onClose }) => {
 
         setLoading(true);
         setError('');
+        setSuccess('');
 
         try {
             await axios.post('http://localhost:2005/api/password-change/request-otp', {
@@ -95,6 +112,7 @@ const ChangePasswordModal = ({ isOpen, onClose }) => {
     const resendOTP = async () => {
         setLoading(true);
         setError('');
+        setSuccess('');
 
         try {
             await axios.post('http://localhost:2005/api/password-change/resend-otp', {
@@ -104,6 +122,7 @@ const ChangePasswordModal = ({ isOpen, onClose }) => {
             setSuccess('OTP resent! Please check your email.');
             setOtpTimer(300); // 5 minutes
             setCanResend(false);
+            setOtpVerified(false); // Reset verification status
         } catch (err) {
             setError(err.response?.data?.message || 'Failed to resend OTP');
         } finally {
@@ -111,9 +130,41 @@ const ChangePasswordModal = ({ isOpen, onClose }) => {
         }
     };
 
+    const verifyOTP = async () => {
+        if (!formData.otp) {
+            setError('OTP is required');
+            return;
+        }
+
+        if (!/^\d{6}$/.test(formData.otp)) {
+            setError('OTP must be exactly 6 digits');
+            return;
+        }
+
+        setLoading(true);
+        setError('');
+        setSuccess('');
+
+        try {
+            // Use the new verify-only endpoint
+            await axios.post('http://localhost:2005/api/password-change/verify-otp-only', {
+                email: formData.email,
+                otp: formData.otp
+            });
+
+            setSuccess('OTP verified successfully! Now create your new password.');
+            setOtpVerified(true);
+            setStep(3);
+        } catch (err) {
+            setError(err.response?.data?.message || 'Invalid OTP. Please try again.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
     const validatePassword = (password) => {
         const errors = [];
-        
+
         if (password.length < 8) {
             errors.push('At least 8 characters');
         }
@@ -129,21 +180,16 @@ const ChangePasswordModal = ({ isOpen, onClose }) => {
         if (!/[@$!%*?&]/.test(password)) {
             errors.push('One special character (@$!%*?&)');
         }
-        
+
         return errors;
     };
 
-    const verifyOTPAndChangePassword = async () => {
-        const { otp, newPassword, confirmPassword } = formData;
+    const changePassword = async () => {
+        const { newPassword, confirmPassword } = formData;
 
         // Validation
-        if (!otp || !newPassword || !confirmPassword) {
+        if (!newPassword || !confirmPassword) {
             setError('All fields are required');
-            return;
-        }
-
-        if (!/^\d{6}$/.test(otp)) {
-            setError('OTP must be exactly 6 digits');
             return;
         }
 
@@ -160,11 +206,13 @@ const ChangePasswordModal = ({ isOpen, onClose }) => {
 
         setLoading(true);
         setError('');
+        setSuccess('');
 
         try {
-            await axios.post('http://localhost:2005/api/password-change/verify-otp', {
+            // Use the new change-password endpoint
+            await axios.post('http://localhost:2005/api/password-change/change-password', {
                 email: formData.email,
-                otp,
+                otp: formData.otp,
                 newPassword
             });
 
@@ -193,6 +241,7 @@ const ChangePasswordModal = ({ isOpen, onClose }) => {
         setOtpTimer(0);
         setCanResend(true);
         setPasswordStrength('');
+        setOtpVerified(false);
     };
 
     const handleClose = () => {
@@ -230,10 +279,10 @@ const ChangePasswordModal = ({ isOpen, onClose }) => {
 
     return (
         <div className="change-password-modal-overlay">
-            <div className="change-password-modal">
-                <div className="modal-header">
-                    <h2>Change Password</h2>
-                    <button 
+            <div className="change-password-modal" style={{ backgroundColor: '#FCFCEC' }}>
+                <div className="modal-header" style={{ color: '#FCFCEC' }}>
+                    <h2 style={{ color: "#A75B2A" }}>Change Password</h2>
+                    <button
                         className="close-button"
                         onClick={handleClose}
                         disabled={loading}
@@ -263,11 +312,12 @@ const ChangePasswordModal = ({ isOpen, onClose }) => {
                                 <div className="step active">1</div>
                                 <div className="step-line"></div>
                                 <div className="step">2</div>
+                                <div className="step-line"></div>
+                                <div className="step">3</div>
                             </div>
-                            
-                            <h3>Request OTP</h3>
+
                             <p>We'll send a verification code to your email address for security purposes.</p>
-                            
+
                             <div className="form-group">
                                 <label htmlFor="email">Email Address</label>
                                 <input
@@ -297,11 +347,13 @@ const ChangePasswordModal = ({ isOpen, onClose }) => {
                                 <div className="step completed">✓</div>
                                 <div className="step-line"></div>
                                 <div className="step active">2</div>
+                                <div className="step-line"></div>
+                                <div className="step">3</div>
                             </div>
-                            
-                            <h3>Verify & Change Password</h3>
-                            <p>Enter the OTP sent to your email and create a new strong password.</p>
-                            
+
+                            <h3>Verify OTP</h3>
+                            <p>Enter the OTP sent to your email to verify your identity.</p>
+
                             <div className="form-group">
                                 <label htmlFor="otp">OTP Code</label>
                                 <input
@@ -314,7 +366,7 @@ const ChangePasswordModal = ({ isOpen, onClose }) => {
                                     maxLength="6"
                                     className="otp-input"
                                 />
-                                
+
                                 <div className="otp-info">
                                     <div className="otp-timer">
                                         {otpTimer > 0 ? (
@@ -336,6 +388,34 @@ const ChangePasswordModal = ({ isOpen, onClose }) => {
                                 </div>
                             </div>
 
+                            <div className="button-group">
+                                <button
+                                    className="secondary-button"
+                                    onClick={() => setStep(1)}
+                                    disabled={loading}
+                                >
+                                    ← Back
+                                </button>
+                                <button
+                                    className="primary-button"
+                                    onClick={verifyOTP}
+                                    disabled={loading}
+                                >
+                                    {loading ? 'Verifying...' : 'Verify OTP'}
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {step === 3 && otpVerified && (
+                        <div className="step-3" style={{ marginTop: '20px' }}>
+                            <div className="step-indicator">
+                                <div className="step completed">✓</div>
+                                <div className="step-line"></div>
+                                <div className="step completed">✓</div>
+                                <div className="step-line"></div>
+                                <div className="step active">3</div>
+                            </div>
                             <div className="form-group">
                                 <label htmlFor="newPassword">New Password</label>
                                 <input
@@ -346,16 +426,16 @@ const ChangePasswordModal = ({ isOpen, onClose }) => {
                                     onChange={handleInputChange}
                                     placeholder="Enter new password"
                                 />
-                                
+
                                 {formData.newPassword && (
                                     <div className="password-strength">
                                         <div className="strength-bar">
-                                            <div 
-                                                className="strength-fill" 
-                                                style={{ 
-                                                    width: passwordStrength === 'strong' ? '100%' : 
-                                                           passwordStrength === 'medium' ? '66%' : 
-                                                           passwordStrength === 'weak' ? '33%' : '10%',
+                                            <div
+                                                className="strength-fill"
+                                                style={{
+                                                    width: passwordStrength === 'strong' ? '100%' :
+                                                        passwordStrength === 'medium' ? '66%' :
+                                                            passwordStrength === 'weak' ? '33%' : '10%',
                                                     backgroundColor: getPasswordStrengthColor()
                                                 }}
                                             ></div>
@@ -365,7 +445,7 @@ const ChangePasswordModal = ({ isOpen, onClose }) => {
                                         </span>
                                     </div>
                                 )}
-                                
+
                                 <div className="password-requirements">
                                     <small>Password must contain:</small>
                                     <ul>
@@ -407,14 +487,14 @@ const ChangePasswordModal = ({ isOpen, onClose }) => {
                             <div className="button-group">
                                 <button
                                     className="secondary-button"
-                                    onClick={() => setStep(1)}
+                                    onClick={() => setStep(2)}
                                     disabled={loading}
                                 >
                                     ← Back
                                 </button>
                                 <button
                                     className="primary-button"
-                                    onClick={verifyOTPAndChangePassword}
+                                    onClick={changePassword}
                                     disabled={loading}
                                 >
                                     {loading ? 'Changing Password...' : 'Change Password'}

@@ -8,10 +8,15 @@ const NotificationComponent = ({ userId }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [debugInfo, setDebugInfo] = useState('');
     const [markingAsRead, setMarkingAsRead] = useState(false);
+    const [hasUnreadNotifications, setHasUnreadNotifications] = useState(false);
     const dropdownRef = useRef(null);
 
     useEffect(() => {
         console.log('NotificationComponent mounted with userId:', userId);
+        // Fetch notifications when component mounts to check for unread notifications
+        if (userId) {
+            fetchNotifications();
+        }
     }, [userId]);
 
     const fetchNotifications = async () => {
@@ -52,6 +57,11 @@ const NotificationComponent = ({ userId }) => {
             console.log('Number of notifications:', data?.length || 0);
 
             setNotifications(data);
+
+            // Check for unread notifications
+            const unreadCount = data.filter(n => !n.is_read).length;
+            setHasUnreadNotifications(unreadCount > 0);
+
         } catch (err) {
             console.error('Error fetching notifications:', err);
             setError(`Failed to fetch notifications: ${err.message}`);
@@ -61,7 +71,7 @@ const NotificationComponent = ({ userId }) => {
         }
     };
 
-    // // Test backend connection
+    // Test backend connection
     const testConnection = async () => {
         try {
             const response = await fetch('http://localhost:2005/api/notifications/test-user-id', {
@@ -77,16 +87,13 @@ const NotificationComponent = ({ userId }) => {
         }
     };
 
-    // Fetch notifications when component opens
+    // Fetch notifications when component opens (but don't fetch again if already loaded)
     useEffect(() => {
-        if (isOpen && userId) {
+        if (isOpen && userId && notifications.length === 0) {
             console.log('Component opened, fetching notifications...');
             fetchNotifications();
         }
     }, [isOpen, userId]);
-
-    // Test connection on mount
-
 
     // Close dropdown when clicking outside
     useEffect(() => {
@@ -141,7 +148,7 @@ const NotificationComponent = ({ userId }) => {
         return date.toLocaleDateString();
     };
 
-    // Mark notification as read - Updated to call backend
+    // Mark notification as read
     const markAsRead = async (notificationId) => {
         try {
             console.log('Marking notification as read:', notificationId);
@@ -163,27 +170,39 @@ const NotificationComponent = ({ userId }) => {
             console.log('Notification marked as read:', result);
 
             // Update local state
-            setNotifications(prev =>
-                prev.map(notif =>
+            setNotifications(prev => {
+                const updated = prev.map(notif =>
                     notif._id === notificationId
                         ? { ...notif, is_read: true, read_at: new Date() }
                         : notif
-                )
-            );
+                );
+
+                // Update unread status
+                const unreadCount = updated.filter(n => !n.is_read).length;
+                setHasUnreadNotifications(unreadCount > 0);
+
+                return updated;
+            });
         } catch (err) {
             console.error('Error marking notification as read:', err);
             // Still update local state for better UX
-            setNotifications(prev =>
-                prev.map(notif =>
+            setNotifications(prev => {
+                const updated = prev.map(notif =>
                     notif._id === notificationId
                         ? { ...notif, is_read: true, read_at: new Date() }
                         : notif
-                )
-            );
+                );
+
+                // Update unread status
+                const unreadCount = updated.filter(n => !n.is_read).length;
+                setHasUnreadNotifications(unreadCount > 0);
+
+                return updated;
+            });
         }
     };
 
-    // Mark all notifications as read - New function
+    // Mark all notifications as read
     const markAllAsRead = async () => {
         if (markingAsRead) return;
 
@@ -214,6 +233,8 @@ const NotificationComponent = ({ userId }) => {
                     read_at: new Date()
                 }))
             );
+
+            setHasUnreadNotifications(false);
         } catch (err) {
             console.error('Error marking all notifications as read:', err);
             // Still update local state for better UX
@@ -224,6 +245,7 @@ const NotificationComponent = ({ userId }) => {
                     read_at: new Date()
                 }))
             );
+            setHasUnreadNotifications(false);
         } finally {
             setMarkingAsRead(false);
         }
@@ -271,24 +293,41 @@ const NotificationComponent = ({ userId }) => {
                 style={{ position: 'relative' }}
             >
                 <FaBell className="navicon" />
-                {unreadCount > 0 && (
+                {/* Show red dot for any unread notifications */}
+                {hasUnreadNotifications && (
                     <span
                         className="notification-dot"
                         style={{
                             position: 'absolute',
-                            top: '5px',
-                            right: '5px',
+                            top: '2px',
+                            right: '2px',
+                            backgroundColor: '#ef4444',
+                            borderRadius: '50%',
+                            width: '8px',
+                            height: '8px',
+                            border: '2px solid white'
+                        }}
+                    ></span>
+                )}
+                {/* Show count badge only when dropdown is open and there are unread notifications */}
+                {isOpen && unreadCount > 0 && (
+                    <span
+                        style={{
+                            position: 'absolute',
+                            top: '-8px',
+                            right: '-8px',
                             backgroundColor: '#ef4444',
                             color: 'white',
                             borderRadius: '50%',
-                            width: '18px',
-                            height: '18px',
-                            fontSize: '10px',
+                            width: '20px',
+                            height: '20px',
+                            fontSize: '11px',
                             fontWeight: 'bold',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            border: '2px solid white'
+                            border: '2px solid white',
+                            zIndex: 10
                         }}
                     >
                         {unreadCount > 99 ? '99+' : unreadCount}
