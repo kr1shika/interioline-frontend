@@ -1,12 +1,11 @@
 import {
-  Button,
   Input,
   Modal,
   ModalBody,
   ModalContent,
   ModalFooter,
   ModalHeader,
-  useDisclosure,
+  useDisclosure
 } from "@heroui/react";
 import {
   Download,
@@ -20,6 +19,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
 import Header from "../../../../../components/header.jsx";
+import "./CustomRoomDesigner.css";
 import Sidebar from "./sidebar.jsx";
 
 // Import components and hooks
@@ -788,18 +788,18 @@ const CustomRoomDesigner = () => {
   );
 
   return (
-    <div className="flex flex-col w-100vw mx-auto bg-[#FCFCEC]">
+    <div className="room-designer-container">
       {/* Loading Screen */}
       {isLoading && (
-        <div className="fixed inset-0 bg-white bg-opacity-95 z-50 flex flex-col items-center justify-center">
-          <div className="text-center">
-            <div className="mb-6">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#B86A45] mx-auto"></div>
+        <div className="loading-screen">
+          <div className="loading-screen-content">
+            <div className="loading-spinner">
+              <div className="spinner"></div>
             </div>
-            <h2 className="text-2xl font-semibold text-[#B86A45] mb-2">
+            <h2>
               {furnitureLoadingState.isLoading ? "Loading 3D Model..." : "Loading Room..."}
             </h2>
-            <p className="text-gray-600 mb-4">
+            <p>
               {furnitureLoadingState.isLoading
                 ? `Loading: ${furnitureLoadingState.currentItem || "3D Model"}`
                 : projectInfo.title
@@ -807,10 +807,10 @@ const CustomRoomDesigner = () => {
                   : "Please wait while we prepare your room"
               }
             </p>
-            <div className="w-80 mx-auto">
-              <div className="bg-gray-200 rounded-full h-2 overflow-hidden">
+            <div className="loading-progress-container">
+              <div className="loading-progress-bar-container">
                 <div
-                  className="bg-[#B86A45] h-full transition-all duration-500 ease-out"
+                  className="loading-progress-bar"
                   style={{
                     width: `${furnitureLoadingState.isLoading
                       ? furnitureLoadingState.progress
@@ -818,13 +818,13 @@ const CustomRoomDesigner = () => {
                   }}
                 ></div>
               </div>
-              <p className="text-sm text-gray-500 mt-2">
+              <p className="loading-percentage">
                 {Math.round(furnitureLoadingState.isLoading
                   ? furnitureLoadingState.progress
                   : loadingProgress)}% complete
               </p>
               {furnitureLoadingState.totalItems > 0 && (
-                <p className="text-xs text-gray-400 mt-1">
+                <p className="loading-items-info">
                   {furnitureLoadingState.completedItems}/{furnitureLoadingState.totalItems} models processed
                 </p>
               )}
@@ -834,76 +834,72 @@ const CustomRoomDesigner = () => {
       )}
 
       <Header />
-      {/* Project Section - Reduced vertical padding */}
-      <div className="bg-[#FFFFF6] rounded-lg shadow-sm p-4 my-2 mx-6">
-        <div className="flex justify-between items-center px-2">
-          <div>
-            <h1 className="text-2xl font-bold mb-1 text-[#B86A45]">
+
+      {/* Project Section */}
+      <div className="project-section">
+        <div className="project-header">
+          <div className="project-info">
+            <h1>
               {projectInfo.id ? `Project: ${projectInfo.title}` : "Room Designer"}
             </h1>
-            <p className="text-[#B86A45] text-sm">
+            <p>
               {projectInfo.id && (
-                <span className="block text-xs mt-1 text-gray-600">
+                <span className="project-status-text">
                   {hasProjectRoom && (
-                    <span className="text-green-600">
+                    <span className={projectRoomLoaded ? "status-loaded" : "status-available"}>
                       {projectRoomLoaded ? "Room loaded" : "Room available"}
                     </span>
                   )}
                   {!hasProjectRoom && (
-                    <span className="text-blue-600">No room design yet</span>
+                    <span className="status-none">No room design yet</span>
                   )}
                 </span>
               )}
             </p>
           </div>
-          <div className="flex gap-2 text-black">
+          <div className="project-buttons">
             {/* Project Room Load Button */}
             {projectInfo.id && hasProjectRoom && !projectRoomLoaded && (
-              <Button
-                color="primary"
-                variant="solid"
-                startContent={<FolderOpen className="w-4 h-4" />}
-                onPress={loadProjectRoom}
-                className="bg-green-600 text-white hover:bg-green-700 flex rounded-md"
+              <button
+                className="btn btn-load-project"
+                onClick={loadProjectRoom}
               >
-                Load Project Room
-              </Button>
+                <FolderOpen className="btn-icon" />
+                <span>Load Project Room</span>
+              </button>
             )}
 
-            <Button
-              color="default"
-              variant="solid"
-              onPress={onSaveOpen}
-              className="bg-[#3b82f6] text-white hover:bg-green-700 flex rounded-md"
+            <button
+              className="btn btn-save"
+              onClick={onSaveOpen}
             >
-              <Save className="w-4 h-4" />
+              <Save className="btn-icon" />
               <span>Save</span>
-            </Button>
-            <Button
-              color="default"
-              variant="solid"
-              startContent={<Download className="w-4 h-4" />}
-              onPress={exportCurrentRoom}
-              className="bg-[#c19557] text-white hover:bg-green-700 flex rounded-md"
+            </button>
+
+            <button
+              className="btn btn-export"
+              onClick={exportCurrentRoom}
             >
+              <Download className="btn-icon" />
               Export
-            </Button>
+            </button>
+
             {pendingGLBLoad && pendingGLBLoad.length > 0 && (
-              <Button
-                color="warning"
-                startContent={<Package className="w-4 h-4" />}
-                onPress={loadPendingGLBModels}
-                className="animate-pulse bg-orange-500 text-white"
+              <button
+                className="btn btn-load-models"
+                onClick={loadPendingGLBModels}
               >
+                <Package className="btn-icon" />
                 Load 3D Models ({pendingGLBLoad.length})
-              </Button>
+              </button>
             )}
           </div>
         </div>
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-6 flex-1 h-8">
-        {/* Sidebar - Made wider */}
+      <div className="main-content">
+        {/* Sidebar */}
         <Sidebar
           // Room Settings Props
           selectedRoomType={selectedRoomType}
@@ -944,12 +940,12 @@ const CustomRoomDesigner = () => {
           loadingProgress={loadingProgress}
         />
 
-        {/* 3D View - Container stays within bounds */}
-        <div className="mt-2 flex-1 bg-white rounded-lg shadow-sm p-4 mr-6 min-w-0 overflow-hidden mb-6">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">
+        {/* 3D View */}
+        <div className="three-d-view-container">
+          <h2 className="three-d-view-header">
             {selectedRoomType.name} - 3D Preview
             {projectInfo.id && (
-              <span className="text-sm font-normal text-gray-600 ml-2">
+              <span className="project-title-small">
                 ({projectInfo.title})
               </span>
             )}
@@ -957,45 +953,45 @@ const CustomRoomDesigner = () => {
 
           <div
             ref={mountRef}
-            className="relative w-full h-[400px] border-2 border-gray-200 rounded-lg overflow-hidden bg-gradient-to-b from-blue-50 to-gray-100"
+            className="three-d-viewport"
           >
             {isLoading && (
-              <div className="absolute inset-0 flex flex-col items-center justify-center bg-white bg-opacity-95 z-10 rounded-lg">
-                <div className="text-gray-800 text-lg mb-4 font-medium">
+              <div className="viewport-loading-overlay">
+                <div className="viewport-loading-text">
                   Loading Room...
                 </div>
-                <div className="w-64 h-3 bg-gray-200 rounded-full overflow-hidden">
+                <div className="viewport-progress-bar">
                   <div
-                    className="h-full bg-blue-500 transition-all duration-300 ease-out rounded-full"
+                    className="viewport-progress-fill"
                     style={{ width: `${loadingProgress}%` }}
                   ></div>
                 </div>
-                <div className="text-sm text-gray-600 mt-2">
+                <div className="viewport-progress-text">
                   {Math.round(loadingProgress)}%
                 </div>
               </div>
             )}
           </div>
 
-          <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-            <div className="text-sm text-gray-600 space-y-1">
+          <div className="status-section">
+            <div className="status-content">
               <p>
                 <strong>Status:</strong>
-                <span className="text-green-600 font-medium">
+                <span className="status-doors">
                   {" "}Doors: {doors.length} active
                 </span>{" "}
                 |
-                <span className="text-blue-600 font-medium">
+                <span className="status-windows">
                   {" "}Windows: {windows.length} active
                 </span>{" "}
                 |
-                <span className="text-purple-600 font-medium">
+                <span className="status-models">
                   {" "}3D Models: {placedFurniture.length} items
                 </span>
                 {furnitureLoadingState.isLoading && (
                   <>
                     {" "}|
-                    <span className="text-orange-600 font-medium">
+                    <span className="status-loading">
                       {" "}Loading: {furnitureLoadingState.currentItem || "Processing..."}
                     </span>
                   </>
@@ -1003,7 +999,7 @@ const CustomRoomDesigner = () => {
                 {projectInfo.id && (
                   <>
                     {" "}|
-                    <span className="text-indigo-600 font-medium">
+                    <span className="status-project">
                       {" "}Project: {projectRoomLoaded ? "Loaded" : hasProjectRoom ? "Available" : "New"}
                     </span>
                   </>
@@ -1019,19 +1015,19 @@ const CustomRoomDesigner = () => {
         <ModalContent>
           {(onClose) => (
             <>
-              <ModalHeader className="flex flex-col gap-1">
+              <ModalHeader className="modal-header">
                 Save Room Design
               </ModalHeader>
-              <ModalBody>
+              <ModalBody className="modal-body">
                 <Input
                   label="Room Name"
                   placeholder="Enter a name for your room design"
                   value={roomName}
                   onChange={(e) => setRoomName(e.target.value)}
                 />
-                <div className="text-sm text-gray-600">
+                <div className="modal-description">
                   <p>This will save your room configuration including:</p>
-                  <ul className="list-disc list-inside mt-2">
+                  <ul>
                     <li>Room dimensions and colors</li>
                     <li>
                       Doors ({doors.length}) and windows ({windows.length})
@@ -1041,20 +1037,20 @@ const CustomRoomDesigner = () => {
                     </li>
                     <li>Total cost: ${totalCost}</li>
                     {projectInfo.id && (
-                      <li className="text-blue-600">
+                      <li className="project-linked">
                         ✓ Linked to project: {projectInfo.title}
                       </li>
                     )}
                   </ul>
                 </div>
               </ModalBody>
-              <ModalFooter>
-                <Button color="danger" variant="light" onPress={onClose}>
+              <ModalFooter className="modal-footer">
+                <button className="btn btn-cancel" onClick={onClose}>
                   Cancel
-                </Button>
-                <Button color="primary" onPress={saveCurrentRoom}>
+                </button>
+                <button className="btn btn-primary" onClick={saveCurrentRoom}>
                   Save Room
-                </Button>
+                </button>
               </ModalFooter>
             </>
           )}
@@ -1066,85 +1062,84 @@ const CustomRoomDesigner = () => {
         <ModalContent>
           {(onClose) => (
             <>
-              <ModalHeader className="flex flex-col gap-1">
+              <ModalHeader className="modal-header">
                 Load Saved Room
               </ModalHeader>
-              <ModalBody>
+              <ModalBody className="modal-body">
                 {savedRooms.length === 0 ? (
-                  <div className="text-center py-8">
-                    <FileText className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-                    <p className="text-gray-600">No saved rooms found</p>
+                  <div className="empty-state">
+                    <FileText className="empty-state-icon" />
+                    <p className="empty-state-text">No saved rooms found</p>
                   </div>
                 ) : (
-                  <div className="space-y-3 max-h-96 overflow-y-auto">
-                    {savedRooms
-                      .filter(room => !projectInfo.id || room.projectId !== projectInfo.id)
-                      .map((room) => (
-                        <div
-                          key={room.id}
-                          className="flex items-center justify-between p-3 border rounded-lg"
-                        >
-                          <div className="flex-1">
-                            <h4 className="font-medium">{room.name}</h4>
-                            <p className="text-sm text-gray-600">
-                              {room.roomDimensions.width}×
-                              {room.roomDimensions.length}m •
-                              {room.placedFurniture?.length || 0} items •
-                              {room.doors?.length || 0} doors •
-                              {room.windows?.length || 0} windows • $
-                              {room.totalCost || 0}
-                              {room.version === "2.0" && (
-                                <span className="ml-2 text-green-600 text-xs">
-                                  • GLB Support
-                                </span>
-                              )}
-                              {room.projectId && (
-                                <span className="ml-2 text-blue-600 text-xs">
-                                  • Project: {room.projectTitle}
-                                </span>
-                              )}
-                            </p>
-                            <p className="text-xs text-gray-500">
-                              Created:{" "}
-                              {new Date(room.createdAt).toLocaleDateString()}
-                            </p>
+                  <div className="saved-rooms-container">
+                    <div className="saved-rooms-list">
+                      {savedRooms
+                        .filter(room => !projectInfo.id || room.projectId !== projectInfo.id)
+                        .map((room) => (
+                          <div
+                            key={room.id}
+                            className="saved-room-item"
+                          >
+                            <div className="saved-room-info">
+                              <h4 className="saved-room-title">{room.name}</h4>
+                              <p className="saved-room-details">
+                                {room.roomDimensions.width}×
+                                {room.roomDimensions.length}m •
+                                {room.placedFurniture?.length || 0} items •
+                                {room.doors?.length || 0} doors •
+                                {room.windows?.length || 0} windows • $
+                                {room.totalCost || 0}
+                                {room.version === "2.0" && (
+                                  <span className="glb-support">
+                                    • GLB Support
+                                  </span>
+                                )}
+                                {room.projectId && (
+                                  <span className="project-info-small">
+                                    • Project: {room.projectTitle}
+                                  </span>
+                                )}
+                              </p>
+                              <p className="saved-room-meta">
+                                Created:{" "}
+                                {new Date(room.createdAt).toLocaleDateString()}
+                              </p>
+                            </div>
+                            <div className="saved-room-actions">
+                              <button
+                                className="btn-small btn-load"
+                                onClick={() => {
+                                  loadRoom(room);
+                                }}
+                              >
+                                Load
+                              </button>
+                              <button
+                                className="btn-small btn-delete"
+                                onClick={() => deleteSavedRoom(room.id)}
+                              >
+                                <Trash2 className="delete-icon" />
+                              </button>
+                            </div>
                           </div>
-                          <div className="flex gap-2">
-                            <Button
-                              size="sm"
-                              color="primary"
-                              onPress={() => {
-                                loadRoom(room);
-                              }}
-                            >
-                              Load
-                            </Button>
-                            <Button
-                              size="sm"
-                              color="danger"
-                              variant="light"
-                              onPress={() => deleteSavedRoom(room.id)}
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
-                          </div>
-                        </div>
-                      ))}
+                        ))}
+                    </div>
                   </div>
                 )}
                 {projectInfo.id && (
-                  <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                    <p className="text-sm text-blue-800">
+                  <div className="note-section">
+                    <p className="note-text">
                       <strong>Note:</strong> This will load a different room design.
                       Your current project room will not be affected.
                     </p>
                   </div>
                 )}
               </ModalBody>
-              <ModalFooter>
-                <Button color="danger" variant="light" onPress={onClose}>
+              <ModalFooter className="modal-footer">
+                <button className="btn btn-close" onClick={onClose}>
                   Close
-                </Button>
+                </button>
               </ModalFooter>
             </>
           )}

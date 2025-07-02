@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import AddReviewModal from "../../../../../components/AddReviewModal.jsx";
 import Header from "../../../../../components/header.jsx";
 import Toast from "../../../../../components/toastMessage.jsx";
 import "./ViewOnlyRoomDesigner.css";
@@ -21,6 +22,7 @@ import {
 } from "./furniture-Catalog";
 
 const ViewOnlyRoomDesigner = () => {
+    // Project state management
     const [projectInfo, setProjectInfo] = useState({
         id: null,
         title: "Room View",
@@ -31,6 +33,9 @@ const ViewOnlyRoomDesigner = () => {
     const location = useLocation();
     const navigate = useNavigate();
     const [toast, setToast] = useState(null);
+
+    // Review modal state
+    const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
 
     // Room configuration state
     const [roomDimensions, setRoomDimensions] = useState({
@@ -64,8 +69,6 @@ const ViewOnlyRoomDesigner = () => {
     const [projectProcessed, setProjectProcessed] = useState(false);
     const [projectRoomLoaded, setProjectRoomLoaded] = useState(false);
     const [pendingGLBLoad, setPendingGLBLoad] = useState(null);
-
-    // Add states for room availability
     const [hasProjectRoom, setHasProjectRoom] = useState(false);
 
     // UI state
@@ -101,6 +104,13 @@ const ViewOnlyRoomDesigner = () => {
         progress: 0
     });
 
+    // Refs to track values without causing re-renders
+    const lastRoomDimensionsRef = useRef(roomDimensions);
+    const lastDoorsRef = useRef(doors);
+    const lastWindowsRef = useRef(windows);
+    const lastWallColorRef = useRef(wallColor);
+    const lastFloorColorRef = useRef(floorColor);
+
     // Show toast message
     const showToast = (message, type = "info") => {
         setToast({ message, type });
@@ -133,13 +143,18 @@ const ViewOnlyRoomDesigner = () => {
 
     // Handle add review
     const handleAddReview = () => {
-        // Navigate to review page or open review modal
-        navigate(`/add-review/${projectInfo.id}`, {
-            state: {
-                projectTitle: projectInfo.title,
-                projectId: projectInfo.id
-            }
-        });
+        setIsReviewModalOpen(true);
+    };
+
+    // Handle review modal close
+    const handleReviewModalClose = () => {
+        setIsReviewModalOpen(false);
+    };
+
+    // Handle successful review submission
+    const handleReviewSubmitSuccess = (review) => {
+        showToast("Review submitted successfully! Thank you for your feedback.", "success");
+        console.log("Review submitted:", review);
     };
 
     // Process project information from location state - ONCE ONLY
@@ -179,7 +194,7 @@ const ViewOnlyRoomDesigner = () => {
             }, 2000);
             setProjectProcessed(true);
         }
-    }, []); // Empty dependency array - run only once
+    }, []);
 
     useEffect(() => {
         if (scene && !roomInitialized && projectProcessed) {
@@ -207,12 +222,10 @@ const ViewOnlyRoomDesigner = () => {
             setLoadingProgress(10);
             console.log("Loading project room for viewing:", existingRoom.name);
 
-            // Clear existing furniture
             clearAllFurniture();
             setPendingGLBLoad(null);
             setLoadingProgress(20);
 
-            // Set room configuration
             setRoomName(existingRoom.name);
             setLoadingProgress(30);
 
@@ -229,19 +242,16 @@ const ViewOnlyRoomDesigner = () => {
             }
             setLoadingProgress(50);
 
-            // Separate GLB and regular furniture
             const hasGLBModels = existingRoom.placedFurniture?.some(item => item.isGLB) || false;
             const regularFurniture = existingRoom.placedFurniture?.filter(item => !item.isGLB) || [];
             setLoadingProgress(60);
 
-            // Load regular furniture immediately
             if (regularFurniture.length > 0) {
                 console.log("Loading regular furniture...");
                 await loadFurnitureFromConfig(regularFurniture);
                 setLoadingProgress(80);
             }
 
-            // Set pending GLB models for later loading
             if (hasGLBModels) {
                 const glbModels = existingRoom.placedFurniture.filter(item => item.isGLB);
                 setPendingGLBLoad(glbModels);
@@ -251,7 +261,6 @@ const ViewOnlyRoomDesigner = () => {
             setLoadingProgress(100);
             setProjectRoomLoaded(true);
 
-            // Small delay to show completion
             setTimeout(() => {
                 setIsLoading(false);
                 setLoadingProgress(0);
@@ -294,21 +303,13 @@ const ViewOnlyRoomDesigner = () => {
         }
     };
 
-    // Refs to track values without causing re-renders
-    const lastRoomDimensionsRef = useRef(roomDimensions);
-    const lastDoorsRef = useRef(doors);
-    const lastWindowsRef = useRef(windows);
-    const lastWallColorRef = useRef(wallColor);
-    const lastFloorColorRef = useRef(floorColor);
-
-    // Update room dimensions when scene is ready - CONTROLLED UPDATES
+    // Update room dimensions when scene is ready
     useEffect(() => {
         if (!updateRoomDimensions || !roomInitialized || isLoading) return;
 
         const currentDims = roomDimensions;
         const lastDims = lastRoomDimensionsRef.current;
 
-        // Only update if dimensions actually changed
         if (
             currentDims.width !== lastDims.width ||
             currentDims.length !== lastDims.length ||
@@ -331,35 +332,33 @@ const ViewOnlyRoomDesigner = () => {
         }
     }, [roomDimensions.width, roomDimensions.length, roomDimensions.height, updateRoomDimensions, calculateRoomMetrics, roomInitialized, isLoading]);
 
-    // Update doors - CONTROLLED UPDATES
+    // Update doors
     useEffect(() => {
         if (!updateDoors || !roomInitialized) return;
 
         const currentDoors = doors;
         const lastDoors = lastDoorsRef.current;
 
-        // Only update if doors actually changed
         if (JSON.stringify(currentDoors) !== JSON.stringify(lastDoors)) {
             lastDoorsRef.current = currentDoors;
             updateDoors(currentDoors);
         }
     }, [doors, updateDoors, roomInitialized]);
 
-    // Update windows - CONTROLLED UPDATES
+    // Update windows
     useEffect(() => {
         if (!updateWindows || !roomInitialized) return;
 
         const currentWindows = windows;
         const lastWindows = lastWindowsRef.current;
 
-        // Only update if windows actually changed
         if (JSON.stringify(currentWindows) !== JSON.stringify(lastWindows)) {
             lastWindowsRef.current = currentWindows;
             updateWindows(currentWindows);
         }
     }, [windows, updateWindows, roomInitialized]);
 
-    // Update colors - CONTROLLED UPDATES
+    // Update colors
     useEffect(() => {
         if (!updateWallColor || !roomInitialized) return;
 
@@ -385,7 +384,6 @@ const ViewOnlyRoomDesigner = () => {
             setFurnitureLoadingState(state);
         };
 
-        // Update loading state every 500ms when loading
         let interval;
         if (getLoadingState().isLoading) {
             interval = setInterval(updateLoadingState, 500);
@@ -419,6 +417,14 @@ const ViewOnlyRoomDesigner = () => {
                     type={toast.type}
                 />
             )}
+
+            {/* Review Modal */}
+            <AddReviewModal
+                isOpen={isReviewModalOpen}
+                onClose={handleReviewModalClose}
+                projectInfo={projectInfo}
+                onSubmitSuccess={handleReviewSubmitSuccess}
+            />
 
             {/* Loading Screen */}
             {isLoading && (
