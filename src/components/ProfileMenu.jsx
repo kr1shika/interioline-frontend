@@ -1,4 +1,7 @@
 import { useRef, useState } from "react";
+import { GoProjectRoadmap } from "react-icons/go";
+import { IoLogOutOutline } from "react-icons/io5";
+import { RiAccountBoxLine } from "react-icons/ri";
 import { useNavigate } from "react-router-dom";
 import defaultProfile from "../assets/images/ham.jpg";
 import { useAuth } from "../provider/authcontext";
@@ -37,7 +40,7 @@ const ProfileMenu = () => {
         if (userRole === "designer") {
             navigate("/designer-profile");
         } else {
-            navigate("/account-settings");
+            navigate("/my-projects");
         }
     };
 
@@ -74,7 +77,7 @@ const ProfileMenu = () => {
                     border: "2px solid #C2805A"
                 }}
                 onError={(e) => {
-                                        e.target.src = defaultProfile;
+                    e.target.src = defaultProfile;
                 }}
             />
 
@@ -84,13 +87,14 @@ const ProfileMenu = () => {
                         position: "absolute",
                         right: 0,
                         top: "40px",
-                        backgroundColor: "#fff",
+                        backgroundColor: "#FFFFF6",
                         border: "1px solid #ccc",
                         borderRadius: "8px",
                         boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
                         zIndex: 1000,
                         minWidth: "180px",
-                        overflow: "hidden"
+                        overflow: "hidden",
+                        color: "#A4502F",
                     }}
                 >
                     <ul style={{
@@ -98,27 +102,44 @@ const ProfileMenu = () => {
                         margin: 0,
                         padding: "8px 0"
                     }}>
-                        <li
-                            style={menuItemStyle}
-                            onClick={handleProjectsClick}
-                            onMouseEnter={(e) => e.target.style.backgroundColor = "#f8f9fa"}
-                            onMouseLeave={(e) => e.target.style.backgroundColor = "transparent"}
-                        >
-                            📋 My Projects
-                        </li>
+                        {/* Show My Projects only for designers */}
+                        {userRole === "designer" && (
+                            <li
+                                style={menuItemStyle}
+                                onClick={handleProjectsClick}
+                                onMouseEnter={(e) => e.target.style.backgroundColor = "#f8f9fa"}
+                                onMouseLeave={(e) => e.target.style.backgroundColor = "transparent"}
+                            >
+                                <GoProjectRoadmap size={16} style={{ color: "#A4502F" }} />
+                                My Projects
+                            </li>
+                        )}
+
                         <li
                             style={menuItemStyle}
                             onClick={handleProfileClick}
                             onMouseEnter={(e) => e.target.style.backgroundColor = "#f8f9fa"}
                             onMouseLeave={(e) => e.target.style.backgroundColor = "transparent"}
                         >
-                            {userRole === "designer" ? "👤 My Profile" : "⚙️ Account Settings"}
+                            {userRole === "designer" ? (
+                                <>
+                                    <RiAccountBoxLine size={16} style={{ color: "#A4502F" }} />
+                                    My Profile
+                                </>
+                            ) : (
+                                <>
+                                    <RiAccountBoxLine size={16} style={{ color: "#A4502F" }} />
+                                    My Account
+                                </>
+                            )}
                         </li>
+
                         <li style={{
                             height: "1px",
                             backgroundColor: "#e9ecef",
                             margin: "8px 0"
                         }} />
+
                         <li
                             style={{
                                 ...menuItemStyle,
@@ -134,7 +155,8 @@ const ProfileMenu = () => {
                                 e.target.style.color = "#dc3545";
                             }}
                         >
-                            🚪 Logout
+                            <IoLogOutOutline size={16} />
+                            Logout
                         </li>
                     </ul>
                 </div>
@@ -148,11 +170,13 @@ const menuItemStyle = {
     cursor: "pointer",
     whiteSpace: "nowrap",
     fontSize: "14px",
-    color: "#333",
+    fontWeight: "500",
     transition: "background-color 0.2s ease",
     display: "flex",
     alignItems: "center",
-    gap: "8px"
+    gap: "8px",
+    color: "#A4502F",
+
 };
 
 export default ProfileMenu;

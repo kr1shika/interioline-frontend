@@ -531,9 +531,12 @@
 }
 
 @keyframes pulse {
-    0%, 100% {
+
+    0%,
+    100% {
         opacity: 1;
     }
+
     50% {
         opacity: 0.5;
     }
@@ -544,32 +547,32 @@
     .room-designer-container {
         width: 100%;
     }
-    
+
     .project-section {
         margin: 8px 12px;
     }
-    
+
     .project-header {
         flex-direction: column;
         align-items: flex-start;
         gap: 12px;
     }
-    
+
     .project-buttons {
         width: 100%;
         justify-content: flex-end;
         flex-wrap: wrap;
     }
-    
+
     .three-d-view-container {
         margin-right: 12px;
         margin-left: 12px;
     }
-    
+
     .main-content {
         gap: 12px;
     }
-    
+
     .three-d-viewport {
         height: 300px;
     }
@@ -580,31 +583,35 @@
         flex-direction: column;
         width: 100%;
     }
-    
+
     .btn {
         justify-content: center;
     }
-    
+
     .three-d-viewport {
         height: 250px;
     }
-    
+
     .three-d-view-container {
         height: auto;
     }
-    
+
     .loading-progress-container {
         width: 280px;
     }
-    
+
     .saved-room-item {
         flex-direction: column;
         align-items: flex-start;
         gap: 12px;
     }
-    
+
     .saved-room-actions {
         width: 100%;
         justify-content: flex-end;
     }
 }
+
+/* Save Modal Specific Styles - Add these to your CustomRoomDesigner.css */
+
+/* Save Modal Container */

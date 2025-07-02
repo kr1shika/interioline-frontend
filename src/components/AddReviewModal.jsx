@@ -1,8 +1,11 @@
-import { X, Star } from "lucide-react";
+import { Star, X } from "lucide-react";
 import { useState } from "react";
+import { useAuth } from "../provider/authcontext";
 import "./AddReviewModal.css";
 
 const AddReviewModal = ({ isOpen, onClose, projectInfo, onSubmitSuccess }) => {
+    const { userId } = useAuth();
+
     const [formData, setFormData] = useState({
         rating: 0,
         comment: ""
@@ -17,7 +20,7 @@ const AddReviewModal = ({ isOpen, onClose, projectInfo, onSubmitSuccess }) => {
             ...prev,
             [field]: value
         }));
-        
+
         // Clear errors when user starts typing
         if (errors[field]) {
             setErrors(prev => ({
@@ -30,11 +33,11 @@ const AddReviewModal = ({ isOpen, onClose, projectInfo, onSubmitSuccess }) => {
     // Validate form
     const validateForm = () => {
         const newErrors = {};
-        
+
         if (!formData.rating || formData.rating < 1) {
             newErrors.rating = "Please select a rating";
         }
-        
+
         if (!formData.comment.trim()) {
             newErrors.comment = "Please write a review comment";
         } else if (formData.comment.trim().length < 10) {
@@ -42,7 +45,7 @@ const AddReviewModal = ({ isOpen, onClose, projectInfo, onSubmitSuccess }) => {
         } else if (formData.comment.trim().length > 500) {
             newErrors.comment = "Review comment must be less than 500 characters";
         }
-        
+
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -50,15 +53,15 @@ const AddReviewModal = ({ isOpen, onClose, projectInfo, onSubmitSuccess }) => {
     // Handle form submission
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
+
         if (!validateForm()) {
             return;
         }
-        
+
         setIsSubmitting(true);
-        
+
         try {
-            const response = await fetch('/api/review', {
+            const response = await fetch('http://localhost:2005/api/review', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -66,17 +69,18 @@ const AddReviewModal = ({ isOpen, onClose, projectInfo, onSubmitSuccess }) => {
                 body: JSON.stringify({
                     projectId: projectInfo.id,
                     rating: formData.rating,
-                    comment: formData.comment.trim()
+                    comment: formData.comment.trim(),
+                    client_id: userId,
                 })
             });
-            
+
             const data = await response.json();
-            
+
             if (response.ok) {
                 // Success
                 onSubmitSuccess && onSubmitSuccess(data.review);
                 onClose();
-                
+
                 // Reset form
                 setFormData({ rating: 0, comment: "" });
                 setErrors({});
@@ -110,9 +114,8 @@ const AddReviewModal = ({ isOpen, onClose, projectInfo, onSubmitSuccess }) => {
                     <button
                         key={star}
                         type="button"
-                        className={`star-button ${
-                            star <= (hoveredRating || formData.rating) ? 'star-filled' : 'star-empty'
-                        }`}
+                        className={`star-button ${star <= (hoveredRating || formData.rating) ? 'star-filled' : 'star-empty'
+                            }`}
                         onMouseEnter={() => setHoveredRating(star)}
                         onMouseLeave={() => setHoveredRating(0)}
                         onClick={() => handleInputChange('rating', star)}
@@ -122,8 +125,8 @@ const AddReviewModal = ({ isOpen, onClose, projectInfo, onSubmitSuccess }) => {
                     </button>
                 ))}
                 <span className="rating-text">
-                    {hoveredRating || formData.rating ? 
-                        `${hoveredRating || formData.rating} star${(hoveredRating || formData.rating) !== 1 ? 's' : ''}` : 
+                    {hoveredRating || formData.rating ?
+                        `${hoveredRating || formData.rating} star${(hoveredRating || formData.rating) !== 1 ? 's' : ''}` :
                         'Click to rate'
                     }
                 </span>
@@ -139,8 +142,8 @@ const AddReviewModal = ({ isOpen, onClose, projectInfo, onSubmitSuccess }) => {
                 {/* Header */}
                 <div className="review-modal-header">
                     <h2>Add Review</h2>
-                    <button 
-                        className="close-button" 
+                    <button
+                        className="close-button"
                         onClick={handleClose}
                         disabled={isSubmitting}
                     >

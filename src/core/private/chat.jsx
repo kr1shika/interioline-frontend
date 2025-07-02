@@ -18,7 +18,6 @@ export default function ChatWidget() {
   useEffect(() => {
     const fetchChatRooms = async () => {
       if (!isLoggedIn || !isUserIdAvailable()) {
-        console.log("🔒 Chat: User not authenticated, skipping chat rooms fetch");
         setChatRooms([]);
         return;
       }
@@ -182,12 +181,7 @@ export default function ChatWidget() {
       {/* Header */}
       <div className="chat-header">
         {selectedRoomId ? (currentRoom?.title || "Project") : "Messages"}
-        {/* Debug info in development */}
-        {process.env.NODE_ENV === 'development' && (
-          <div style={{ fontSize: '10px', opacity: 0.7 }}>
-            User: {userId?.substring(0, 8)}...
-          </div>
-        )}
+
       </div>
 
       {/* Error message */}

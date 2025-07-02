@@ -17,7 +17,7 @@
 .chat-header {
   padding: 1rem;
   font-weight: 600;
-  color: #BE7B5D;
+  color: #A75B2A;
   border-bottom: 1px solid #F4D7C8;
 }
 
@@ -33,8 +33,9 @@
 .chat-room-card {
   cursor: pointer;
   padding: 0.75rem;
+  border: 1px solid #cd7a518a;
   border-radius: 0.75rem;
-  background-color: #F4E1D8;
+  background-color: #f1e8d764;
   transition: background-color 0.2s;
   display: flex;
   align-items: center;
@@ -42,7 +43,7 @@
 }
 
 .chat-room-card:hover {
-  background-color: #EED4C5;
+  background-color: #f1e8d7;
 }
 
 .chat-room-card img {
@@ -56,7 +57,7 @@
   font-size: 0.875rem;
   padding: 0.25rem 0.75rem;
   text-align: left;
-  color: #BE7B5D;
+  color: #A75B2A;
   border: none;
   background: none;
   cursor: pointer;
@@ -83,14 +84,14 @@
 }
 
 .chat-message.sender {
-  background-color: #D9BBA7;
+  background-color: #f1e8d7;
   align-self: flex-end;
   text-align: right;
   margin-left: auto;
 }
 
 .chat-message.receiver {
-  background-color: #FFF2E3;
+  background-color: #a75c2a47;
   align-self: flex-start;
 }
 

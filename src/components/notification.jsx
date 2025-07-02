@@ -10,7 +10,7 @@ const NotificationComponent = ({ userId }) => {
     const [markingAsRead, setMarkingAsRead] = useState(false);
     const [hasUnreadNotifications, setHasUnreadNotifications] = useState(false);
     const dropdownRef = useRef(null);
-
+    const [hoveredIndex, setHoveredIndex] = useState(null);
     useEffect(() => {
         console.log('NotificationComponent mounted with userId:', userId);
         if (userId) {
@@ -112,17 +112,17 @@ const NotificationComponent = ({ userId }) => {
     const getNotificationIcon = (type) => {
         switch (type) {
             case 'project_update':
-                return <FaBriefcase style={{ color: '#3b82f6' }} />;
+                return <FaBriefcase style={{ color: '#B86A45' }} />;
             case 'message':
-                return <FaComment style={{ color: '#10b981' }} />;
+                return <FaComment style={{ color: '#B86A45' }} />;
             case 'payment':
-                return <FaCreditCard style={{ color: '#8b5cf6' }} />;
+                return <FaCreditCard style={{ color: '#B86A45' }} />;
             case 'system':
-                return <FaCog style={{ color: '#6b7280' }} />;
+                return <FaCog style={{ color: '#B86A45' }} />;
             case 'review':
-                return <FaStar style={{ color: '#f59e0b' }} />;
+                return <FaStar style={{ color: '#B86A45' }} />;
             default:
-                return <FaBell style={{ color: '#9ca3af' }} />;
+                return <FaBell style={{ color: '#B86A45' }} />;
         }
     };
 
@@ -296,7 +296,7 @@ const NotificationComponent = ({ userId }) => {
                             position: 'absolute',
                             top: '2px',
                             right: '2px',
-                            backgroundColor: '#ef4444',
+                            backgroundColor: '#dc3545',
                             borderRadius: '50%',
                             width: '8px',
                             height: '8px',
@@ -310,7 +310,7 @@ const NotificationComponent = ({ userId }) => {
                             position: 'absolute',
                             top: '-8px',
                             right: '-8px',
-                            backgroundColor: '#ef4444',
+                            backgroundColor: '#dc3545',
                             color: 'white',
                             borderRadius: '50%',
                             width: '20px',
@@ -338,7 +338,7 @@ const NotificationComponent = ({ userId }) => {
                         top: '100%',
                         marginTop: '10px',
                         width: '320px',
-                        backgroundColor: 'white',
+                        backgroundColor: '#FFFFF6',
                         borderRadius: '8px',
                         boxShadow: '0 10px 25px rgba(0, 0, 0, 0.15)',
                         border: '1px solid #e5e7eb',
@@ -354,9 +354,9 @@ const NotificationComponent = ({ userId }) => {
                         justifyContent: 'space-between',
                         padding: '16px',
                         borderBottom: '1px solid #e5e7eb',
-                        backgroundColor: '#f9fafb'
+                        backgroundColor: '#FFFFF6'
                     }}>
-                        <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '600', color: '#111827' }}>
+                        <h3 style={{ margin: 0, fontSize: '18px', fontWeight: '600', color: '#A4502F' }}>
                             Notifications
                         </h3>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -383,7 +383,7 @@ const NotificationComponent = ({ userId }) => {
                                         <FaCheckDouble style={{ fontSize: '10px' }} />
                                         {markingAsRead ? 'Reading...' : 'Mark all'}
                                     </button>
-                                    <span style={{ fontSize: '12px', color: '#6b7280' }}>
+                                    <span style={{ fontSize: '12px', color: '#B86A45' }}>
                                         {unreadCount} unread
                                     </span>
                                 </>
@@ -401,7 +401,7 @@ const NotificationComponent = ({ userId }) => {
                                     justifyContent: 'center'
                                 }}
                             >
-                                <FaTimes style={{ color: '#6b7280', fontSize: '14px' }} />
+                                <FaTimes style={{ color: '#B86A45', fontSize: '14px' }} />
                             </button>
                         </div>
                     </div>
@@ -413,14 +413,14 @@ const NotificationComponent = ({ userId }) => {
                                     width: '24px',
                                     height: '24px',
                                     border: '2px solid #e5e7eb',
-                                    borderTop: '2px solid #3b82f6',
+                                    borderTop: '2px solid #B86A45',
                                     borderRadius: '50%',
                                     animation: 'spin 1s linear infinite'
                                 }}></div>
-                                <span style={{ marginLeft: '8px' }}>Loading...</span>
+                                <span style={{ marginLeft: '8px', color: '#B86A45' }}>Loading...</span>
                             </div>
                         ) : error ? (
-                            <div style={{ padding: '16px', textAlign: 'center', color: '#ef4444' }}>
+                            <div style={{ padding: '16px', textAlign: 'center', color: '#dc3545' }}>
                                 <p style={{ marginBottom: '8px' }}>{error}</p>
                                 <button
                                     onClick={fetchNotifications}
@@ -451,8 +451,8 @@ const NotificationComponent = ({ userId }) => {
                                 </button>
                             </div>
                         ) : notifications.length === 0 ? (
-                            <div style={{ padding: '32px', textAlign: 'center', color: '#6b7280' }}>
-                                <FaBell style={{ fontSize: '32px', color: '#d1d5db', marginBottom: '8px' }} />
+                            <div style={{ padding: '32px', textAlign: 'center', color: '#B86A45' }}>
+                                <FaBell style={{ fontSize: '32px', color: '#B86A45', marginBottom: '8px' }} />
                                 <p style={{ marginBottom: '16px' }}>No notifications yet</p>
                                 <button
                                     onClick={createTestNotification}
@@ -474,19 +474,24 @@ const NotificationComponent = ({ userId }) => {
                                 {notifications.map((notification, index) => (
                                     <div
                                         key={notification._id}
+                                        onMouseEnter={() => setHoveredIndex(index)}
+                                        onMouseLeave={() => setHoveredIndex(null)}
                                         style={{
                                             padding: '16px',
                                             borderBottom: index < notifications.length - 1 ? '1px solid #f3f4f6' : 'none',
-                                            backgroundColor: !notification.is_read ? '#eff6ff' : 'white',
-                                            borderLeft: !notification.is_read ? '4px solid #3b82f6' : '4px solid transparent',
+                                            backgroundColor:
+                                                hoveredIndex === index ? '#FCFCEC' : '#FFFFF6',
+                                            borderLeft: !notification.is_read ? '4px solid #B86A45' : '4px solid transparent',
                                             cursor: 'pointer',
                                             transition: 'background-color 0.2s'
                                         }}
                                         onClick={() => !notification.is_read && markAsRead(notification._id)}
-                                        onMouseEnter={(e) => e.target.style.backgroundColor = '#f9fafb'}
-                                        onMouseLeave={(e) => e.target.style.backgroundColor = !notification.is_read ? '#eff6ff' : 'white'}
                                     >
-                                        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+                                        <div style={{
+                                            display: 'flex',
+                                            alignItems: 'flex-start',
+                                            gap: '12px'
+                                        }}>
                                             <div style={{ flexShrink: 0, marginTop: '4px', fontSize: '16px' }}>
                                                 {getNotificationIcon(notification.type)}
                                             </div>
@@ -498,7 +503,7 @@ const NotificationComponent = ({ userId }) => {
                                                             margin: 0,
                                                             fontSize: '14px',
                                                             fontWeight: '500',
-                                                            color: !notification.is_read ? '#111827' : '#374151',
+                                                            color: !notification.is_read ? '#A4502F' : '#B86A45',
                                                             marginBottom: '4px'
                                                         }}>
                                                             {notification.title}
@@ -506,7 +511,7 @@ const NotificationComponent = ({ userId }) => {
                                                         <p style={{
                                                             margin: 0,
                                                             fontSize: '12px',
-                                                            color: '#6b7280',
+                                                            color: '#B86A45',
                                                             lineHeight: '1.4'
                                                         }}>
                                                             {notification.message}
@@ -514,7 +519,7 @@ const NotificationComponent = ({ userId }) => {
                                                     </div>
 
                                                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginLeft: '8px' }}>
-                                                        <span style={{ fontSize: '10px', color: '#9ca3af', whiteSpace: 'nowrap' }}>
+                                                        <span style={{ fontSize: '10px', color: '#B86A45', whiteSpace: 'nowrap' }}>
                                                             {formatTimeAgo(notification.createdAt)}
                                                         </span>
                                                         {notification.is_read ? (
@@ -542,7 +547,7 @@ const NotificationComponent = ({ userId }) => {
                         <div style={{
                             padding: '12px',
                             borderTop: '1px solid #e5e7eb',
-                            backgroundColor: '#f9fafb'
+                            backgroundColor: '#FFFFF6'
                         }}>
                             <button
                                 onClick={() => setIsOpen(false)}
@@ -566,11 +571,11 @@ const NotificationComponent = ({ userId }) => {
             )}
 
             <style jsx>{`
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-      `}</style>
+                @keyframes spin {
+                  0% { transform: rotate(0deg); }
+                  100% { transform: rotate(360deg); }
+                }
+            `}</style>
         </div>
     );
 };

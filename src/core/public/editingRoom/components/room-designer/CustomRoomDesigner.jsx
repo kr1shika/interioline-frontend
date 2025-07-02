@@ -1,5 +1,4 @@
 import {
-  Input,
   Modal,
   ModalBody,
   ModalContent,
@@ -1010,52 +1009,98 @@ const CustomRoomDesigner = () => {
         </div>
       </div>
 
+
       {/* Save Modal */}
-      <Modal isOpen={isSaveOpen} onOpenChange={onSaveOpenChange}>
-        <ModalContent>
-          {(onClose) => (
-            <>
-              <ModalHeader className="modal-header">
-                Save Room Design
-              </ModalHeader>
-              <ModalBody className="modal-body">
-                <Input
-                  label="Room Name"
-                  placeholder="Enter a name for your room design"
-                  value={roomName}
-                  onChange={(e) => setRoomName(e.target.value)}
-                />
-                <div className="modal-description">
-                  <p>This will save your room configuration including:</p>
-                  <ul>
-                    <li>Room dimensions and colors</li>
-                    <li>
-                      Doors ({doors.length}) and windows ({windows.length})
-                    </li>
-                    <li>
-                      Furniture placement ({placedFurniture.length} items)
-                    </li>
-                    <li>Total cost: ${totalCost}</li>
-                    {projectInfo.id && (
-                      <li className="project-linked">
-                        ✓ Linked to project: {projectInfo.title}
-                      </li>
-                    )}
-                  </ul>
-                </div>
-              </ModalBody>
-              <ModalFooter className="modal-footer">
-                <button className="btn btn-cancel" onClick={onClose}>
-                  Cancel
-                </button>
-                <button className="btn btn-primary" onClick={saveCurrentRoom}>
-                  Save Room
-                </button>
-              </ModalFooter>
-            </>
-          )}
-        </ModalContent>
-      </Modal>
+      {isSaveOpen && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            height: "100vh",
+            width: "100vw",
+            backgroundColor: "rgba(0, 0, 0, 0.4)",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            zIndex: 1000,
+            color: "black",
+          }}
+        >
+          <div
+            style={{
+              backgroundColor: "white",
+              padding: "20px",
+              borderRadius: "10px",
+              width: "90%",
+              maxWidth: "500px",
+              boxShadow: "0 0 10px rgba(0, 0, 0, 0.2)",
+            }}
+          >
+            <h2 style={{ marginBottom: "15px" }}>Save Room Design</h2>
+
+            <input
+              style={{
+                width: "100%",
+                padding: "10px",
+                marginBottom: "20px",
+                fontSize: "14px",
+                border: "1px solid #ccc",
+                borderRadius: "5px",
+              }}
+              placeholder="Enter a name for your room design"
+              value={roomName}
+              onChange={(e) => setRoomName(e.target.value)}
+            />
+
+            <div style={{ marginBottom: "20px" }}>
+              <p style={{ marginBottom: "10px", fontWeight: "bold" }}>
+                This will save your room configuration including:
+              </p>
+              <ul style={{ paddingLeft: "20px", marginBottom: "10px" }}>
+                <li>Room dimensions and colors</li>
+                <li>Doors ({doors.length}) and windows ({windows.length})</li>
+                <li>Furniture placement ({placedFurniture.length} items)</li>
+                <li>Total cost: ${totalCost}</li>
+                {projectInfo.id && (
+                  <li style={{ color: "green", fontWeight: "bold" }}>
+                    ✓ Linked to project: {projectInfo.title}
+                  </li>
+                )}
+              </ul>
+            </div>
+
+            <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px" }}>
+              <button
+                onClick={() => onSaveOpenChange(false)}
+                style={{
+                  padding: "8px 12px",
+                  backgroundColor: "#ccc",
+                  border: "none",
+                  borderRadius: "5px",
+                  cursor: "pointer",
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={saveCurrentRoom}
+                style={{
+                  padding: "8px 12px",
+                  backgroundColor: "#007bff",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "5px",
+                  cursor: "pointer",
+                }}
+              >
+                Save Room
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
 
       {/* Load Modal */}
       <Modal isOpen={isLoadOpen} onOpenChange={onLoadOpenChange} size="lg">
