@@ -39,9 +39,9 @@ const ViewOnlyRoomDesigner = () => {
 
     // Room configuration state
     const [roomDimensions, setRoomDimensions] = useState({
-        width: 5,
-        length: 6.5,
-        height: 3,
+        width: 7,
+        length: 8,
+        height: 6,
     });
 
     const [doors, setDoors] = useState([

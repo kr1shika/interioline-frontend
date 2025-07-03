@@ -9,7 +9,6 @@ import LandingHeader from "../../components/landingHeader.jsx";
 import ThreeCanvas from "../../components/room.jsx";
 import "../style/LandingPage.css";
 import AuthPopup from "./authComponent.jsx";
-
 function LandingPage() {
     const [showAuth, setShowAuth] = useState(false);
     const [activeStep, setActiveStep] = useState(null);

@@ -184,13 +184,12 @@ export const furnitureCatalog = [
         price: 499
     },
 
-    // BEDROOM FURNITURE (4 items)
     {
         id: 'bed101',
         name: 'Modern Platform Bed',
         type: 'bed',
         category: 'bedroom',
-        dimensions: { width: 3.2, height: 1.7, depth: 3.4 },
+        dimensions: { width: 4, height: 1.9, depth: 3.4 },
         color: '#8B4513',
         description: 'Contemporary platform bed with stylish headboard',
         material: 'Wood',

@@ -68,9 +68,7 @@ const Sidebar = ({
         },
         {
             name: "Medium Living Room",
-            width: 5,
-            length: 6.5,
-            height: 3,
+            width: 7, length: 8, height: 6,
             type: "living",
         },
         {
@@ -140,34 +138,7 @@ const Sidebar = ({
                     }
                 >
                     <div className="tab-content-spacing">
-                        {/* Room Type & Size Section */}
-                        <CollapsibleSection
-                            title="Room Type & Size"
-                            isOpen={roomTypeOpen}
-                            onToggle={() => setRoomTypeOpen(!roomTypeOpen)}
-                            icon={<Home className="icon-sm" />}
-                        >
-                            <label className="form-label">
-                                Room Preset
-                            </label>
-                            <select
-                                value={ROOM_PRESETS.findIndex(
-                                    (room) => room === selectedRoomType
-                                )}
-                                onChange={(e) =>
-                                    setSelectedRoomType(
-                                        ROOM_PRESETS[parseInt(e.target.value)]
-                                    )
-                                }
-                                className="room-select"
-                            >
-                                {ROOM_PRESETS.map((room, index) => (
-                                    <option key={index} value={index}>
-                                        {room.name} ({room.width}m × {room.length}m)
-                                    </option>
-                                ))}
-                            </select>
-                        </CollapsibleSection>
+
 
                         {/* Custom Dimensions Section */}
                         <CollapsibleSection

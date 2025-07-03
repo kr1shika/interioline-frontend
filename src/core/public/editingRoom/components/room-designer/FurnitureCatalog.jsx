@@ -206,7 +206,6 @@ const FurnitureCatalog = ({
                                         className={`filter-btn ${activeStyle === style ? "active" : ""}`}
                                         title={`${stats.count} items, avg ${stats.avgPrice}`}
                                     >
-                                        {style} ({stats.count})
                                     </button>
                                 ))}
                             </div>
@@ -233,7 +232,7 @@ const FurnitureCatalog = ({
                                     title={`${stats.count} items`}
                                 >
                                     {categoryIcons[category]}
-                                    {category} ({stats.count})
+                                    {category}
                                 </button>
                             );
                         })}

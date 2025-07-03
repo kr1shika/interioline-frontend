@@ -3,6 +3,8 @@
 .furniture-catalog-container {
     margin: 0;
     border-color: #20396c;
+    /* min-height: 180vh; */
+    /* height: 100%; */
 }
 
 /* Header Section */
@@ -139,7 +141,9 @@
 
 /* Category Section */
 .category-section {
-    margin-bottom: 1rem;
+    margin-top: 0.8rem;
+
+    margin-bottom: 0.8rem;
     color: #B86A45;
 }
 
@@ -243,7 +247,7 @@
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 0.75rem;
-    max-height: 294px;
+    max-height: 364px;
     overflow-y: auto;
     padding-right: 0.5rem;
 }

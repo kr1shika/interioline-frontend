@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 
@@ -8,7 +8,7 @@ export const useRoomScene = (mountRef) => {
     const [renderer, setRenderer] = useState(null);
     const [controls, setControls] = useState(null);
     const [roomObject, setRoomObject] = useState(null);
-    const [currentRoomDimensions, setCurrentRoomDimensions] = useState({ width: 5, length: 6.5, height: 3 });
+    const [currentRoomDimensions, setCurrentRoomDimensions] = useState({ width: 13, length: 10, height: 5 });
 
     const doorsRef = useRef([]);
     const windowsRef = useRef([]);

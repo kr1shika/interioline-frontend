@@ -11,9 +11,9 @@ const ROOM_PRESETS = [
     },
     {
         name: "Medium Living Room",
-        width: 5,
-        length: 6.5,
-        height: 3,
+        width: 7,
+        length: 8,
+        height: 6,
         type: "living",
     },
     {
@@ -30,7 +30,7 @@ const ROOM_PRESETS = [
 const RoomSettings = ({
     selectedRoomType = ROOM_PRESETS[1], // Default fallback
     setSelectedRoomType,
-    roomDimensions = { width: 5, length: 6.5, height: 3 }, // Default fallback
+    roomDimensions = { width: 7, length: 8, height: 6 }, // Default fallback
     setRoomDimensions,
     wallColor = "#f8f8f8", // Default fallback
     setWallColor,
@@ -46,13 +46,13 @@ const RoomSettings = ({
     handleRemoveWindow
 }) => {
     // Ensure we have valid data before rendering
-    const safeRoomDimensions = roomDimensions || { width: 5, length: 6.5, height: 3 };
+    const safeRoomDimensions = roomDimensions || { width: 7, length: 8, height: 6 };
     const safeSelectedRoomType = selectedRoomType || ROOM_PRESETS[1];
 
     return (
         <div className="room-settings">
             {/* Room Type and Size */}
-            <div className="setting-group">
+            {/* <div className="setting-group">
                 <label className="setting-label">Room Type & Size</label>
                 <select
                     value={ROOM_PRESETS.findIndex(room =>
@@ -71,7 +71,7 @@ const RoomSettings = ({
                         </option>
                     ))}
                 </select>
-            </div>
+            </div> */}
 
             {/* Custom Dimensions */}
             <div className="setting-group">
@@ -84,12 +84,12 @@ const RoomSettings = ({
                             min="2"
                             max="20"
                             step="0.1"
-                            value={safeRoomDimensions.width || 5}
+                            value={safeRoomDimensions.width || 7}
                             onChange={(e) => {
                                 if (setRoomDimensions) {
                                     setRoomDimensions(prev => ({
                                         ...prev,
-                                        width: parseFloat(e.target.value) || 5,
+                                        width: parseFloat(e.target.value) || 7,
                                     }));
                                 }
                             }}
@@ -103,12 +103,12 @@ const RoomSettings = ({
                             min="2"
                             max="20"
                             step="0.1"
-                            value={safeRoomDimensions.length || 6.5}
+                            value={safeRoomDimensions.length || 8}
                             onChange={(e) => {
                                 if (setRoomDimensions) {
                                     setRoomDimensions(prev => ({
                                         ...prev,
-                                        length: parseFloat(e.target.value) || 6.5,
+                                        length: parseFloat(e.target.value) || 8,
                                     }));
                                 }
                             }}
@@ -122,12 +122,12 @@ const RoomSettings = ({
                             min="2"
                             max="4"
                             step="0.1"
-                            value={safeRoomDimensions.height || 3}
+                            value={safeRoomDimensions.height || 6}
                             onChange={(e) => {
                                 if (setRoomDimensions) {
                                     setRoomDimensions(prev => ({
                                         ...prev,
-                                        height: parseFloat(e.target.value) || 3,
+                                        height: parseFloat(e.target.value) || 6,
                                     }));
                                 }
                             }}

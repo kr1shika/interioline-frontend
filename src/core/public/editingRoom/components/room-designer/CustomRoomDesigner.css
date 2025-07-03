@@ -85,7 +85,10 @@
     background-color: #FFFFF6;
     border-radius: 12px;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    padding: 16px;
+    padding: 10px;
+    padding-left: 15px;
+    padding-right: 15px;
+
     margin: 8px 24px;
 }
 
@@ -97,7 +100,7 @@
 }
 
 .project-info h1 {
-    font-size: 1.5rem;
+    font-size: 1.3rem;
     font-weight: bold;
     margin-bottom: 4px;
     color: #B86A45;
@@ -221,7 +224,7 @@
     font-size: 1.25rem;
     font-weight: 600;
     color: #1f2937;
-    margin-bottom: 16px;
+    margin-bottom: 10px;
 }
 
 .project-title-small {
@@ -234,7 +237,7 @@
 .three-d-viewport {
     position: relative;
     width: 100%;
-    height: 400px;
+    height: 518px;
     border: 2px solid #e5e7eb;
     border-radius: 12px;
     overflow: hidden;

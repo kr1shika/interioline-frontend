@@ -49,15 +49,15 @@ const CustomRoomDesigner = () => {
   // Room configuration state
   const [selectedRoomType, setSelectedRoomType] = useState({
     name: "Medium Living Room",
-    width: 5,
-    length: 6.5,
-    height: 3,
+    width: 7,
+    length: 8,
+    height: 6,
     type: "living",
   });
   const [roomDimensions, setRoomDimensions] = useState({
-    width: 5,
-    length: 6.5,
-    height: 3,
+    width: 7,
+    length: 8,
+    height: 6,
   });
 
   // Initialize with empty arrays instead of default door/window
@@ -699,9 +699,9 @@ const CustomRoomDesigner = () => {
 
     // Check if there's any meaningful content to save
     const hasContent = placedFurniture.length > 0 ||
-      roomDimensions.width !== 5 ||
-      roomDimensions.length !== 6.5 ||
-      roomDimensions.height !== 3 ||
+      roomDimensions.width !== 7 ||
+      roomDimensions.length !== 8 ||
+      roomDimensions.height !== 5 ||
       doors.length > 0 ||  // Changed from > 1 to > 0
       windows.length > 0 ||  // Changed from > 1 to > 0
       wallColor !== "#f8f8f8" ||
@@ -962,40 +962,7 @@ const CustomRoomDesigner = () => {
             )}
           </div>
 
-          <div className="status-section">
-            <div className="status-content">
-              <p>
-                <strong>Status:</strong>
-                <span className="status-doors">
-                  {" "}Doors: {doors.length} active
-                </span>{" "}
-                |
-                <span className="status-windows">
-                  {" "}Windows: {windows.length} active
-                </span>{" "}
-                |
-                <span className="status-models">
-                  {" "}3D Models: {placedFurniture.length} items
-                </span>
-                {furnitureLoadingState.isLoading && (
-                  <>
-                    {" "}|
-                    <span className="status-loading">
-                      {" "}Loading: {furnitureLoadingState.currentItem || "Processing..."}
-                    </span>
-                  </>
-                )}
-                {projectInfo.id && (
-                  <>
-                    {" "}|
-                    <span className="status-project">
-                      {" "}Project: {projectRoomLoaded ? "Loaded" : hasProjectRoom ? "Available" : "New"}
-                    </span>
-                  </>
-                )}
-              </p>
-            </div>
-          </div>
+
         </div>
       </div>
 

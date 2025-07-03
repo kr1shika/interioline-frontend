@@ -7,11 +7,10 @@
     padding: 24px;
     margin: 8px 0px 24px 24px;
     overflow-y: auto;
-    max-height: calc(100vh - 200px);
+    max-height: calc(100vh);
     color: #B86A45;
 }
 
-/* Custom Scrollbar for Sidebar */
 .sidebar::-webkit-scrollbar {
     width: 2px;
 }
@@ -28,11 +27,8 @@
 
 .sidebar::-webkit-scrollbar-thumb:hover {
     background-color: rgba(0, 0, 0, 0.2);
-    /* Slightly more visible on hover */
 }
 
-
-/* Layout Utilities */
 .flex {
     display: flex;
 }
