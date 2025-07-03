@@ -54,8 +54,8 @@ const Sidebar = ({
     const [roomTypeOpen, setRoomTypeOpen] = useState(true);
     const [dimensionsOpen, setDimensionsOpen] = useState(true);
     const [colorsOpen, setColorsOpen] = useState(true);
-    const [doorsOpen, setDoorsOpen] = useState(true);
-    const [windowsOpen, setWindowsOpen] = useState(true);
+    const [doorsOpen, setDoorsOpen] = useState(false);  // Keep closed initially
+    const [windowsOpen, setWindowsOpen] = useState(false);  // Keep closed initially
     const [measurementsOpen, setMeasurementsOpen] = useState(false);
 
     const ROOM_PRESETS = [
@@ -386,7 +386,7 @@ const Sidebar = ({
                                 </div>
                             ) : (
                                 <p className="empty-message">
-                                    No doors added yet
+                                    No doors added yet. Click "Add Door" to get started.
                                 </p>
                             )}
                         </CollapsibleSection>
@@ -526,7 +526,7 @@ const Sidebar = ({
                                 </div>
                             ) : (
                                 <p className="empty-message">
-                                    No windows added yet
+                                    No windows added yet. Click "Add Window" to get started.
                                 </p>
                             )}
                         </CollapsibleSection>

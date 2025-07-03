@@ -91,7 +91,6 @@ const FurnitureCatalog = ({
     };
 
     const renderFurnitureImage = (item) => {
-        // If image is broken, show fallback
         if (brokenImages.has(item.id)) {
             return (
                 <div className="image-fallback">
@@ -164,13 +163,7 @@ const FurnitureCatalog = ({
     return (
         <>
             <div className="furniture-catalog-container" ref={containerRef}>
-                {/* Header */}
-                <div className="catalog-header">
-                    <div className="catalog-title-section">
-                        <Download className="catalog-icon" />
-                        <h2 className="catalog-title">3D Furniture Catalog</h2>
-                    </div>
-                </div>
+
 
                 {/* Search */}
                 <div className="search-container">

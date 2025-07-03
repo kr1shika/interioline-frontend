@@ -3,8 +3,8 @@ import { useNavigate } from "react-router-dom";
 import img3 from "../../assets/images/contact.png";
 import match from "../../assets/images/MATCH.png";
 import img2 from "../../assets/images/project.png";
-
 import AutoCarousel from "../../components/autocarousel.jsx";
+import Footer from "../../components/footer.jsx";
 import LandingHeader from "../../components/landingHeader.jsx";
 import ThreeCanvas from "../../components/room.jsx";
 import "../style/LandingPage.css";
@@ -154,15 +154,18 @@ function LandingPage() {
                         <div className="showcase-image">
                             <div className="room-showcase">
                                 <div className="showcase-placeholder">
-                                    <p>Beautiful Living Room Design Showcase</p>
+                                    <p>image placeholder for now</p>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
+
             </div>
 
             {showAuth && <AuthPopup onClose={() => setShowAuth(false)} />}
+            <Footer />
+
         </div>
     );
 }

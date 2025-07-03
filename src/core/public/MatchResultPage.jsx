@@ -25,10 +25,8 @@ export default function MatchResultPage() {
                 const res = await fetch("http://localhost:2005/api/user/getAllDesigners");
                 const data = await res.json();
 
-                // Filter out matched designer
                 const filtered = data.filter(d => d._id !== match._id);
 
-                // Fetch portfolio images for each suggestion
                 const enhanced = await Promise.all(
                     filtered.map(async (designer) => {
                         try {

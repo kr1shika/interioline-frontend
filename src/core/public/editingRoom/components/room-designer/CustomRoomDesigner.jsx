@@ -60,19 +60,9 @@ const CustomRoomDesigner = () => {
     height: 3,
   });
 
-  const [doors, setDoors] = useState([
-    { id: "door1", wall: "south", position: 2, width: 0.9, height: 2.1 },
-  ]);
-  const [windows, setWindows] = useState([
-    {
-      id: "window1",
-      wall: "north",
-      position: 2.5,
-      width: 1.5,
-      height: 1.2,
-      sillHeight: 0.9,
-    },
-  ]);
+  // Initialize with empty arrays instead of default door/window
+  const [doors, setDoors] = useState([]);
+  const [windows, setWindows] = useState([]);
 
   const [wallColor, setWallColor] = useState("#f8f8f8");
   const [floorColor, setFloorColor] = useState("#d4b896");
@@ -712,8 +702,8 @@ const CustomRoomDesigner = () => {
       roomDimensions.width !== 5 ||
       roomDimensions.length !== 6.5 ||
       roomDimensions.height !== 3 ||
-      doors.length > 1 ||
-      windows.length > 1 ||
+      doors.length > 0 ||  // Changed from > 1 to > 0
+      windows.length > 0 ||  // Changed from > 1 to > 0
       wallColor !== "#f8f8f8" ||
       floorColor !== "#d4b896";
 

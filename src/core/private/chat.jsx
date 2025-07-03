@@ -1,5 +1,9 @@
 import axios from "axios";
 import { useEffect, useRef, useState } from "react";
+import { IoMdImages } from "react-icons/io";
+import { MdNavigateBefore } from "react-icons/md";
+import { TbSend2 } from "react-icons/tb";
+import defaultProfileImg from "../../assets/images/profile.jpg";
 import { useAuth } from "../../provider/authcontext";
 import "../style/ChatWidget.css";
 
@@ -14,6 +18,24 @@ export default function ChatWidget() {
   const messagesEndRef = useRef(null);
 
   const { userId, isLoggedIn, isUserIdAvailable, getToken } = useAuth();
+
+  const getProfilePicture = (user) => {
+    if (user?.profilePicture) {
+      if (user.profilePicture.startsWith('http')) {
+        return user.profilePicture;
+      }
+      return `http://localhost:2005${user.profilePicture}`;
+    }
+    return defaultProfileImg;
+  };
+
+  const getOtherUser = (room) => {
+    if (!room.participants || room.participants.length === 0) return null;
+
+    return room.participants.find(participant =>
+      participant._id?.toString() !== userId
+    );
+  };
 
   useEffect(() => {
     const fetchChatRooms = async () => {
@@ -179,9 +201,41 @@ export default function ChatWidget() {
   return (
     <div className="chat-widget">
       {/* Header */}
-      <div className="chat-header">
-        {selectedRoomId ? (currentRoom?.title || "Project") : "Messages"}
-
+      <div className="chat-header" style={{
+        display: 'flex',
+        alignItems: 'center',
+        padding: '12px 16px'
+      }}>
+        {selectedRoomId && (
+          <button
+            onClick={() => setSelectedRoomId(null)}
+            className="chat-back-button"
+            disabled={loading}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: 'inherit',
+              fontSize: '20px',
+              cursor: loading ? 'not-allowed' : 'pointer',
+              opacity: loading ? 0.6 : 1,
+              padding: '0',
+              marginRight: '10px',
+              display: 'flex',
+              alignItems: 'center',
+              minWidth: '24px',
+              height: '24px'
+            }}
+          >
+            <MdNavigateBefore />
+          </button>
+        )}
+        <span style={{
+          fontSize: '16px',
+          fontWeight: '500',
+          lineHeight: '1'
+        }}>
+          {selectedRoomId ? (currentRoom?.title || "Project") : "Messages"}
+        </span>
       </div>
 
       {/* Error message */}
@@ -206,35 +260,42 @@ export default function ChatWidget() {
           ) : chatRooms.length === 0 ? (
             <p className="text-sm text-gray-500">No chat rooms found.</p>
           ) : (
-            chatRooms.map((room) => (
-              <div
-                key={room._id}
-                onClick={() => openChatRoom(room._id)}
-                className="chat-room-card"
-                style={{
-                  cursor: loading ? 'not-allowed' : 'pointer',
-                  opacity: loading ? 0.6 : 1
-                }}
-              >
-                <div className="flex items-center">
-                  <img src="/default-user.png" alt="User Avatar" />
-                  <span>{room.title || "Untitled Project"}</span>
+            chatRooms.map((room) => {
+              const otherUser = getOtherUser(room);
+              return (
+                <div
+                  key={room._id}
+                  onClick={() => openChatRoom(room._id)}
+                  className="chat-room-card"
+                  style={{
+                    cursor: loading ? 'not-allowed' : 'pointer',
+                    opacity: loading ? 0.6 : 1
+                  }}
+                >
+                  <div className="flex items-center">
+                    <img
+                      src={getProfilePicture(otherUser)}
+                      alt={otherUser?.name || "User Avatar"}
+                      onError={(e) => {
+                        e.target.src = defaultProfileImg;
+                      }}
+                      style={{
+                        width: '40px',
+                        height: '40px',
+                        borderRadius: '50%',
+                        objectFit: 'cover',
+                        marginRight: '12px'
+                      }}
+                    />
+                    <span>{room.title || otherUser?.name || "Untitled Project"}</span>
+                  </div>
                 </div>
-              </div>
-            ))
+              );
+            })
           )}
         </div>
       ) : (
         <div className="flex flex-col flex-1" style={{ minHeight: 0 }}>
-          {/* Back button */}
-          <button
-            onClick={() => setSelectedRoomId(null)}
-            className="chat-back-button"
-            disabled={loading}
-          >
-            ← Back to Rooms
-          </button>
-
           {/* Content container: messages + input */}
           <div className="chat-content-container" style={{ display: "flex", flexDirection: "column", flex: 1, minHeight: 0 }}>
             <div className="chat-messages" style={{ flex: 1, overflowY: "auto" }}>
@@ -250,18 +311,32 @@ export default function ChatWidget() {
                 messages.map((msg) => {
                   const senderId = msg.senderId?._id || msg.senderId;
                   const isSender = senderId?.toString() === userId;
+                  const hasText = msg.text && msg.text.trim();
+                  const hasAttachments = msg.attachments && msg.attachments.length > 0;
+                  const isImageOnly = !hasText && hasAttachments;
+
                   return (
                     <div
                       key={msg._id}
-                      className={`chat-message ${isSender ? "sender" : "receiver"}`}
+                      className={`chat-message ${isSender ? "sender" : "receiver"} ${isImageOnly ? "image-only" : ""}`}
+                      style={isImageOnly ? {
+                        background: 'none',
+                        padding: '4px',
+                        margin: isSender ? '4px 0 4px auto' : '4px auto 4px 0',
+                        maxWidth: 'fit-content'
+                      } : {}}
                     >
-                      {msg.text && <div>{msg.text}</div>}
+                      {hasText && <div>{msg.text}</div>}
                       {msg.attachments?.map((imgUrl, idx) => (
                         <div key={idx} className="chat-image-wrapper">
                           <img
                             src={`http://localhost:2005${imgUrl}`}
                             alt="attachment"
                             className="chat-image"
+                            style={isImageOnly ? {
+                              borderRadius: '8px',
+                              boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                            } : {}}
                           />
                         </div>
                       ))}
@@ -289,8 +364,24 @@ export default function ChatWidget() {
                           setImages((prev) => prev.filter((_, i) => i !== idx))
                         }
                         disabled={loading}
+                        style={{
+                          background: 'rgba(0, 0, 0, 0.7)',
+                          border: 'none',
+                          borderRadius: '50%',
+                          width: '20px',
+                          height: '20px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          cursor: 'pointer',
+                          color: 'white',
+                          fontSize: '12px',
+                          position: 'absolute',
+                          top: '2px',
+                          right: '2px'
+                        }}
                       >
-                        ❌
+                        ✕
                       </button>
                     </div>
                   ))}
@@ -305,10 +396,17 @@ export default function ChatWidget() {
                   disabled={loading}
                   style={{
                     opacity: loading ? 0.6 : 1,
-                    cursor: loading ? 'not-allowed' : 'pointer'
+                    cursor: loading ? 'not-allowed' : 'pointer',
+                    background: 'none',
+                    border: 'none',
+                    fontSize: '20px',
+                    color: '#A75B2A',
+                    display: 'flex',
+                    alignItems: 'center',
+                    padding: '8px'
                   }}
                 >
-                  📷
+                  <IoMdImages />
                 </button>
                 <input
                   id="image-upload"
@@ -339,10 +437,17 @@ export default function ChatWidget() {
                   disabled={loading || (!text.trim() && images.length === 0)}
                   style={{
                     opacity: loading || (!text.trim() && images.length === 0) ? 0.6 : 1,
-                    cursor: loading || (!text.trim() && images.length === 0) ? 'not-allowed' : 'pointer'
+                    cursor: loading || (!text.trim() && images.length === 0) ? 'not-allowed' : 'pointer',
+                    background: 'none',
+                    border: 'none',
+                    fontSize: '20px',
+                    color: '#A75B2A',
+                    display: 'flex',
+                    alignItems: 'center',
+                    padding: '8px'
                   }}
                 >
-                  {loading ? '⏳' : '➤'}
+                  {loading ? '⏳' : <TbSend2 />}
                 </button>
               </div>
             </div>
