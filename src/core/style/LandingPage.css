@@ -6,7 +6,6 @@
     overflow-y: auto;
     overflow-x: hidden;
     /* ✅ This disables sideways scroll */
-
 }
 
 .main-content {
@@ -30,13 +29,12 @@
 }
 
 .text-section h1 {
-    font-size: 2.8rem;
+    font-size: 5rem;
     color: #A75B2A;
-    font-weight: 800;
+    font-weight: 1000;
     /* margin-bottom: 15px; */
     min-width: 500px;
     padding-bottom: 10px;
-
 }
 
 .text-section p {
@@ -55,10 +53,8 @@
     font-size: 1rem;
     border: none;
     cursor: pointer;
-    /* z-index: 100px; */
 }
 
-/* CANVAS SECTION */
 .canvas-section {
     width: 1600px;
     height: 490px;

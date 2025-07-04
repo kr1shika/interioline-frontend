@@ -45,7 +45,7 @@ function LandingPage() {
             {/* <LandingHeader onGetStartedClick={() => setShowAuth()} /> */}
 
             <div className="main-content">
-                <div className="text-section">
+                <div className="text-section" style={{}}>
                     <h1>
                         Share Your Space, Explore ideas, and see designs come to life
                     </h1>
@@ -161,7 +161,6 @@ function LandingPage() {
                 </div>
 
             </div>
-
             {showAuth && <AuthPopup onClose={() => setShowAuth(false)} />}
             <Footer />
 

@@ -1,6 +1,6 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { FiEdit } from "react-icons/fi";
+import { FiEdit, FiEye, FiStar, FiTrendingUp, FiUsers } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import bannerArt from "../../assets/images/art.png";
 import profile from "../../assets/images/profile.jpg";
@@ -20,6 +20,12 @@ export default function MyProjectsPage() {
     const [toast, setToast] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+    const [dashboardStats, setDashboardStats] = useState({
+        activeProjects: 0,
+        totalClients: 0,
+        revenueThisMonth: 0,
+        averageRating: 0
+    });
 
     const navigate = useNavigate();
     const {
@@ -54,6 +60,11 @@ export default function MyProjectsPage() {
                 const res = await axios.get(`http://localhost:2005/api/project/user/${userId}`, config);
                 setProjects(res.data || []);
                 console.log("✅ Projects loaded:", res.data?.length || 0);
+
+                // Calculate dashboard stats for designers
+                if (userRole === 'designer' && res.data) {
+                    calculateDashboardStats(res.data);
+                }
             } catch (err) {
                 console.error("❌ Error fetching projects:", err);
 
@@ -86,6 +97,35 @@ export default function MyProjectsPage() {
             }
         };
 
+        const fetchDesignerStats = async () => {
+            if (userRole !== 'designer') return;
+
+            try {
+                const token = getToken();
+                const config = {
+                    ...(token && {
+                        headers: { Authorization: `Bearer ${token}` }
+                    })
+                };
+
+                // Fetch designer statistics from the project controller
+                const statsRes = await axios.get(`http://localhost:2005/api/project/designer/stats/${userId}`, config);
+                if (statsRes.data) {
+                    setDashboardStats(prev => ({
+                        ...prev,
+                        totalClients: statsRes.data.totalClients || 0,
+                        revenueThisMonth: statsRes.data.revenueThisMonth || 0,
+                        averageRating: statsRes.data.averageRating || 4.5,
+                        totalReviews: statsRes.data.totalReviews || 0
+                    }));
+                    console.log("✅ Designer stats updated:", statsRes.data);
+                }
+            } catch (err) {
+                console.error("❌ Error fetching designer stats:", err);
+                // Don't show error for stats - it's not critical
+            }
+        };
+
         const loadData = async () => {
             setLoading(true);
 
@@ -96,11 +136,44 @@ export default function MyProjectsPage() {
                 await fetchUserProfile();
             }
 
+            // Fetch additional stats for designers
+            if (userRole === 'designer') {
+                await fetchDesignerStats();
+            }
+
             setLoading(false);
         };
 
         loadData();
     }, [userId, userRole, isLoggedIn, authLoading, navigate, isUserIdAvailable, getToken]);
+
+    const calculateDashboardStats = (projectsData) => {
+        const activeProjects = projectsData.filter(p =>
+            p.status === 'pending' || p.status === 'in_progress'
+        ).length;
+
+        // Get unique clients
+        const uniqueClients = new Set(projectsData.map(p => p.client)).size;
+
+        // Calculate this month's revenue
+        const currentMonth = new Date().getMonth();
+        const currentYear = new Date().getFullYear();
+        const thisMonthRevenue = projectsData
+            .filter(p => {
+                const projectDate = new Date(p.createdAt);
+                return projectDate.getMonth() === currentMonth &&
+                    projectDate.getFullYear() === currentYear &&
+                    p.status === 'completed';
+            })
+            .reduce((total, p) => total + (parseFloat(p.payment) || 0), 0);
+
+        setDashboardStats(prev => ({
+            ...prev,
+            activeProjects,
+            totalClients: uniqueClients,
+            revenueThisMonth: thisMonthRevenue
+        }));
+    };
 
     const statusOptions = ["pending", "in_progress", "completed", "cancelled"];
 
@@ -124,11 +197,17 @@ export default function MyProjectsPage() {
             );
 
             // Update local state
-            setProjects(projects.map(project =>
+            const updatedProjects = projects.map(project =>
                 project._id === projectId
                     ? { ...project, status: newStatus }
                     : project
-            ));
+            );
+            setProjects(updatedProjects);
+
+            // Recalculate dashboard stats
+            if (userRole === 'designer') {
+                calculateDashboardStats(updatedProjects);
+            }
 
             console.log("✅ Project status updated:", newStatus);
         } catch (err) {
@@ -308,7 +387,58 @@ export default function MyProjectsPage() {
             )}
 
             <div className="page-content">
+                {/* Designer Welcome Section */}
+                {userRole === 'designer' && (
+                    <div className="designer-welcome">
+                        <h2>Welcome back, kir!</h2>
+                        <p>Here's what's happening with your design projects</p>
+                    </div>
+                )}
 
+                {/* Designer Dashboard Stats */}
+                {userRole === 'designer' && (
+                    <div className="dashboard-stats">
+                        <div className="stat-card">
+                            <div className="stat-icon blue">
+                                <FiEye />
+                            </div>
+                            <div className="stat-content">
+                                <div className="stat-number">{dashboardStats.activeProjects}</div>
+                                <div className="stat-label">Active Projects</div>
+                            </div>
+                        </div>
+
+                        <div className="stat-card">
+                            <div className="stat-icon green">
+                                <FiUsers />
+                            </div>
+                            <div className="stat-content">
+                                <div className="stat-number">{dashboardStats.totalClients}</div>
+                                <div className="stat-label">Total Clients</div>
+                            </div>
+                        </div>
+
+                        <div className="stat-card">
+                            <div className="stat-icon purple">
+                                <FiTrendingUp />
+                            </div>
+                            <div className="stat-content">
+                                <div className="stat-number">${dashboardStats.revenueThisMonth.toLocaleString()}</div>
+                                <div className="stat-label">Revenue This Month</div>
+                            </div>
+                        </div>
+
+                        <div className="stat-card">
+                            <div className="stat-icon yellow">
+                                <FiStar />
+                            </div>
+                            <div className="stat-content">
+                                <div className="stat-number">{dashboardStats.averageRating.toFixed(1)}</div>
+                                <div className="stat-label">Average Rating</div>
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 {/* Profile Section - Only for clients */}
                 {userRole === 'client' && userProfile && (
@@ -431,7 +561,7 @@ export default function MyProjectsPage() {
                     />
                 </div>
             )}
-            
+
         </div>
     );
 }
