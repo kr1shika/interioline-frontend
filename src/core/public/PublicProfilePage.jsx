@@ -3,13 +3,14 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import Header from "../../components/header.jsx";
 import PortfolioPostViewer from "../../components/PortfolioPostViewer.jsx";
-import "./../style/publicprofile.css";
+import "./../style/profile.css"; // Changed to use the same CSS as private profile
 
 export default function PublicProfilePage() {
     const { designerId } = useParams();
     const [designer, setDesigner] = useState(null);
     const [portfolioPosts, setPortfolioPosts] = useState([]);
     const [activePost, setActivePost] = useState(null);
+    const [loadingProfile, setLoadingProfile] = useState(true);
 
     useEffect(() => {
         const fetchDesigner = async () => {
@@ -18,13 +19,15 @@ export default function PublicProfilePage() {
                 setDesigner(res.data);
             } catch (err) {
                 console.error("Error fetching designer profile", err);
+            } finally {
+                setLoadingProfile(false);
             }
         };
 
         const fetchPortfolioPosts = async () => {
             try {
                 const res = await axios.get(`http://localhost:2005/api/portfolio/posts/${designerId}`);
-                setPortfolioPosts(res.data.posts);
+                setPortfolioPosts(res.data.posts || []);
             } catch (err) {
                 console.error("Error fetching portfolio posts", err);
             }
@@ -36,23 +39,33 @@ export default function PublicProfilePage() {
         }
     }, [designerId]);
 
-    if (!designer) {
+    // Show loading while profile data is being fetched
+    if (loadingProfile || !designer) {
         return (
-            <div className="public-profile-page">
+            <div className="profile-page">
                 <Header />
-                <div className="loading">Loading...</div>
+                <div style={{
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    height: '400px',
+                    fontSize: '16px',
+                    color: '#C2805A'
+                }}>
+                    Loading profile...
+                </div>
             </div>
         );
     }
 
     return (
-        <div className="public-profile-page">
+        <div className="profile-page">
             <Header />
 
             <div className="profile-container">
-                {/* Profile Card */}
+                {/* Profile Card - Same structure as private but without edit button */}
                 <div className="profile-card">
-                    <div className="profile-pic-wrapper">
+                    <div className="profile-card-content">
                         <img
                             src={
                                 designer.profilepic
@@ -60,20 +73,25 @@ export default function PublicProfilePage() {
                                     : "/assets/default-avatar.png"
                             }
                             alt={designer.full_name}
-                            className="profile-pic"
+                            className="profile-image"
                         />
-                    </div>
 
-                    <div className="profile-info">
-                        <h2>{designer.full_name}</h2>
-                        <p className="location">Kathmandu, Nepal</p>
-                        <p className="bio">{designer.bio}</p>
+                        <div className="profile-content">
+                            <div className="profile-info">
+                                <h1>{designer.full_name}</h1>
+                                <p className="location">Kathmandu, Nepal</p>
+                                <p className="bio">{designer.bio}</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                {/* Portfolio Section */}
+                {/* Portfolio Section - Same structure as private but without add button */}
                 <section className="portfolio-section">
-                    <h3>Portfolio</h3>
+                    <div className="section-header">
+                        <h2>Portfolio</h2>
+                    </div>
+
                     <div className="portfolio-grid">
                         {portfolioPosts.length === 0 ? (
                             <div className="no-posts">
@@ -87,15 +105,16 @@ export default function PublicProfilePage() {
                                 return (
                                     <div
                                         key={post._id}
-                                        className="portfolio-card"
+                                        className="portfolio-post"
                                         onClick={() => setActivePost(post)}
                                     >
                                         <img
                                             src={`http://localhost:2005${primaryImage.url}`}
                                             alt={primaryImage.caption || post.title}
                                         />
-                                        <div className="portfolio-overlay">
-                                            {post.title}
+                                        <div className="post-overlay">
+                                            <span className="post-title">{post.title}</span>
+                                            {/* Removed trash icon for public view */}
                                         </div>
                                     </div>
                                 );
@@ -104,10 +123,12 @@ export default function PublicProfilePage() {
                     </div>
                 </section>
 
-                {/* Reviews Section */}
-                <section className="review-section">
-                    <h3>Reviews</h3>
-                    <div className="review-grid">
+                {/* Reviews Section - Same structure as private */}
+                <section className="reviews-section">
+                    <div className="section-header">
+                        <h2>Reviews</h2>
+                    </div>
+                    <div className="reviews-grid">
                         {[
                             { name: "Tara Lively", text: "Loved how good the designer was at understanding my visions..." },
                             { name: "Yuki", text: "Loved the design work and the process." },
