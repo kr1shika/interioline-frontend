@@ -1,6 +1,6 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { FiCreditCard, FiEdit, FiEye, FiStar, FiTrendingUp, FiUsers } from "react-icons/fi";
+import { FiCreditCard, FiEdit, FiEye, FiMoreHorizontal, FiStar, FiTrendingUp, FiUsers } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import bannerArt from "../../assets/images/art.png";
 import profile from "../../assets/images/profile.jpg";
@@ -364,6 +364,9 @@ export default function MyProjectsPage() {
 
     // Check if project can accept payments
     const canMakePayment = (project) => {
+        // Don't allow payments for completed projects
+        if (project.status === 'completed') return false;
+
         const payments = projectPaymentDetails[project._id] || [];
 
         // If there's a "full" payment, no more payments allowed
@@ -493,6 +496,10 @@ export default function MyProjectsPage() {
             }
         }
     };
+
+    // Separate active and completed projects
+    const activeProjects = projects.filter(project => project.status !== 'completed');
+    const completedProjects = projects.filter(project => project.status === 'completed');
 
     // Show loading while auth is being determined
     if (authLoading) {
@@ -647,34 +654,44 @@ export default function MyProjectsPage() {
                     </div>
                 )}
 
-                <h3 className="section-heading">
-                    {userRole === 'designer' ? 'Your Projects' : 'Ongoing Projects'}
-                </h3>
+                {/* Active Projects Section */}
+                {activeProjects.length > 0 && (
+                    <>
+                        <h3 className="section-heading">
+                            {userRole === 'designer' ? 'Your Projects' : 'Ongoing Projects'}
+                        </h3>
 
-                {loading ? (
-                    <div style={{
-                        textAlign: 'center',
-                        padding: '40px',
-                        color: '#C2805A'
-                    }}>
-                        Loading projects...
-                    </div>
-                ) : (
-                    <div className="project-list">
-                        {projects.map((project) => (
-                            <div className="project-card" key={project._id}>
-                                <div className="project-card-content">
-                                    <img src={room} alt="project icon" />
-                                    <div className="project-info">
-                                        <h4>{project.title}</h4>
-                                        <div className="status-section">
-                                            <div className="status-row">
-                                                <span>Status: </span>
+                        {loading ? (
+                            <div style={{
+                                textAlign: 'center',
+                                padding: '40px',
+                                color: '#C2805A'
+                            }}>
+                                Loading projects...
+                            </div>
+                        ) : (
+                            <div className="active-projects-container">
+                                {activeProjects.map((project) => (
+                                    <div className="active-project-card" key={project._id}>
+                                        <div className="active-project-header">
+                                            <div className="active-project-icon">
+                                                <img src={room} alt="project icon" />
+                                            </div>
+                                            <div className="active-project-info">
+                                                <h4 className="active-project-title">{project.title}</h4>
+                                                <p className="active-project-client">
+                                                    {userRole === 'designer' ?
+                                                        `client: ${project.client_name || 'Unknown Client'}` :
+                                                        `designer: ${project.designer_name || 'Unknown Designer'}`
+                                                    }
+                                                </p>
+                                            </div>
+                                            <div className="active-project-status">
                                                 {userRole === 'designer' ? (
                                                     <select
                                                         value={project.status}
                                                         onChange={(e) => updateProjectStatus(project._id, e.target.value)}
-                                                        className="status-dropdown"
+                                                        className="active-status-dropdown"
                                                     >
                                                         {statusOptions.map(status => (
                                                             <option key={status} value={status}>
@@ -683,72 +700,142 @@ export default function MyProjectsPage() {
                                                         ))}
                                                     </select>
                                                 ) : (
-                                                    <strong>{statusLabelMap[project.status]}</strong>
+                                                    <span className={`status-badge ${project.status}`}>
+                                                        {statusLabelMap[project.status]}
+                                                    </span>
                                                 )}
                                             </div>
-                                            <div className="progress-container">
-                                                <div className="progress-bar">
-                                                    <div
-                                                        className="progress-fill"
-                                                        style={{ width: `${getStatusProgress(project.status)}%` }}
-                                                    ></div>
-                                                </div>
-                                                <span className="progress-text">
-                                                    {getStatusProgress(project.status)}%
-                                                </span>
+                                        </div>
+
+                                        <div className="active-project-progress">
+                                            <div className="progress-bar">
+                                                <div
+                                                    className="progress-fill"
+                                                    style={{ width: `${getStatusProgress(project.status)}%` }}
+                                                ></div>
+                                            </div>
+                                            <span className="progress-text">
+                                                {getStatusProgress(project.status)}%
+                                            </span>
+                                        </div>
+
+                                        <div className="active-project-footer">
+                                            <div className="active-project-date">
+                                                <span>Due date:</span>
+                                                <span>{new Date(project.createdAt).toLocaleDateString()}</span>
+                                            </div>
+                                            <div className="active-project-actions">
+                                                <button
+                                                    className="active-action-btn view-btn"
+                                                    onClick={() => handleProjectAction(project)}
+                                                >
+                                                    {userRole === 'designer' ? 'Edit' : 'View'}
+                                                </button>
+
+                                                {/* Payment Button - Only for clients on unpaid projects */}
+                                                {canMakePayment(project) && (
+                                                    <button
+                                                        className="active-action-btn pay-btn"
+                                                        onClick={() => handlePaymentClick(project)}
+                                                    >
+                                                        Pay Now
+                                                    </button>
+                                                )}
+
+                                                {/* Payment History Button - Show when payments exist */}
+                                                {shouldShowPaymentHistory(project) && !canMakePayment(project) && (
+                                                    <button
+                                                        className="active-action-btn history-btn"
+                                                        onClick={() => handlePaymentHistory(project)}
+                                                    >
+                                                        Payment History
+                                                    </button>
+                                                )}
                                             </div>
                                         </div>
-                                        <p>Amount: <strong>Rs. {project.payment_amount || 50000}</strong></p>
-                                        <p>Payment: <strong>{getPaymentStatusDisplay(project)}</strong></p>
-                                        <p className="created-at">Created {new Date(project.createdAt).toLocaleString()}</p>
                                     </div>
-                                </div>
-                                <div className="project-actions">
-                                    <button
-                                        className="action-btn"
-                                        onClick={() => handleProjectAction(project)}
-                                    >
-                                        {userRole === 'designer' ? 'Edit' : 'View'}
-                                    </button>
-
-                                    {/* Payment Button - Only for clients on unpaid projects */}
-                                    {canMakePayment(project) && (
-                                        <button
-                                            className="action-btn payment-btn"
-                                            onClick={() => handlePaymentClick(project)}
-                                            style={{
-                                                background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                                                marginLeft: '8px'
-                                            }}
-                                        >
-                                            <FiCreditCard style={{ marginRight: '4px' }} />
-                                            {getPaymentButtonText(project)}
-                                        </button>
-                                    )}
-
-                                    {/* Payment History Button - Show when payments exist */}
-                                    {shouldShowPaymentHistory(project) && !canMakePayment(project) && (
-                                        <button
-                                            className="action-btn history-btn"
-                                            onClick={() => handlePaymentHistory(project)}
-                                            style={{
-                                                background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
-                                                marginLeft: '8px'
-                                            }}
-                                        >
-                                            <FiEye style={{ marginRight: '4px' }} />
-                                            Payment History
-                                        </button>
-                                    )}
-                                </div>
+                                ))}
                             </div>
-                        ))}
-                    </div>
+                        )}
+                    </>
                 )}
 
+                {/* Past Projects Section */}
+                {completedProjects.length > 0 && (
+                    <>
+                        <h3 className="section-heading past-projects-heading">
+                            Past Projects
+                        </h3>
+
+                        <div className="past-projects-grid">
+                            {completedProjects.map((project) => (
+                                <div className="past-project-card" key={project._id}>
+                                    <div className="past-project-header">
+                                        <div className="past-project-icon">
+                                            <img src={room} alt="project icon" />
+                                        </div>
+                                        <div className="past-project-header-info">
+                                            <h4 className="past-project-title">{project.title}</h4>
+                                            <p className="past-project-client">
+                                                {userRole === 'designer' ?
+                                                    `client: ${project.client_name || 'Unknown Client'}` :
+                                                    `designer: ${project.designer_name || 'Unknown Designer'}`
+                                                }
+                                            </p>
+                                        </div>
+                                        <div className="past-project-menu">
+                                            <FiMoreHorizontal />
+                                        </div>
+                                    </div>
+
+                                    <div className="past-project-content">
+                                        <div className="past-project-status">
+                                            <span className="completed-badge">Completed</span>
+                                        </div>
+                                    </div>
+
+                                    <div className="past-project-footer">
+                                        <div className="past-project-date">
+                                            <span>Due date:</span>
+                                            <span>{new Date(project.createdAt).toLocaleDateString()}</span>
+                                        </div>
+                                        <div className="past-project-actions">
+                                            <button
+                                                className="past-project-view-btn"
+                                                onClick={() => handleProjectAction(project)}
+                                            >
+                                                <FiEye />
+                                            </button>
+
+                                            {/* Payment History Button for completed projects */}
+                                            {shouldShowPaymentHistory(project) && (
+                                                <button
+                                                    className="past-project-history-btn"
+                                                    onClick={() => handlePaymentHistory(project)}
+                                                    title="Payment History"
+                                                >
+                                                    <FiCreditCard />
+                                                </button>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </>
+                )}
+
+                {/* Show message when no projects exist */}
                 {!loading && projects.length === 0 && (
                     <div className="no-projects">
                         <p>No projects found. {userRole === 'client' ? 'Start your first project!' : 'You haven\'t been assigned any projects yet.'}</p>
+                    </div>
+                )}
+
+                {/* Show message when no active projects but have completed ones */}
+                {!loading && activeProjects.length === 0 && completedProjects.length > 0 && (
+                    <div className="no-active-projects">
+                        <p>No active projects. {userRole === 'client' ? 'Start a new project!' : 'No active projects assigned.'}</p>
                     </div>
                 )}
             </div>
