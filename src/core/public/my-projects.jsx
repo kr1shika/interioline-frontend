@@ -1,6 +1,6 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { FiEdit, FiEye, FiStar, FiTrendingUp, FiUsers } from "react-icons/fi";
+import { FiCreditCard, FiEdit, FiEye, FiStar, FiTrendingUp, FiUsers } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import bannerArt from "../../assets/images/art.png";
 import profile from "../../assets/images/profile.jpg";
@@ -11,12 +11,16 @@ import { useAuth } from "../../provider/authcontext";
 import EditProfileForm from "../private/designer/EditProfileForm.jsx";
 import "../style/myprj.css";
 import { getRoomConfigurationByProjectId } from "./editingRoom/components/room-designer/furniture-Catalog";
+import PaymentPage from "./PaymentPage.jsx"; // Add this import
 
 export default function MyProjectsPage() {
     const [projects, setProjects] = useState([]);
     const [userProfile, setUserProfile] = useState(null);
     const [showAuth, setShowAuth] = useState(false);
     const [showEditProfile, setShowEditProfile] = useState(false);
+    const [showPaymentPage, setShowPaymentPage] = useState(false); // Payment page state
+    const [selectedProject, setSelectedProject] = useState(null); // Selected project for payment
+    const [paymentType, setPaymentType] = useState('initial'); // Payment type
     const [toast, setToast] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
@@ -277,6 +281,76 @@ export default function MyProjectsPage() {
         }, 4000);
     };
 
+    // Payment Functions
+    const handlePaymentClick = (project) => {
+        setSelectedProject(project);
+
+        // Determine payment type based on project status
+        if (project.payment === 'pending') {
+            setPaymentType('initial');
+        } else if (project.payment === 'half-installment' && project.status === 'completed') {
+            setPaymentType('final');
+        }
+
+        setShowPaymentPage(true);
+    };
+
+    const handlePaymentSuccess = (paymentData) => {
+        console.log('💳 Payment successful:', paymentData);
+
+        // Update project payment status locally
+        setProjects(prevProjects =>
+            prevProjects.map(project =>
+                project._id === selectedProject._id
+                    ? {
+                        ...project,
+                        payment: paymentType === 'initial' ? 'half-installment' : 'completed'
+                    }
+                    : project
+            )
+        );
+
+        setShowPaymentPage(false);
+        setSelectedProject(null);
+
+        // Show success toast
+        showToast(
+            `Payment of Rs. ${paymentData.amount.toLocaleString()} completed successfully!`,
+            "success"
+        );
+    };
+
+    const handleClosePayment = () => {
+        setShowPaymentPage(false);
+        setSelectedProject(null);
+    };
+
+    const calculatePaymentAmount = (project, type) => {
+        const basePrice = 50000;
+        let totalAmount = basePrice;
+
+        if (project?.room_dimensions) {
+            const area = (project.room_dimensions.length || 10) * (project.room_dimensions.width || 10);
+            totalAmount += area * 500;
+        }
+
+        return type === 'initial' || type === 'final' ? Math.round(totalAmount * 0.5) : totalAmount;
+    };
+
+    // Check if project can accept payments
+    const canMakePayment = (project) => {
+        return userRole === 'client' &&
+            (project.status === 'pending' || project.status === 'in_progress') &&
+            project.payment !== 'completed';
+    };
+
+    // Get payment status display
+    const getPaymentStatusDisplay = (project) => {
+        if (project.payment === 'completed') return '✅ Paid';
+        if (project.payment === 'half-installment') return '🔄 50% Paid';
+        return '⏳ Payment Pending';
+    };
+
     // Modified function to handle edit/view button click
     const handleProjectAction = async (project) => {
         console.log("Project action clicked for:", project.title, "Status:", project.status);
@@ -528,7 +602,8 @@ export default function MyProjectsPage() {
                                                 </span>
                                             </div>
                                         </div>
-                                        <p>Payment: <strong>{project.payment}</strong></p>
+                                        <p>Amount: <strong>Rs. {project.payment_amount || 50000}</strong></p>
+                                        <p>Payment: <strong>{getPaymentStatusDisplay(project)}</strong></p>
                                         <p className="created-at">Created {new Date(project.createdAt).toLocaleString()}</p>
                                     </div>
                                 </div>
@@ -539,6 +614,21 @@ export default function MyProjectsPage() {
                                     >
                                         {userRole === 'designer' ? 'Edit' : 'View'}
                                     </button>
+
+                                    {/* Payment Button - Only for clients on unpaid projects */}
+                                    {canMakePayment(project) && (
+                                        <button
+                                            className="action-btn payment-btn"
+                                            onClick={() => handlePaymentClick(project)}
+                                            style={{
+                                                background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                                                marginLeft: '8px'
+                                            }}
+                                        >
+                                            <FiCreditCard style={{ marginRight: '4px' }} />
+                                            {project.payment === 'pending' ? 'Pay Initial (50%)' : 'Pay Final (50%)'}
+                                        </button>
+                                    )}
                                 </div>
                             </div>
                         ))}
@@ -558,6 +648,28 @@ export default function MyProjectsPage() {
                     <EditProfileForm
                         designer={userProfile}
                         onClose={handleCloseEditProfile}
+                    />
+                </div>
+            )}
+
+            {/* Payment Page */}
+            {showPaymentPage && selectedProject && (
+                <div style={{
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    zIndex: 1000
+                }}>
+                    <PaymentPage
+                        projectId={selectedProject._id}
+                        amount={calculatePaymentAmount(selectedProject, paymentType)}
+                        paymentType={paymentType}
+                        onSuccess={handlePaymentSuccess}
+                        onClose={handleClosePayment}
+                        userId={userId}
+                        project={selectedProject} // Pass the full project data
                     />
                 </div>
             )}

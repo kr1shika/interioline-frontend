@@ -18,6 +18,7 @@ const ViewOnlyRoomDesigner = lazy(() => import("./core/public/editingRoom/compon
 function App() {
 
   const publicRoutes = [
+
     {
       path: "/room-view",
       element: (
