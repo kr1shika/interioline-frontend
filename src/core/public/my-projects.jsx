@@ -24,6 +24,7 @@ export default function MyProjectsPage() {
     const [toast, setToast] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+
     const [dashboardStats, setDashboardStats] = useState({
         activeProjects: 0,
         totalClients: 0,
@@ -648,12 +649,13 @@ export default function MyProjectsPage() {
                         <div className="banner-text">
                             <h3>Your dream interior is just a step away!</h3>
                             <p>Don't wait any longer to create the perfect space that reflects your style and personality.</p>
-                            <button className="start-btn">Start New Project</button>
+                            <button className="start-btn" onClick={() => navigate("/search")}>
+                                Start New Project
+                            </button>
                         </div>
                         <img src={bannerArt} alt="banner art" />
                     </div>
                 )}
-
                 {/* Active Projects Section */}
                 {activeProjects.length > 0 && (
                     <>

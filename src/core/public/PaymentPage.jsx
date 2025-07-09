@@ -503,7 +503,6 @@ const PaymentPage = ({ projectId, amount, paymentType, onSuccess, onClose, userI
     );
 };
 
-// STYLES OBJECT
 const styles = {
     // CONTAINER
     container: {
@@ -571,9 +570,7 @@ const styles = {
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        // marginTop: '10px',
         marginBottom: '5px',
-
         fontSize: '14px'
     },
     infoLabel: {

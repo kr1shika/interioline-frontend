@@ -127,7 +127,14 @@ export const furnitureCatalog = [
         defaultScale: { x: 1, y: 1, z: 1 },
         minScale: 0.5,
         maxScale: 2.0,
-        price: 399
+        price: 399,
+        placement: {
+            type: 'floor',         // Floor placement
+            canStack: false,
+            supportsSurface: true, // Other items can be placed on this
+            surfaceHeight: 1.45,   // Height of the placing surface
+            maxSurfaceLoad: 50     // Maximum weight it can support (kg)
+        }
     },
     {
         id: 'dining_table',
@@ -315,7 +322,7 @@ export const furnitureCatalog = [
     {
         id: 'vintage_lamp',
         name: 'Vintage Table Lamp',
-        type: 'lighting',
+        type: 'table_lamp',
         category: 'lighting',
         dimensions: { width: 1.45, height: 2.5, depth: 1.45 },
         color: '#8B4513',
@@ -328,12 +335,19 @@ export const furnitureCatalog = [
         defaultScale: { x: 1, y: 1, z: 1 },
         minScale: 0.7,
         maxScale: 1.5,
-        price: 229
+        price: 229,
+        placement: {
+            type: 'surface',        // Requires a surface to be placed on
+            canStack: false,
+            supportsSurface: false,
+            requiresSurface: true,
+            weight: 5              // kg - for weight validation
+        }
     },
     {
         id: 'wall_lamp',
         name: 'Wall-Mounted Lamp',
-        type: 'lighting',
+        type: 'wall_lamp',
         category: 'lighting',
         dimensions: { width: 1.3, height: 1.4, depth: 1.2 },
         color: '#2F4F4F',
@@ -346,8 +360,16 @@ export const furnitureCatalog = [
         defaultScale: { x: 1, y: 1, z: 1 },
         minScale: 0.7,
         maxScale: 1.5,
-        price: 99
+        price: 99,
+        placement: {
+            type: 'wall',          // Wall-mounted
+            canStack: false,
+            supportsSurface: false,
+            wallOffset: 0.2,       // Distance from wall surface
+            preferredHeight: 1.8   // Preferred mounting height in meters
+        }
     },
+
 
     // DECORATIVE PLANTS (2 items)
     {
@@ -366,7 +388,13 @@ export const furnitureCatalog = [
         defaultScale: { x: 1, y: 1, z: 1 },
         minScale: 0.5,
         maxScale: 2.0,
-        price: 79
+        price: 79,
+        placement: {
+            type: 'flexible',      // Can go on floor OR surfaces
+            canStack: false,
+            supportsSurface: false,
+            weight: 3              // Light enough for most surfaces
+        }
     },
     {
         id: 'snake_plant',
@@ -407,6 +435,139 @@ export const furnitureCatalog = [
         price: 399
     }
 ];
+
+export const getPlacementInfo = (item) => {
+    if (!item.placement) return { type: 'floor', description: 'Floor placement', icon: '🏢', color: '#6b7280' };
+
+    switch (item.placement.type) {
+        case 'wall':
+            return {
+                type: 'wall',
+                description: 'Wall-mounted',
+                icon: '🏠',
+                color: '#dc2626',
+                details: `Mounts ${item.placement.preferredHeight || 1.8}m high`
+            };
+        case 'surface':
+            return {
+                type: 'surface',
+                description: 'Requires surface',
+                icon: '📋',
+                color: '#059669',
+                details: `Weight: ${item.placement.weight || 'Unknown'}kg`
+            };
+        case 'flexible':
+            return {
+                type: 'flexible',
+                description: 'Floor or surface',
+                icon: '🔄',
+                color: '#7c3aed',
+                details: `Weight: ${item.placement.weight || 'Unknown'}kg`
+            };
+        case 'floor':
+        default:
+            return {
+                type: 'floor',
+                description: 'Floor placement',
+                icon: '🏢',
+                color: '#6b7280',
+                details: item.placement.supportsSurface ?
+                    `Can support ${item.placement.maxSurfaceLoad}kg` :
+                    'Standard floor item'
+            };
+    }
+};
+
+export const canPlaceOnSurface = (item, surfaceItem) => {
+    if (!item.placement || !surfaceItem.placement) return false;
+
+    // Check if item can be placed on surfaces
+    const itemCanBePlaced = item.placement.type === 'surface' || item.placement.type === 'flexible';
+
+    // Check if surface item supports other items
+    const surfaceSupports = surfaceItem.placement.supportsSurface;
+
+    // Check weight constraints
+    const weightOk = !surfaceItem.placement.maxSurfaceLoad ||
+        !item.placement.weight ||
+        item.placement.weight <= surfaceItem.placement.maxSurfaceLoad;
+
+    return itemCanBePlaced && surfaceSupports && weightOk;
+};
+
+export const canMountOnWall = (item) => {
+    return item.placement?.type === 'wall';
+};
+
+export const searchFurnitureByPlacement = (placementType) => {
+    return furnitureCatalog.filter(item => {
+        if (!item.placement) return placementType === 'floor';
+
+        switch (placementType) {
+            case 'wall':
+                return item.placement.type === 'wall';
+            case 'surface':
+                return item.placement.type === 'surface' || item.placement.type === 'flexible';
+            case 'floor':
+                return item.placement.type === 'floor' || item.placement.type === 'flexible';
+            default:
+                return true;
+        }
+    });
+};
+
+export const getSurfaceItems = () => {
+    return furnitureCatalog.filter(item => item.placement?.supportsSurface);
+};
+
+export const getWallMountableItems = () => {
+    return furnitureCatalog.filter(item => item.placement?.type === 'wall');
+};
+
+export const getSurfacePlaceableItems = () => {
+    return furnitureCatalog.filter(item =>
+        item.placement?.type === 'surface' || item.placement?.type === 'flexible'
+    );
+};
+
+export const addPlacementToExistingItems = () => {
+    // If you want to quickly add placement info to existing items, you can use this:
+    const placementMap = {
+        // Tables and surfaces that support other items
+        'coffee_table': { type: 'floor', supportsSurface: true, surfaceHeight: 1.45, maxSurfaceLoad: 50 },
+        'dining_table': { type: 'floor', supportsSurface: true, surfaceHeight: 1.75, maxSurfaceLoad: 100 },
+        'table101': { type: 'floor', supportsSurface: true, surfaceHeight: 1.75, maxSurfaceLoad: 80 },
+        'tvtable': { type: 'floor', supportsSurface: true, surfaceHeight: 1.5, maxSurfaceLoad: 30 },
+        'doormate': { type: 'floor', supportsSurface: true, surfaceHeight: 2.8, maxSurfaceLoad: 20 },
+
+        // Lighting that can be placed on surfaces
+        'vintage_lamp': { type: 'surface', weight: 5, requiresSurface: true },
+
+        // Wall-mounted items
+        'wall_lamp': { type: 'wall', wallOffset: 0.2, preferredHeight: 1.8 },
+
+        // Flexible items (floor or surface)
+        'plant101': { type: 'flexible', weight: 3 },
+        'snake_plant': { type: 'flexible', weight: 2 },
+
+        // Floor-only items
+        'couch': { type: 'floor', supportsSurface: true, surfaceHeight: 0.8 },
+        'vrown_leather_couch': { type: 'floor', supportsSurface: true, surfaceHeight: 0.8 },
+        't_chair': { type: 'floor' },
+        'webby_chair': { type: 'floor' },
+        'stripped_chair': { type: 'floor' },
+        'upholstered_swivel_armchair': { type: 'floor' },
+        'bed101': { type: 'floor' },
+        'bed_small': { type: 'floor' },
+        'simple_bed': { type: 'floor' },
+        'corner_bed': { type: 'floor' },
+        'lamp': { type: 'floor' },
+        'floor_lamp': { type: 'floor' },
+        'tall_lamp': { type: 'floor' }
+    };
+
+    return placementMap;
+};
 
 // Enhanced helper functions with proper filtering
 export const getFurnitureByCategory = (category) => {
