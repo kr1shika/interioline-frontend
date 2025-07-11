@@ -39,12 +39,16 @@ body {
 }
 
 .profile-image {
-  min-width: 130px;
-  min-height: 130px;
+  width: 130px;
+  height: 130px;
+  max-width: 130px;
+  max-height: 130px;
   border-radius: 50%;
   object-fit: cover;
   flex-shrink: 0;
+  display: block;
 }
+
 
 .profile-content {
   flex: 1;

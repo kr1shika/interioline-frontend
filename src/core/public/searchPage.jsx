@@ -1,6 +1,6 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import matchImg from "../../assets/images/MATCH.png";
 import qbohemian from "../../assets/images/quiz/qbohemian.png";
 import qminimalist from "../../assets/images/quiz/qminimalist.png";
@@ -18,22 +18,24 @@ export default function SearchDesignersPage() {
     const [isQuizBased, setIsQuizBased] = useState(false);
     const [userQuizData, setUserQuizData] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [selectedStyle, setSelectedStyle] = useState(null);
+    const [isStyleFiltered, setIsStyleFiltered] = useState(false);
+
     const navigate = useNavigate();
+    const location = useLocation();
     const { isLoggedIn, userId, userRole } = useAuth();
 
     const calculateCompatibilityScore = (designer, quizAnswers) => {
         let score = 0;
 
-        const quizStyle = quizAnswers["2"]?.toLowerCase(); // interior style
-        const quizTone = quizAnswers["4"]?.toLowerCase();  // color tones
-        const quizFunction = quizAnswers["5"]?.toLowerCase(); // functionality
+        const quizStyle = quizAnswers["2"]?.toLowerCase();
+        const quizTone = quizAnswers["4"]?.toLowerCase();
+        const quizFunction = quizAnswers["5"]?.toLowerCase();
 
-        // Style match (specialization) - 40 points
         if (designer.specialization?.toLowerCase().includes(quizStyle)) {
             score += 40;
         }
 
-        // Tone match - 30 points
         if (
             designer.preferredTones &&
             Array.isArray(designer.preferredTones) &&
@@ -42,7 +44,6 @@ export default function SearchDesignersPage() {
             score += 30;
         }
 
-        // Functional/Decorative approach - 30 points
         if (designer.approach?.toLowerCase() === quizFunction) {
             score += 30;
         }
@@ -50,7 +51,23 @@ export default function SearchDesignersPage() {
         return score;
     };
 
-    // Simple function to generate style analysis
+    const truncateBio = (bio, maxLength = 90) => {
+        if (!bio) return "Designer bio unavailable.";
+
+        if (bio.length <= maxLength) {
+            return bio;
+        }
+
+        const truncated = bio.substring(0, maxLength);
+        const lastSpaceIndex = truncated.lastIndexOf(' ');
+
+        if (lastSpaceIndex > maxLength * 0.8) {
+            return truncated.substring(0, lastSpaceIndex) + "...";
+        }
+
+        return truncated + "...";
+    };
+
     const generateStyleAnalysis = (answers) => {
         const parts = [];
 
@@ -81,98 +98,143 @@ export default function SearchDesignersPage() {
         return parts.join(" ");
     };
 
-    useEffect(() => {
-        const fetchDesigners = async () => {
-            try {
-                setLoading(true);
+    const handleStyleClick = async (styleName) => {
+        try {
+            setLoading(true);
+            setSelectedStyle(styleName);
+            setIsStyleFiltered(true);
+            setIsQuizBased(false);
 
-                // First, fetch all designers with their portfolio images
-                const res = await axios.get("http://localhost:2005/api/user/getAllDesigners");
-                const designersData = res.data;
+            console.log(`Filtering designers by style: ${styleName}`);
 
-                // For each designer, fetch their portfolio posts
-                const designersWithPrimaryImage = await Promise.all(
-                    designersData.map(async (designer) => {
-                        try {
-                            const postRes = await axios.get(`http://localhost:2005/api/portfolio/posts/${designer._id}`);
-                            const posts = postRes.data.posts;
+            const res = await axios.get(`http://localhost:2005/api/user/style/${styleName}`);
+            const filteredDesigners = res.data.designers;
 
-                            // Find the first image from the first post
-                            const firstPost = posts[0];
-                            let primaryImage = null;
+            console.log(`Found ${filteredDesigners.length} designers for ${styleName} style`);
 
-                            if (firstPost && firstPost.images && firstPost.images.length > 0) {
-                                const primary = firstPost.images.find(img => img.is_primary);
-                                primaryImage = primary ? primary.url : firstPost.images[0].url;
-                            }
-
-                            return { ...designer, primaryImage };
-                        } catch (err) {
-                            console.error(`Error fetching portfolio for ${designer.full_name}:`, err);
-                            return { ...designer, primaryImage: null };
-                        }
-                    })
-                );
-
-                // Check if user is logged in and has quiz data
-                if (isLoggedIn && userId && userRole === "client") {
+            const designersWithPrimaryImage = await Promise.all(
+                filteredDesigners.map(async (designer) => {
                     try {
-                        // Fetch current user's data to check for quiz answers
-                        const userRes = await axios.get(`http://localhost:2005/api/user/${userId}`);
-                        const userData = userRes.data;
+                        const postRes = await axios.get(`http://localhost:2005/api/portfolio/posts/${designer._id}`);
+                        const posts = postRes.data.posts;
 
-                        // Check if user has completed the style quiz
-                        if (userData.style_quiz && Object.keys(userData.style_quiz).length > 0) {
-                            console.log("✅ User has quiz data, splitting designers by compatibility");
+                        const firstPost = posts[0];
+                        let primaryImage = null;
 
-                            // Calculate compatibility scores for each designer
-                            const designersWithScores = designersWithPrimaryImage.map(designer => ({
-                                ...designer,
-                                compatibilityScore: calculateCompatibilityScore(designer, userData.style_quiz)
-                            }));
-
-                            // Sort by compatibility score (highest first)
-                            const sortedDesigners = designersWithScores.sort((a, b) =>
-                                b.compatibilityScore - a.compatibilityScore
-                            );
-
-                            setDesigners(sortedDesigners);
-                            setUserQuizData(userData.style_quiz);
-                            setIsQuizBased(true);
-                        } else {
-                            // No quiz data, show designers in default order
-                            setDesigners(designersWithPrimaryImage);
-                            setIsQuizBased(false);
+                        if (firstPost && firstPost.images && firstPost.images.length > 0) {
+                            const primary = firstPost.images.find(img => img.is_primary);
+                            primaryImage = primary ? primary.url : firstPost.images[0].url;
                         }
-                    } catch (error) {
-                        console.error("Error fetching user quiz data:", error);
-                        // Fallback to default order
+
+                        return { ...designer, primaryImage };
+                    } catch (err) {
+                        console.error(`Error fetching portfolio for ${designer.full_name}:`, err);
+                        return { ...designer, primaryImage: null };
+                    }
+                })
+            );
+
+            setDesigners(designersWithPrimaryImage);
+        } catch (error) {
+            console.error("Error filtering designers by style:", error);
+            setDesigners([]);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const clearStyleFilter = () => {
+        setSelectedStyle(null);
+        setIsStyleFiltered(false);
+        fetchAllDesigners();
+    };
+
+    const fetchAllDesigners = async () => {
+        try {
+            setLoading(true);
+
+            const res = await axios.get("http://localhost:2005/api/user/getAllDesigners");
+            const designersData = res.data;
+
+            const designersWithPrimaryImage = await Promise.all(
+                designersData.map(async (designer) => {
+                    try {
+                        const postRes = await axios.get(`http://localhost:2005/api/portfolio/posts/${designer._id}`);
+                        const posts = postRes.data.posts;
+
+                        const firstPost = posts[0];
+                        let primaryImage = null;
+
+                        if (firstPost && firstPost.images && firstPost.images.length > 0) {
+                            const primary = firstPost.images.find(img => img.is_primary);
+                            primaryImage = primary ? primary.url : firstPost.images[0].url;
+                        }
+
+                        return { ...designer, primaryImage };
+                    } catch (err) {
+                        console.error(`Error fetching portfolio for ${designer.full_name}:`, err);
+                        return { ...designer, primaryImage: null };
+                    }
+                })
+            );
+
+            if (isLoggedIn && userId && userRole === "client") {
+                try {
+                    const userRes = await axios.get(`http://localhost:2005/api/user/${userId}`);
+                    const userData = userRes.data;
+
+                    if (userData.style_quiz && Object.keys(userData.style_quiz).length > 0) {
+                        console.log("✅ User has quiz data, splitting designers by compatibility");
+
+                        const designersWithScores = designersWithPrimaryImage.map(designer => ({
+                            ...designer,
+                            compatibilityScore: calculateCompatibilityScore(designer, userData.style_quiz)
+                        }));
+
+                        const sortedDesigners = designersWithScores.sort((a, b) =>
+                            b.compatibilityScore - a.compatibilityScore
+                        );
+
+                        setDesigners(sortedDesigners);
+                        setUserQuizData(userData.style_quiz);
+                        setIsQuizBased(true);
+                    } else {
                         setDesigners(designersWithPrimaryImage);
                         setIsQuizBased(false);
                     }
-                } else {
-                    // User not logged in or not a client, show default order
+                } catch (error) {
+                    console.error("Error fetching user quiz data:", error);
                     setDesigners(designersWithPrimaryImage);
                     setIsQuizBased(false);
                 }
-
-            } catch (err) {
-                console.error("Failed to fetch designers:", err);
-                setDesigners([]);
-            } finally {
-                setLoading(false);
+            } else {
+                setDesigners(designersWithPrimaryImage);
+                setIsQuizBased(false);
             }
-        };
 
-        fetchDesigners();
-    }, [isLoggedIn, userId, userRole]);
+        } catch (err) {
+            console.error("Failed to fetch designers:", err);
+            setDesigners([]);
+        } finally {
+            setLoading(false);
+        }
+    };
 
-    // Simple function to get compatibility percentage
+    useEffect(() => {
+        const searchParams = new URLSearchParams(location.search);
+        const styleParam = searchParams.get('style');
+
+        if (styleParam) {
+            handleStyleClick(styleParam);
+        } else {
+            fetchAllDesigners();
+        }
+    }, [isLoggedIn, userId, userRole, location.search]);
+
     const getCompatibilityPercentage = (score) => {
         return Math.round((score / 100) * 100);
     };
 
-    // Simple function to get badge class
     const getCompatibilityBadgeClass = (score) => {
         if (score >= 80) return "compatibility-badge high";
         if (score >= 50) return "compatibility-badge medium";
@@ -180,12 +242,11 @@ export default function SearchDesignersPage() {
         return "compatibility-badge minimal";
     };
 
-    // Split designers into recommended (59%+) and others
-    const recommendedDesigners = isQuizBased
+    const recommendedDesigners = isQuizBased && !isStyleFiltered
         ? designers.filter(designer => getCompatibilityPercentage(designer.compatibilityScore) >= 59)
         : [];
 
-    const otherDesigners = isQuizBased
+    const otherDesigners = isQuizBased && !isStyleFiltered
         ? designers.filter(designer => getCompatibilityPercentage(designer.compatibilityScore) < 59)
         : designers;
 
@@ -204,8 +265,6 @@ export default function SearchDesignersPage() {
                     </div>
                     <img src={matchImg} alt="Match Illustration" className="match-illustration" />
                 </section>
-
-
                 <section className="style-section">
                     <h3>Browse by Style</h3>
                     <div className="style-grid">
@@ -216,7 +275,11 @@ export default function SearchDesignersPage() {
                             { name: "Scandinavian", image: qscandinavian },
                             { name: "Traditional", image: qtraditional },
                         ].map((style, i) => (
-                            <div key={i} className="style-card">
+                            <div
+                                key={i}
+                                className={`style-card ${selectedStyle === style.name ? 'selected' : ''}`}
+                                onClick={() => handleStyleClick(style.name)}
+                            >
                                 <img src={style.image} alt={style.name} />
                                 <p>{style.name}</p>
                             </div>
@@ -224,8 +287,19 @@ export default function SearchDesignersPage() {
                     </div>
                 </section>
 
-                {/* Recommended Designers Section - Only show if user has quiz data and there are good matches */}
-                {isQuizBased && recommendedDesigners.length > 0 && (
+                {/* Style Filter Banner */}
+                {isStyleFiltered && (
+                    <section className="style-filter-banner">
+                        <div className="filter-content">
+                            <h3>Showing {designers.length} {selectedStyle} Designers</h3>
+                            <p>Designers specializing in {selectedStyle} style</p>
+                            <button onClick={clearStyleFilter} className="clear-filter-btn">
+                                Show All Designers
+                            </button>
+                        </div>
+                    </section>
+                )}
+                {isQuizBased && !isStyleFiltered && recommendedDesigners.length > 0 && (
                     <section className="recommended-designers-section">
                         <h3>
                             Recommended for You ({recommendedDesigners.length} matches)
@@ -239,14 +313,9 @@ export default function SearchDesignersPage() {
                             {recommendedDesigners.map((designer, i) => (
                                 <div
                                     key={designer._id || i}
-                                    className="designer-card quiz-ranked recommended"
+                                    className="designer-card recommended"
                                     onClick={() => navigate(`/designer/${designer._id}`)}
                                 >
-                                    {/* Compatibility Badge */}
-                                    <div className={getCompatibilityBadgeClass(designer.compatibilityScore)}>
-                                        {getCompatibilityPercentage(designer.compatibilityScore)}% Match
-                                    </div>
-
                                     <div className="designer-header">
                                         <img
                                             src={
@@ -255,11 +324,11 @@ export default function SearchDesignersPage() {
                                                     : "/assets/default-avatar.png"
                                             }
                                             alt={designer.full_name}
-                                            className="w-34 h-34 rounded-full object-cover"
+                                            className="designer-profile-pic"
                                         />
                                         <div>
                                             <h4>{designer.full_name}</h4>
-                                            <p>{designer.bio || "Designer bio unavailable."}</p>
+                                            <p>{truncateBio(designer.bio, 90)}</p>
                                             {designer.specialization && (
                                                 <p className="specialization">
                                                     Specializes in {designer.specialization}
@@ -277,7 +346,6 @@ export default function SearchDesignersPage() {
                                         alt="room"
                                         className="room-preview"
                                     />
-
                                     <div className="compatibility-details">
                                         <p className="compatibility-text">
                                             Perfect match for your {userQuizData["2"]?.toLowerCase()} style preferences
@@ -292,9 +360,11 @@ export default function SearchDesignersPage() {
                 {/* All Designers Section */}
                 <section className="designers-section">
                     <h3>
-                        {isQuizBased ?
-                            `All Designers${otherDesigners.length > 0 ? ` (${otherDesigners.length} more)` : ''}` :
-                            "Meet Our Designers"
+                        {isStyleFiltered
+                            ? `${selectedStyle} Designers`
+                            : isQuizBased
+                                ? `All Designers${otherDesigners.length > 0 ? ` (${otherDesigners.length} more)` : ''}`
+                                : "Meet Our Designers"
                         }
                         {loading && <span className="loading-indicator"> (Loading...)</span>}
                     </h3>
@@ -305,69 +375,59 @@ export default function SearchDesignersPage() {
                         </div>
                     ) : (
                         <>
-                            <div className="designers-grid">
-                                {designers.map((designer, i) => (
-                                    <div
-                                        key={designer._id || i}
-                                        className={`designer-card ${isQuizBased ? 'quiz-ranked' : ''}`}
-                                        onClick={() => navigate(`/designer/${designer._id}`)}
-                                    >
-                                        {/* Compatibility Badge */}
-                                        {isQuizBased && (
-                                            <div className={getCompatibilityBadgeClass(designer.compatibilityScore)}>
-                                                {getCompatibilityPercentage(designer.compatibilityScore)}% Match
+                            <div className={`designers-grid ${designers.length === 0 && isStyleFiltered ? 'empty-state' : ''}`}>
+                                {designers.length === 0 && isStyleFiltered ? (
+                                    <div className="no-designers-found">
+                                        <h4>No {selectedStyle} designers found</h4>
+                                        <p>Try browsing other styles or <button onClick={clearStyleFilter} className="link-button">view all designers</button></p>
+                                    </div>
+                                ) : (
+                                    (isStyleFiltered ? designers : isQuizBased ? otherDesigners : designers).map((designer, i) => (
+                                        <div
+                                            key={designer._id || i}
+                                            className={`designer-card ${isStyleFiltered ? 'style-filtered' : ''}`}
+                                            onClick={() => navigate(`/designer/${designer._id}`)}
+                                        >
+                                            <div className="designer-header">
+                                                <img
+                                                    src={
+                                                        designer.profilepic
+                                                            ? `http://localhost:2005${designer.profilepic}`
+                                                            : "/assets/default-avatar.png"
+                                                    }
+                                                    alt={designer.full_name}
+                                                    className="designer-profile-pic"
+                                                />
+                                                <div>
+                                                    <h4>{designer.full_name}</h4>
+                                                    <p>{truncateBio(designer.bio, 90)}</p>
+                                                    {designer.specialization && (
+                                                        <p className="specialization">
+                                                            Specializes in {designer.specialization}
+                                                        </p>
+                                                    )}
+                                                </div>
                                             </div>
-                                        )}
 
-
-
-                                        <div className="designer-header">
                                             <img
                                                 src={
-                                                    designer.profilepic
-                                                        ? `http://localhost:2005${designer.profilepic}`
-                                                        : "/assets/default-avatar.png"
+                                                    designer.primaryImage
+                                                        ? `http://localhost:2005${designer.primaryImage}`
+                                                        : "/assets/rooms/sample1.jpg"
                                                 }
-                                                alt={designer.full_name}
-                                                className="w-34 h-34 rounded-full object-cover"
+                                                alt="room"
+                                                className="room-preview"
                                             />
-                                            <div>
-                                                <h4>{designer.full_name}</h4>
-                                                <p>{designer.bio || "Designer bio unavailable."}</p>
-                                                {/* Show specialization if it matches quiz */}
-                                                {isQuizBased && designer.specialization && (
-                                                    <p className="specialization">
-                                                        Specializes in {designer.specialization}
-                                                    </p>
-                                                )}
-                                            </div>
                                         </div>
-
-                                        <img
-                                            src={
-                                                designer.primaryImage
-                                                    ? `http://localhost:2005${designer.primaryImage}`
-                                                    : "/assets/rooms/sample1.jpg"
-                                            }
-                                            alt="room"
-                                            className="room-preview"
-                                        />
-
-                                        {/* Compatibility details for quiz-based results */}
-                                        {isQuizBased && (
-                                            <div className="compatibility-details">
-                                                <p className="compatibility-text">
-                                                    Great match for your {userQuizData["2"]?.toLowerCase()} style preferences
-                                                </p>
-                                            </div>
-                                        )}
-                                    </div>
-                                ))}
+                                    ))
+                                )}
                             </div>
 
-                            <div className="load-more">
-                                <button>MORE</button>
-                            </div>
+                            {!isStyleFiltered && (
+                                <div className="load-more">
+                                    <button>MORE</button>
+                                </div>
+                            )}
                         </>
                     )}
                 </section>

@@ -29,17 +29,12 @@
 .logo-icon {
   width: 32px;
   height: 32px;
-  background-color: #A75B2A;
   border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: #FCFCEC;
   transition: background-color 0.2s ease;
-}
-
-.logo-icon:hover {
-  background-color: rgba(167, 91, 42, 0.8);
 }
 
 .logo-text {

@@ -15,11 +15,7 @@ export default function PreferenceQuiz({ onComplete, onClose, initialData = {} }
       title: "What's your primary design specialization?",
       type: "select",
       options: [
-        "Residential Interior Design",
-        "Commercial Interior Design",
-        "Kitchen & Bath Design",
-        "Sustainable Design",
-        "Luxury Design",
+
         "Minimalist Design",
         "Traditional Design",
         "Modern Contemporary",

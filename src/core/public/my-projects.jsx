@@ -498,11 +498,9 @@ export default function MyProjectsPage() {
         }
     };
 
-    // Separate active and completed projects
     const activeProjects = projects.filter(project => project.status !== 'completed');
     const completedProjects = projects.filter(project => project.status === 'completed');
 
-    // Show loading while auth is being determined
     if (authLoading) {
         return (
             <div className="my-projects-page">
@@ -520,8 +518,6 @@ export default function MyProjectsPage() {
             </div>
         );
     }
-
-    // Show error if access denied
     if (error) {
         return (
             <div className="my-projects-page">
@@ -551,7 +547,6 @@ export default function MyProjectsPage() {
             </div>
         );
     }
-
     return (
         <div className="my-projects-page">
             <Header onGetStartedClick={() => setShowAuth(true)} />
@@ -617,7 +612,6 @@ export default function MyProjectsPage() {
                         </div>
                     </div>
                 )}
-
                 {/* Profile Section - Only for clients */}
                 {userRole === 'client' && userProfile && (
                     <div className="profile-section">
@@ -642,7 +636,6 @@ export default function MyProjectsPage() {
                         </div>
                     </div>
                 )}
-
                 {/* Show banner only for clients */}
                 {userRole === 'client' && (
                     <div className="start-banner">
@@ -765,7 +758,7 @@ export default function MyProjectsPage() {
                 {/* Past Projects Section */}
                 {completedProjects.length > 0 && (
                     <>
-                        <h3 className="section-heading past-projects-heading">
+                        <h3 className="section-heading past-projects-headingg">
                             Past Projects
                         </h3>
 
