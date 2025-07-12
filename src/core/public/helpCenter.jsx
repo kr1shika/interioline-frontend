@@ -54,9 +54,9 @@ export default function HelpCenter() {
         <div style={{
             backgroundColor: " #FCFCEC",
             color: "#BE7B5D",
-            minHeight: "100vh",
-            marginTop: "-50px"
+            minHeight: "100vh"
         }}>
+
             <Header onGetStartedClick={() => setShowAuth(true)} />
 
             <div className="faq-container">

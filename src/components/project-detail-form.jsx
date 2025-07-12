@@ -271,9 +271,9 @@ export default function UploadRoomDataModal({ onClose, projectId }) {
                     </div>
 
                     {/* Information Notice */}
-                    <div className="primary-info" style={{ marginTop: '-15px' }}>
+                    <div className="primary-info" style={{ marginTop: '-15px', }}>
                         <span className="primary-label">
-                            💡 Tip: Upload current room photos to help your designer understand the space better
+                         Tip: Upload current room photos to help your designer understand the space better
                         </span>
                     </div>
 

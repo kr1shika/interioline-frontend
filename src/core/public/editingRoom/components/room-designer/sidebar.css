@@ -63,8 +63,11 @@
     margin-top: 16px;
 }
 
-/* Enhanced Tab Styling */
+/* Fix for Tabs look to match original Tailwind-based style */
 .sidebar [data-slot="tabList"] {
+    display: flex;
+    gap: 8px;
+    /* like gap-2 */
     background: #f3f4f6;
     border-radius: 8px;
     padding: 4px;
@@ -72,17 +75,33 @@
 }
 
 .sidebar [data-slot="tab"] {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    /* icon-text gap */
+    padding: 8px 12px;
+    /* like px-3 py-2 */
     border-radius: 6px;
     transition: all 0.2s ease;
     font-weight: 500;
+    font-size: 14px;
+    line-height: 1.2;
+    color: #6b7280;
+    white-space: nowrap;
+}
+
+.sidebar [data-slot="tab"]:hover {
+    background: #e5e7eb;
+    color: #374151;
 }
 
 .sidebar [data-slot="tab"][data-selected="true"] {
-    background: #3b82f6 !important;
-    color: white !important;
+    background: #3b82f6;
+    color: white;
     box-shadow: 0 2px 4px rgba(59, 130, 246, 0.25);
     transform: translateY(-1px);
 }
+
 
 .sidebar [data-slot="tab"]:not([data-selected="true"]) {
     color: #6b7280;

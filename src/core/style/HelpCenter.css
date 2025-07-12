@@ -3,7 +3,7 @@ body {
   background-color: #fdfbee;
   color: #8b4d24;
   margin: 0;
-  padding: 40px 16px;
+  /* padding: 40px 16px; */
 }
 
 .faq-container {
@@ -14,8 +14,10 @@ body {
 
 .faq-title {
   font-size: 2rem;
+  margin-top: 1.9rem;
+
   font-weight: bold;
-  margin-bottom: 2rem;
+  margin-bottom: 1.9rem;
   color: #a75b2a;
   letter-spacing: 1px;
 }

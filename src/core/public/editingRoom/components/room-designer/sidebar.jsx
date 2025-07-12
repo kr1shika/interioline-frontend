@@ -108,25 +108,7 @@ const Sidebar = ({
                 selectedKey={activeTab}
                 onSelectionChange={(key) => setActiveTab(key)}
                 variant="underlined"
-                classNames={{
-                    tabList: "gap-2 w-full bg-gray-100 rounded-lg p-1",
-                    cursor: "bg-blue-500 rounded-md",
-                    tab: "px-3 py-2 h-auto rounded-md transition-all duration-200",
-                    tabContent: "text-sm font-medium"
-                }}
-                styles={{
-                    tabList: {
-                        backgroundColor: "#f3f4f6",
-                        borderRadius: "8px",
-                        padding: "4px",
-                        marginBottom: "16px"
-                    },
-                    tab: {
-                        borderRadius: "6px",
-                        transition: "all 0.2s ease",
-                        fontWeight: "500"
-                    }
-                }}
+
             >
                 <Tab
                     key="basic"

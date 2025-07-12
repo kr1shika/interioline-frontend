@@ -6,12 +6,14 @@ import img2 from "../../assets/images/meow.png";
 import img3 from "../../assets/images/meow101.png";
 import Header from "../../components/header.jsx";
 import "../style/initiatizeProject.css";
-import UploadRoomDataModal from "./../../components/project-detail-form.jsx"; 
+import UploadRoomDataModal from "./../../components/project-detail-form.jsx";
 
 export default function InitialProjectPage() {
     const location = useLocation();
     const navigate = useNavigate();
-    const { userId, designerId } = location.state || {};
+
+    const userId = location.state?.userId || null;
+    const designerId = location.state?.designerId || null;
 
     const [title, setTitle] = useState("");
     const [placeholder, setPlaceholder] = useState("Loading...");
@@ -21,6 +23,11 @@ export default function InitialProjectPage() {
     const [showAuth, setShowAuth] = useState(false);
 
     useEffect(() => {
+        if (!userId || !designerId) {
+            console.warn("Missing userId or designerId for initialization:", { userId, designerId });
+            return;
+        }
+
         const fetchData = async () => {
             try {
                 const userRes = await axios.get(`http://localhost:2005/api/user/${userId}`);
@@ -33,6 +40,7 @@ export default function InitialProjectPage() {
                 console.error("Error fetching data:", err);
             }
         };
+
         fetchData();
     }, [userId, designerId]);
 
@@ -57,8 +65,43 @@ export default function InitialProjectPage() {
 
     const handleModalClose = () => {
         setShowUploadModal(false);
-        navigate("/my-projects"); 
+        navigate("/my-projects");
     };
+
+    // 🚀 Show fallback if data missing
+    if (!userId || !designerId) {
+        return (
+            <div style={{ padding: "2rem", textAlign: "center", color: "#C2805A" }}>
+                <Header />
+                <h3>⚠️ Cannot initialize project</h3>
+                <p>Missing user or designer information. Please go back and start from your profile or quiz page.</p>
+                <button
+                    style={{
+                        marginTop: "1rem",
+                        background: "#C2805A",
+                        color: "white",
+                        padding: "0.75rem 1.5rem",
+                        border: "none",
+                        borderRadius: "8px",
+                        cursor: "pointer"
+                    }}
+                    onClick={() => navigate(-1)}
+                >
+                    Go Back
+                </button>
+            </div>
+        );
+    }
+
+    // 🚀 Show loading state until designer data fetched
+    if (!designer) {
+        return (
+            <div style={{ padding: "2rem", textAlign: "center", color: "#C2805A" }}>
+                <Header />
+                <h3>Loading project setup...</h3>
+            </div>
+        );
+    }
 
     return (
         <div className="initial-project-page">
@@ -66,31 +109,32 @@ export default function InitialProjectPage() {
 
             <h2>Initialize your project</h2>
 
-            {designer && (
-                <div className="designer-avatar-wrapper">
-                    <img
-                        className="designer-avatar"
-                        src={
-                            designer.profilepic
-                                ? `http://localhost:2005${designer.profilepic}`
-                                : "/assets/default-avatar.png"
-                        }
-                        alt="designer avatar"
-                    />
-                    <p className="selection-line">
-                        You've selected{" "}
-                        <strong>{designer.full_name}</strong>
-                        {" "}for your project -
-                        <input
-                            type="text"
-                            className="project-title-input"
-                            placeholder={placeholder}
-                            value={title}
-                            onChange={(e) => setTitle(e.target.value)}
-                        />
-                    </p>
-                </div>
-            )}
+            <div className="designer-avatar-wrapper">
+                <img
+                    className="designer-avatar"
+                    src={
+                        designer.profilepic
+                            ? `http://localhost:2005${designer.profilepic}`
+                            : "/assets/default-avatar.png"
+                    }
+                    alt="designer avatar"
+                />
+                <p className="selection-line">
+                    You've selected&nbsp;
+                    <strong>"{designer.full_name}"</strong>
+                    &nbsp;for your project -
+                  <div className={`project-title-input-wrapper ${title ? 'hide-cursor' : ''}`}>
+    <input
+        type="text"
+        className="project-title-input"
+        placeholder={placeholder}
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+    />
+</div>
+
+                </p>
+            </div>
 
             <div className="payment-cards">
                 <div className="card">

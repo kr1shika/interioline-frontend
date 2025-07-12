@@ -1,9 +1,12 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
+import AuthPromptModal from "../../components/AuthPromptModal";
 import Header from "../../components/header.jsx";
 import PortfolioPostViewer from "../../components/PortfolioPostViewer.jsx";
-import "./../style/profile.css"; // Changed to use the same CSS as private profile
+import { useAuth } from "../../provider/authcontext.jsx";
+import "./../style/profile.css";
+
 
 export default function PublicProfilePage() {
     const { designerId } = useParams();
@@ -11,6 +14,11 @@ export default function PublicProfilePage() {
     const [portfolioPosts, setPortfolioPosts] = useState([]);
     const [activePost, setActivePost] = useState(null);
     const [loadingProfile, setLoadingProfile] = useState(true);
+    const [reviews, setReviews] = useState([]);
+    const [averageRating, setAverageRating] = useState(0);
+    const { userId, isLoggedIn, loading } = useAuth();
+    const [showAuthModal, setShowAuthModal] = useState(false);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchDesigner = async () => {
@@ -33,13 +41,23 @@ export default function PublicProfilePage() {
             }
         };
 
+        const fetchReviews = async () => {
+            try {
+                const res = await axios.get(`http://localhost:2005/api/review/designer/${designerId}`);
+                setReviews(res.data.reviews || []);
+                setAverageRating(res.data.averageRating || 0);
+            } catch (err) {
+                console.error("Error fetching reviews", err);
+            }
+        };
+
         if (designerId) {
             fetchDesigner();
             fetchPortfolioPosts();
+            fetchReviews();
         }
     }, [designerId]);
 
-    // Show loading while profile data is being fetched
     if (loadingProfile || !designer) {
         return (
             <div className="profile-page">
@@ -61,9 +79,7 @@ export default function PublicProfilePage() {
     return (
         <div className="profile-page">
             <Header />
-
             <div className="profile-container">
-                {/* Profile Card - Same structure as private but without edit button */}
                 <div className="profile-card">
                     <div className="profile-card-content">
                         <img
@@ -75,33 +91,61 @@ export default function PublicProfilePage() {
                             alt={designer.full_name}
                             className="profile-image"
                         />
-
                         <div className="profile-content">
                             <div className="profile-info">
-                                <h1>{designer.full_name}</h1>
+                                <div style={{ display: 'flex', gap: '1rem' }}>
+                                    <h1>{designer.full_name}</h1>
+                                    {/* Average stars */}
+                                    <div style={{ fontSize: '1.5rem', marginTop: '0.4rem', color: '#FFA500' }}>
+                                        {Array.from({ length: 5 }, (_, i) => (
+                                            <span key={i}>
+                                                {i < Math.round(averageRating) ? '★' : '☆'}
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
                                 <p className="location">Kathmandu, Nepal</p>
                                 <p className="bio">{designer.bio}</p>
                             </div>
                         </div>
+
+                        <div style={{ marginLeft: 'auto', textAlign: 'center' }}>
+                            <button
+                                className="edit-button"
+                                onClick={() => {
+                                    if (!isLoggedIn || !userId) {
+                                        setShowAuthModal(true);
+                                    } else {
+                                        navigate("/initial-project", {
+                                            state: {
+                                                designerId: designer._id,
+                                                userId
+                                            }
+                                        });
+                                    }
+                                }}
+                            >
+                                Select {designer.full_name}
+                            </button>
+
+
+                        </div>
+
                     </div>
                 </div>
 
-                {/* Portfolio Section - Same structure as private but without add button */}
+                {/* Portfolio Section */}
                 <section className="portfolio-section">
                     <div className="section-header">
                         <h2>Portfolio</h2>
                     </div>
-
                     <div className="portfolio-grid">
                         {portfolioPosts.length === 0 ? (
-                            <div className="no-posts">
-                                No portfolio posts available.
-                            </div>
+                            <div className="no-posts">No portfolio posts available.</div>
                         ) : (
                             portfolioPosts.map((post) => {
                                 const primaryImage = post.images.find(img => img.is_primary) || post.images[0];
                                 if (!primaryImage) return null;
-
                                 return (
                                     <div
                                         key={post._id}
@@ -114,7 +158,6 @@ export default function PublicProfilePage() {
                                         />
                                         <div className="post-overlay">
                                             <span className="post-title">{post.title}</span>
-                                            {/* Removed trash icon for public view */}
                                         </div>
                                     </div>
                                 );
@@ -123,33 +166,55 @@ export default function PublicProfilePage() {
                     </div>
                 </section>
 
-                {/* Reviews Section - Same structure as private */}
                 <section className="reviews-section">
                     <div className="section-header">
                         <h2>Reviews</h2>
                     </div>
                     <div className="reviews-grid">
-                        {[
-                            { name: "Tara Lively", text: "Loved how good the designer was at understanding my visions..." },
-                            { name: "Yuki", text: "Loved the design work and the process." },
-                            { name: "Sel", text: "Great communication and visuals!" }
-                        ].map((review, index) => (
-                            <div key={index} className="review-card">
-                                <strong>{review.name}</strong>
-                                <p>{review.text}</p>
-                            </div>
-                        ))}
+                        {reviews.length === 0 ? (
+                            <div className="no-posts">No reviews yet.</div>
+                        ) : (
+                            reviews.map((review, index) => (
+                                <div key={index} className="review-card">
+                                    <img
+                                        src={review.client?.profilepic
+                                            ? `http://localhost:2005${review.client.profilepic}`
+                                            : "/assets/default-avatar.png"
+                                        }
+                                        alt={review.client?.full_name || "Anonymous"}
+                                    />
+                                    <strong>{review.client?.full_name || "Anonymous"}</strong>
+                                    <small>Happy Client</small>
+                                    <p>"{review.comment}"</p>
+                                    <div className="review-stars">
+                                        {Array.from({ length: 5 }, (_, i) => (
+                                            <span key={i}>
+                                                {i < review.rating ? '★' : '☆'}
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
+                            ))
+                        )}
                     </div>
                 </section>
+
             </div>
 
-            {/* Portfolio Post Viewer Modal */}
             {activePost && (
                 <PortfolioPostViewer
                     post={activePost}
                     onClose={() => setActivePost(null)}
                 />
             )}
+
+            {showAuthModal && (
+                <AuthPromptModal
+                    variant="notLoggedIn"
+                    onClose={() => setShowAuthModal(false)}
+                />
+            )}
+
         </div>
     );
 }
