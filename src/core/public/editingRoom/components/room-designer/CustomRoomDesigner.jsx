@@ -13,6 +13,8 @@ import {
   Save,
   Trash2
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import AuthPopup from "../../../authComponent";
 import AuthPromptModal from "../../../../../components/AuthPromptModal";
 
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -69,6 +71,8 @@ const CustomRoomDesigner = () => {
 
   const [wallColor, setWallColor] = useState("#f8f8f8");
   const [floorColor, setFloorColor] = useState("#d4b896");
+  const navigate = useNavigate();
+  const [showAuthPopup, setShowAuthPopup] = useState(false);
 
   // Room management state
   const [roomName, setRoomName] = useState("");
@@ -1167,8 +1171,18 @@ const CustomRoomDesigner = () => {
         <AuthPromptModal
           variant={!isLoggedIn ? "notLoggedIn" : "noProject"}
           onClose={() => setShowAuthPromptModal(false)}
+          onLoginStartProject={() => {
+            setShowAuthPopup(true);
+            setShowAuthPromptModal(false);
+          }}
+          onPickDesignerStart={() => {
+            navigate("/search");
+          }}
         />
       )}
+
+      {showAuthPopup && <AuthPopup onClose={() => setShowAuthPopup(false)} />}
+
 
 
 

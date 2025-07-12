@@ -400,7 +400,7 @@ export default function SearchDesignersPage() {
                                                 />
                                                 <div>
                                                     <h4>{designer.full_name}</h4>
-                                                    <p>{truncateBio(designer.bio, 90)}</p>
+                                                    <p>{truncateBio(designer.bio, 60)}</p>
                                                     {designer.specialization && (
                                                         <p className="specialization">
                                                             Specializes in {designer.specialization}

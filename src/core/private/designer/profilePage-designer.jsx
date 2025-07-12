@@ -27,6 +27,30 @@ export default function ProfilePage() {
     const { isLoggedIn, userId, userRole, loading, isUserIdAvailable, getToken } = useAuth();
     const navigate = useNavigate();
 
+    const [reviews, setReviews] = useState([]);
+    const [averageRating, setAverageRating] = useState(0);
+
+    const fetchReviews = async () => {
+        try {
+            const token = getToken();
+            const config = {
+                ...(token && {
+                    headers: { Authorization: `Bearer ${token}` }
+                })
+            };
+
+            const res = await axios.get(`http://localhost:2005/api/review/designer/${userId}`, config);
+            setReviews(res.data.reviews || []);
+            setAverageRating(res.data.averageRating || 0);
+            console.log("✅ Reviews loaded:", res.data.reviews?.length || 0);
+        } catch (err) {
+            console.error("❌ Error fetching reviews:", err);
+        }
+    };
+
+
+
+
     useEffect(() => {
         // Wait for auth to finish loading
         if (loading) return;
@@ -104,6 +128,7 @@ export default function ProfilePage() {
         // Load data
         fetchDesigner();
         fetchPortfolioPosts();
+        fetchReviews();
 
     }, [userId, isLoggedIn, userRole, loading, navigate, showAddForm, isUserIdAvailable, getToken]);
 
@@ -321,24 +346,38 @@ export default function ProfilePage() {
                     </div>
                 </section>
 
-                {/* Reviews Section */}
                 <section className="reviews-section">
                     <div className="section-header">
                         <h2>Reviews</h2>
                     </div>
                     <div className="reviews-grid">
-                        {[
-                            { name: "Tara Lively", text: "Loved how good the designer was at understanding my visions..." },
-                            { name: "Yuki", text: "Loved the design work and the process." },
-                            { name: "Sel", text: "Great communication and visuals!" }
-                        ].map((r, i) => (
-                            <div key={i} className="review-card">
-                                <strong>{r.name}</strong>
-                                <p>{r.text}</p>
-                            </div>
-                        ))}
+                        {reviews.length === 0 ? (
+                            <div className="no-posts">No reviews yet.</div>
+                        ) : (
+                            reviews.map((review, index) => (
+                                <div key={index} className="review-card">
+                                    <img
+                                        src={
+                                            review.client?.profilepic
+                                                ? `http://localhost:2005${review.client.profilepic}`
+                                                : "/assets/default-avatar.png"
+                                        }
+                                        alt={review.client?.full_name || "Anonymous"}
+                                    />
+                                    <strong>{review.client?.full_name || "Anonymous"}</strong>
+                                    {/* <small>Happy Client</small> */}
+                                    <p>"{review.comment}"</p>
+                                    <div className="review-stars">
+                                        {Array.from({ length: 5 }, (_, i) => (
+                                            <span key={i}>{i < review.rating ? '★' : '☆'}</span>
+                                        ))}
+                                    </div>
+                                </div>
+                            ))
+                        )}
                     </div>
                 </section>
+
             </div>
 
             {/* Edit Modal */}

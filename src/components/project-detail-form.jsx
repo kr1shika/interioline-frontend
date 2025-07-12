@@ -1,6 +1,8 @@
 import axios from "axios";
 import { useState } from "react";
 import "./addpost.css";
+import Toast from "./toastMessage.jsx";
+import { AnimatePresence } from "framer-motion";
 
 export default function UploadRoomDataModal({ onClose, projectId }) {
     const [roomData, setRoomData] = useState({
@@ -13,6 +15,9 @@ export default function UploadRoomDataModal({ onClose, projectId }) {
     const [selectedImages, setSelectedImages] = useState([]);
     const [dragActive, setDragActive] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [toastMessage, setToastMessage] = useState(null);
+const [toastType, setToastType] = useState("success");
+
 
     const handleInputChange = (field, value) => {
         setRoomData(prev => ({
@@ -129,8 +134,13 @@ export default function UploadRoomDataModal({ onClose, projectId }) {
                     headers: { "Content-Type": "multipart/form-data" },
                 }
             );
-            alert("Room details updated successfully!");
-            onClose();
+setToastType("success");
+setToastMessage("Project initialized and details have been saved");
+setTimeout(() => {
+    setToastMessage(null);
+    onClose();
+}, 2500);
+
         } catch (error) {
             console.error("Upload failed:", error);
             alert("Failed to update room details. Please try again.");
@@ -297,6 +307,12 @@ export default function UploadRoomDataModal({ onClose, projectId }) {
                     </div>
                 </form>
             </div>
+            <AnimatePresence>
+    {toastMessage && (
+        <Toast message={toastMessage} type={toastType} />
+    )}
+</AnimatePresence>
+
         </div>
     );
 }

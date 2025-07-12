@@ -1,4 +1,6 @@
-import { Link } from "react-router-dom";
+import { Search, X } from 'lucide-react';
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../provider/authcontext";
 import ChatIconWithWidget from "./chatIcon";
 import "./landingHeader.css";
@@ -7,8 +9,29 @@ import ProfileMenu from "./ProfileMenu";
 
 const LandingHeader = ({ onGetStartedClick }) => {
     const { isLoggedIn, userId, loading, isUserIdAvailable } = useAuth();
+    const navigate = useNavigate();
 
-    // Show loading state while auth is being determined
+    const [searchActive, setSearchActive] = useState(false);
+    const [searchQuery, setSearchQuery] = useState("");
+
+    const handleToggleSearch = () => {
+        if (searchActive && searchQuery) {
+            navigate(`/search?query=${encodeURIComponent(searchQuery)}`);
+        } else if (searchActive) {
+            setSearchActive(false);
+            setSearchQuery("");
+        } else {
+            setSearchActive(true);
+        }
+    };
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        if (searchQuery.trim()) {
+            navigate(`/search?query=${encodeURIComponent(searchQuery.trim())}`);
+        }
+    };
+
     if (loading) {
         return (
             <div className="landnavbar">
@@ -42,19 +65,51 @@ const LandingHeader = ({ onGetStartedClick }) => {
 
             {isLoggedIn && isUserIdAvailable() ? (
                 <div className="landnavbar-right">
-                    <Link to="/about" className="landnav-link">
-                        About
-                    </Link>
-                    <NotificationComponent userId={userId} />
+                    <div className={`header-search-container ${searchActive ? 'active' : ''}`}>
+                        <form onSubmit={handleSubmit}>
+                            <input
+                                type="text"
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="header-search-input"
+                                placeholder="Search..."
+                                autoFocus={searchActive}
+                            />
+                        </form>
+                    </div>
+
+                    <button
+                        className={`search-toggle-button ${searchActive ? 'spin' : ''}`}
+                        onClick={handleToggleSearch}
+                    >
+                        {searchActive ? <X size={20} /> : <Search size={20} />}
+                    </button>
+                    {/* <NotificationComponent userId={userId} /> */}
                     <ChatIconWithWidget />
                     <ProfileMenu />
-
                 </div>
             ) : (
                 <div className="landnavbar-right">
-                    <Link to="/about" className="landnav-link">
-                        About
-                    </Link>
+                    <div className={`header-search-container ${searchActive ? 'active' : ''}`}>
+                        <form onSubmit={handleSubmit}>
+                            <input
+                                type="text"
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="header-search-input"
+                                placeholder="Search..."
+                                autoFocus={searchActive}
+                            />
+                        </form>
+                    </div>
+
+                    <button
+                        className={`search-toggle-button ${searchActive ? 'spin' : ''}`}
+                        onClick={handleToggleSearch}
+                    >
+                        {searchActive ? <X size={20} /> : <Search size={20} />}
+                    </button>
+
                     <button
                         onClick={onGetStartedClick}
                         className="landnav-link start-now-button"

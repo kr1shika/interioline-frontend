@@ -41,8 +41,8 @@ function LandingPage() {
 
     return (
         <div className="landing-page">
-            <LandingHeader />
-            {/* <LandingHeader onGetStartedClick={() => setShowAuth()} /> */}
+            {/* <LandingHeader /> */}
+            <LandingHeader onGetStartedClick={() => setShowAuth(true)} />
 
             <div className="main-content">
                 <div className="text-section" style={{}}>

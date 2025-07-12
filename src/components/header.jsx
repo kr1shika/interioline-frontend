@@ -1,25 +1,47 @@
-import { FolderOpen, HelpCircle, Home } from 'lucide-react';
+import axios from "axios";
+import { FolderOpen, HelpCircle, Home, Search, X } from 'lucide-react';
 import { useEffect, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import logo from "../assets/images/logo.png";
 import { useAuth } from "../provider/authcontext";
 import ChatIconWithWidget from "./chatIcon";
 import "./Headerr.css";
 import NotificationComponent from "./notification";
 import ProfileMenu from "./ProfileMenu";
-import axios from "axios";
 
 const Header = ({ onGetStartedClick }) => {
     const { isLoggedIn, loading, userId, getToken } = useAuth();
     const location = useLocation();
+    const navigate = useNavigate();
+
+    const [searchActive, setSearchActive] = useState(false);
+    const [searchQuery, setSearchQuery] = useState("");
     const [hasProjects, setHasProjects] = useState(false);
+
+    const handleToggleSearch = () => {
+        if (searchActive && searchQuery) {
+            navigate(`/search?query=${encodeURIComponent(searchQuery)}`);
+        } else if (searchActive) {
+            // Just close
+            setSearchActive(false);
+            setSearchQuery("");
+        } else {
+            setSearchActive(true);
+        }
+    };
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        if (searchQuery.trim()) {
+            navigate(`/search?query=${encodeURIComponent(searchQuery.trim())}`);
+        }
+    };
 
     useEffect(() => {
         const fetchProjectCount = async () => {
             if (!isLoggedIn || !userId) return;
 
             try {
-
                 const res = await axios.get(`http://localhost:2005/api/project/user/${userId}`);
                 const projects = res.data || [];
                 setHasProjects(projects.length > 0);
@@ -31,13 +53,6 @@ const Header = ({ onGetStartedClick }) => {
         fetchProjectCount();
     }, [isLoggedIn, userId, getToken]);
 
-    // if (loading) {
-    //     return <div>Loading header...</div>;
-    // }
-
-
-
-    // Show loading state while auth is being determined
     if (loading) {
         return (
             <div className="navbar">
@@ -87,26 +102,45 @@ const Header = ({ onGetStartedClick }) => {
                         <FolderOpen size={16} />
                         Projects
                     </Link>
-
                 </nav>
             </div>
 
-            {isLoggedIn ? (
-                <div className="navbar-right">
-                    <NotificationComponent userId={userId} />
-                    <ChatIconWithWidget />
-                    <ProfileMenu />
+            <div className="navbar-right">
+                <div className={`header-search-container ${searchActive ? 'active' : ''}`}>
+                    <form onSubmit={handleSubmit}>
+                        <input
+                            type="text"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            className="header-search-input"
+                            placeholder="Search..."
+                            autoFocus={searchActive}
+                        />
+                    </form>
                 </div>
-            ) : (
-                <div className="navbar-right">
+
+                <button
+                    className={`search-toggle-button ${searchActive ? 'spin' : ''}`}
+                    onClick={handleToggleSearch}
+                >
+                    {searchActive ? <X size={20} /> : <Search size={20} />}
+                </button>
+
+                {isLoggedIn ? (
+                    <>
+                        <NotificationComponent userId={userId} />
+                        <ChatIconWithWidget />
+                        <ProfileMenu />
+                    </>
+                ) : (
                     <button
                         onClick={onGetStartedClick}
                         className="get-started-button"
                     >
                         Get Started
                     </button>
-                </div>
-            )}
+                )}
+            </div>
         </div>
     );
 };

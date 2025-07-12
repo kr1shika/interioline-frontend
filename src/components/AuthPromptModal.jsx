@@ -1,17 +1,24 @@
-import React from "react";
 import "./AuthPromptModal.css";
 
-export default function AuthPromptModal({ variant, onClose }) {
+export default function AuthPromptModal({
+  variant,
+  onClose,
+  onLoginStartProject,
+  onPickDesignerStart
+}) {
   let title = "Action Required";
   let message = "";
   let buttonText = "";
+  let buttonAction = onClose;
 
   if (variant === "notLoggedIn") {
     message = "To continue designing your dream room, please login and start a project with a designer. This ensures your designs are saved and linked to your profile.";
     buttonText = "Login & Start Project";
+    buttonAction = onLoginStartProject;
   } else if (variant === "noProject") {
     message = "To edit this room, please pick a designer and start your project first. This helps us customize your experience and link your designs.";
     buttonText = "Pick Designer & Start Project";
+    buttonAction = onPickDesignerStart;
   }
 
   return (
@@ -25,7 +32,7 @@ export default function AuthPromptModal({ variant, onClose }) {
         </div>
         <div className="auth-prompt-actions center-actions">
           <button
-            onClick={onClose}
+            onClick={buttonAction}
             className="btn btn-submit-compact"
           >
             {buttonText}
