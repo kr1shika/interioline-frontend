@@ -1,4 +1,5 @@
 import { FolderOpen, HelpCircle, Home } from 'lucide-react';
+import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import logo from "../assets/images/logo.png";
 import { useAuth } from "../provider/authcontext";
@@ -6,9 +7,35 @@ import ChatIconWithWidget from "./chatIcon";
 import "./Headerr.css";
 import NotificationComponent from "./notification";
 import ProfileMenu from "./ProfileMenu";
+import axios from "axios";
+
 const Header = ({ onGetStartedClick }) => {
-    const { isLoggedIn, loading, userId } = useAuth();
+    const { isLoggedIn, loading, userId, getToken } = useAuth();
     const location = useLocation();
+    const [hasProjects, setHasProjects] = useState(false);
+
+    useEffect(() => {
+        const fetchProjectCount = async () => {
+            if (!isLoggedIn || !userId) return;
+
+            try {
+
+                const res = await axios.get(`http://localhost:2005/api/project/user/${userId}`);
+                const projects = res.data || [];
+                setHasProjects(projects.length > 0);
+            } catch (err) {
+                console.error("❌ Failed to fetch projects:", err);
+            }
+        };
+
+        fetchProjectCount();
+    }, [isLoggedIn, userId, getToken]);
+
+    // if (loading) {
+    //     return <div>Loading header...</div>;
+    // }
+
+
 
     // Show loading state while auth is being determined
     if (loading) {
@@ -54,12 +81,13 @@ const Header = ({ onGetStartedClick }) => {
                         Help Center
                     </Link>
                     <Link
-                        to="/projects"
-                        className={`nav-item ${location.pathname === '/projects' ? 'active' : ''}`}
+                        to={isLoggedIn && hasProjects ? "/my-projects" : "/room-edit"}
+                        className={`nav-item ${['/my-projects', '/room-edit'].includes(location.pathname) ? 'active' : ''}`}
                     >
                         <FolderOpen size={16} />
                         Projects
                     </Link>
+
                 </nav>
             </div>
 

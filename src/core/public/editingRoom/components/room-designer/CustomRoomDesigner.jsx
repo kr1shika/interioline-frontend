@@ -7,28 +7,28 @@ import {
   useDisclosure
 } from "@heroui/react";
 import {
-  Download,
   FileText,
   FolderOpen,
   Package,
   Save,
   Trash2
 } from "lucide-react";
+import AuthPromptModal from "../../../../../components/AuthPromptModal";
+
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
 import Header from "../../../../../components/header.jsx";
+import { useAuth } from "../../../../../provider/authcontext";
 import "./CustomRoomDesigner.css";
 import Sidebar from "./sidebar.jsx";
 
-// Import components and hooks
 import { useFurniturePlacement } from "../hooks/useFurniturePlacement";
 import { useRoomMeasurements } from "../hooks/useRoomMeasurements";
 import { useRoomScene } from "../hooks/useRoomScene";
 import {
   calculateTotalCost,
   deleteRoomConfiguration,
-  exportRoomConfigurationWithGLB,
   getRoomConfigurationByProjectId,
   getSavedRoomConfigurations,
   saveRoomConfigurationWithGLB,
@@ -37,7 +37,6 @@ import {
 } from "./furniture-Catalog";
 
 const CustomRoomDesigner = () => {
-  // Project state management
   const [projectInfo, setProjectInfo] = useState({
     id: null,
     title: "New Room Design",
@@ -59,6 +58,10 @@ const CustomRoomDesigner = () => {
     length: 8,
     height: 6,
   });
+
+  const { isLoggedIn } = useAuth();
+  const [showAuthPromptModal, setShowAuthPromptModal] = useState(false);
+
 
   // Initialize with empty arrays instead of default door/window
   const [doors, setDoors] = useState([]);
@@ -143,6 +146,17 @@ const CustomRoomDesigner = () => {
   const lastWindowsRef = useRef(windows);
   const lastWallColorRef = useRef(wallColor);
   const lastFloorColorRef = useRef(floorColor);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (!isLoggedIn || !projectInfo.id) {
+        setShowAuthPromptModal(true);
+      }
+    }, 15000); // 10 seconds
+    return () => clearTimeout(timer);
+  }, [isLoggedIn, projectInfo.id]);
+
+
 
   // Initialize saved rooms on component mount
   useEffect(() => {
@@ -436,6 +450,10 @@ const CustomRoomDesigner = () => {
 
   // Save room manually
   const saveCurrentRoom = async () => {
+    if (!isLoggedIn || !projectInfo.id) {
+      alert("Please login first and start a design.");
+      return;
+    }
     const config = createRoomConfig();
 
     try {
@@ -467,11 +485,7 @@ const CustomRoomDesigner = () => {
     }
   };
 
-  // Export room
-  const exportCurrentRoom = () => {
-    const config = createRoomConfig();
-    exportRoomConfigurationWithGLB(config, false);
-  };
+
 
   // Delete saved room
   const deleteSavedRoom = (id) => {
@@ -860,19 +874,20 @@ const CustomRoomDesigner = () => {
 
             <button
               className="btn btn-save"
-              onClick={onSaveOpen}
+              onClick={() => {
+                if (!isLoggedIn || !projectInfo.id) {
+                  setShowAuthPromptModal(true);
+                } else {
+                  onSaveOpen();
+                }
+              }}
             >
               <Save className="btn-icon" />
               <span>Save</span>
             </button>
 
-            <button
-              className="btn btn-export"
-              onClick={exportCurrentRoom}
-            >
-              <Download className="btn-icon" />
-              Export
-            </button>
+
+
 
             {pendingGLBLoad && pendingGLBLoad.length > 0 && (
               <button
@@ -1147,6 +1162,16 @@ const CustomRoomDesigner = () => {
           )}
         </ModalContent>
       </Modal>
+
+      {showAuthPromptModal && (
+        <AuthPromptModal
+          variant={!isLoggedIn ? "notLoggedIn" : "noProject"}
+          onClose={() => setShowAuthPromptModal(false)}
+        />
+      )}
+
+
+
     </div>
   );
 };

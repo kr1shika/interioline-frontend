@@ -502,52 +502,7 @@ const Sidebar = ({
                             )}
                         </CollapsibleSection>
 
-                        {/* Room Stats Section */}
-                        <CollapsibleSection
-                            title="Room Statistics"
-                            isOpen={measurementsOpen}
-                            onToggle={() => setMeasurementsOpen(!measurementsOpen)}
-                            icon={<Ruler className="icon-sm" />}
-                        >
-                            <div className="stats-content">
-                                <div className="stat-item">
-                                    <span className="stat-label">Floor Area:</span>
-                                    <span className="stat-value">{(roomArea || 0).toFixed(2)} m²</span>
-                                </div>
-                                <div className="stat-item">
-                                    <span className="stat-label">Volume:</span>
-                                    <span className="stat-value">{(roomVolume || 0).toFixed(2)} m³</span>
-                                </div>
-                                <div className="stat-item">
-                                    <span className="stat-label">3D Models:</span>
-                                    <span className="stat-value highlight">{placedFurniture?.length || 0}</span>
-                                </div>
-                                <div className="stat-item">
-                                    <span className="stat-label">Furniture Coverage:</span>
-                                    <span className="stat-value">
-                                        {(furnitureAreaPercentage || 0).toFixed(1)}%
-                                    </span>
-                                </div>
-                                <div className="stat-item">
-                                    <span className="stat-label">Doors:</span>
-                                    <span className="stat-value">{doors?.length || 0}</span>
-                                </div>
-                                <div className="stat-item">
-                                    <span className="stat-label">Windows:</span>
-                                    <span className="stat-value">{windows?.length || 0}</span>
-                                </div>
-                                <div className="stat-item">
-                                    <span className="stat-label">Total Cost:</span>
-                                    <span className="stat-value highlight">${(totalCost || 0).toLocaleString()}</span>
-                                </div>
-                                {furnitureLoadingState?.cacheSize > 0 && (
-                                    <div className="stat-item">
-                                        <span className="stat-label">Cached Models:</span>
-                                        <span className="stat-value blue">{furnitureLoadingState.cacheSize}</span>
-                                    </div>
-                                )}
-                            </div>
-                        </CollapsibleSection>
+
                     </div>
                 </Tab>
 
