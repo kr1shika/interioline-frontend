@@ -89,16 +89,16 @@
 
 /* Icon animation */
 .search-toggle-button {
-  background: none;
+  background: #A75B2A;
   border: none;
   cursor: pointer;
-  padding: 8px;
+  padding: 4px;
   border-radius: 8px;
   transition: transform 0.5s ease;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #A75B2A;
+  color: #FFFFF6;
   /* margin-left: -2px; */
 }
 

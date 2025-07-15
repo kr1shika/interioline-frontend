@@ -14,8 +14,8 @@ import {
   Trash2
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import AuthPopup from "../../../authComponent";
 import AuthPromptModal from "../../../../../components/AuthPromptModal";
+import AuthPopup from "../../../authComponent";
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";

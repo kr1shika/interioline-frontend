@@ -1,21 +1,21 @@
-import React, { useState } from "react";
-import { Button, Card, CardBody, Tabs, Tab, Badge } from "@heroui/react";
+import { Badge, Button, Card, CardBody, Tab, Tabs } from "@heroui/react";
 import {
-  wallColors,
-  floorColors,
-  wallTextures,
-  carpets,
-  lightingOptions,
-} from "./ColorsandTextures";
-import {
-  Settings,
-  Palette,
   Home,
-  Sun,
   Layers,
+  Palette,
   Plus,
+  Settings,
+  Sun,
   Trash2,
 } from "lucide-react";
+import { useState } from "react";
+import {
+  carpets,
+  floorColors,
+  lightingOptions,
+  wallColors,
+  wallTextures,
+} from "./ColorsandTextures";
 
 const RoomControls = ({
   roomDimensions,
@@ -76,11 +76,10 @@ const RoomControls = ({
       {colors.map((colorOption) => (
         <button
           key={colorOption.value}
-          className={`aspect-square rounded-lg border-2 transition-all duration-200 hover:scale-110 ${
-            selectedColor === colorOption.value
-              ? "border-blue-500 ring-2 ring-blue-200"
-              : "border-gray-300 hover:border-gray-400"
-          }`}
+          className={`aspect-square rounded-lg border-2 transition-all duration-200 hover:scale-110 ${selectedColor === colorOption.value
+            ? "border-blue-500 ring-2 ring-blue-200"
+            : "border-gray-300 hover:border-gray-400"
+            }`}
           style={{ backgroundColor: colorOption.value }}
           onClick={() => onColorSelect(colorOption.value)}
           title={colorOption.name}
@@ -119,21 +118,19 @@ const RoomControls = ({
             <span className="text-sm font-medium text-gray-700">View Mode</span>
             <div className="flex rounded-lg overflow-hidden border border-gray-200">
               <button
-                className={`px-3 py-1.5 text-sm font-medium transition-colors ${
-                  viewMode === "orbit"
-                    ? "bg-blue-500 text-white"
-                    : "bg-white text-gray-700 hover:bg-gray-50"
-                }`}
+                className={`px-3 py-1.5 text-sm font-medium transition-colors ${viewMode === "orbit"
+                  ? "bg-blue-500 text-white"
+                  : "bg-white text-gray-700 hover:bg-gray-50"
+                  }`}
                 onClick={() => setViewMode("orbit")}
               >
                 Orbit
               </button>
               <button
-                className={`px-3 py-1.5 text-sm font-medium transition-colors ${
-                  viewMode === "first-person"
-                    ? "bg-blue-500 text-white"
-                    : "bg-white text-gray-700 hover:bg-gray-50"
-                }`}
+                className={`px-3 py-1.5 text-sm font-medium transition-colors ${viewMode === "first-person"
+                  ? "bg-blue-500 text-white"
+                  : "bg-white text-gray-700 hover:bg-gray-50"
+                  }`}
                 onClick={() => setViewMode("first-person")}
               >
                 First Person
@@ -180,11 +177,10 @@ const RoomControls = ({
               <div className="flex flex-wrap gap-1 mb-3">
                 <button
                   onClick={() => setWallColorCategory("all")}
-                  className={`px-2 py-1 text-xs rounded transition-colors ${
-                    wallColorCategory === "all"
-                      ? "bg-blue-500 text-white"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  }`}
+                  className={`px-2 py-1 text-xs rounded transition-colors ${wallColorCategory === "all"
+                    ? "bg-blue-500 text-white"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    }`}
                 >
                   All
                 </button>
@@ -192,11 +188,10 @@ const RoomControls = ({
                   <button
                     key={category}
                     onClick={() => setWallColorCategory(category)}
-                    className={`px-2 py-1 text-xs rounded capitalize transition-colors ${
-                      wallColorCategory === category
-                        ? "bg-blue-500 text-white"
-                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                    }`}
+                    className={`px-2 py-1 text-xs rounded capitalize transition-colors ${wallColorCategory === category
+                      ? "bg-blue-500 text-white"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      }`}
                   >
                     {category}
                   </button>
@@ -214,11 +209,10 @@ const RoomControls = ({
                 {wallTextures.map((texture) => (
                   <button
                     key={texture.id}
-                    className={`p-3 border rounded-lg text-left transition-all hover:shadow-sm ${
-                      wallTexture === texture.id
-                        ? "border-blue-500 bg-blue-50"
-                        : "border-gray-200 hover:border-gray-300"
-                    }`}
+                    className={`p-3 border rounded-lg text-left transition-all hover:shadow-sm ${wallTexture === texture.id
+                      ? "border-blue-500 bg-blue-50"
+                      : "border-gray-200 hover:border-gray-300"
+                      }`}
                     onClick={() => setWallTexture(texture.id)}
                   >
                     <div className="font-medium text-sm">{texture.name}</div>
@@ -259,11 +253,10 @@ const RoomControls = ({
               <div className="flex flex-wrap gap-1 mb-3">
                 <button
                   onClick={() => setFloorCategory("all")}
-                  className={`px-2 py-1 text-xs rounded transition-colors ${
-                    floorCategory === "all"
-                      ? "bg-green-500 text-white"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  }`}
+                  className={`px-2 py-1 text-xs rounded transition-colors ${floorCategory === "all"
+                    ? "bg-green-500 text-white"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    }`}
                 >
                   All
                 </button>
@@ -271,11 +264,10 @@ const RoomControls = ({
                   <button
                     key={category}
                     onClick={() => setFloorCategory(category)}
-                    className={`px-2 py-1 text-xs rounded capitalize transition-colors ${
-                      floorCategory === category
-                        ? "bg-green-500 text-white"
-                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                    }`}
+                    className={`px-2 py-1 text-xs rounded capitalize transition-colors ${floorCategory === category
+                      ? "bg-green-500 text-white"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                      }`}
                   >
                     {category}
                   </button>
@@ -286,11 +278,10 @@ const RoomControls = ({
                 {filteredFloorColors.map((floor) => (
                   <button
                     key={floor.value}
-                    className={`relative border rounded-lg overflow-hidden transition-all hover:shadow-md ${
-                      floorColor === floor.value
-                        ? "ring-2 ring-green-500 border-green-500"
-                        : "border-gray-200"
-                    }`}
+                    className={`relative border rounded-lg overflow-hidden transition-all hover:shadow-md ${floorColor === floor.value
+                      ? "ring-2 ring-green-500 border-green-500"
+                      : "border-gray-200"
+                      }`}
                     onClick={() => setFloorColor(floor.value)}
                   >
                     <div
@@ -449,11 +440,10 @@ const RoomControls = ({
               {lightingOptions.map((option) => (
                 <button
                   key={option.name}
-                  className={`p-3 border rounded-lg text-left transition-all ${
-                    selectedLighting.name === option.name
-                      ? "border-yellow-400 bg-yellow-50"
-                      : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
-                  }`}
+                  className={`p-3 border rounded-lg text-left transition-all ${selectedLighting.name === option.name
+                    ? "border-yellow-400 bg-yellow-50"
+                    : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
+                    }`}
                   onClick={() => setSelectedLighting(option)}
                 >
                   <div className="flex items-center justify-between">

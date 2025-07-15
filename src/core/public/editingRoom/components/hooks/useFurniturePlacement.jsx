@@ -374,9 +374,12 @@ export const useFurniturePlacement = (scene, roomArea) => {
             furnitureObject.updateMatrixWorld(true);
 
             // Adjust to sit on floor
+            // Adjust to sit on top of floor
             const scaledBox = new THREE.Box3().setFromObject(furnitureObject);
             const bottomY = scaledBox.min.y;
-            furnitureObject.position.y = -bottomY + 0.001;
+            const floorThickness = 0.05; // must match your room floor thickness
+            furnitureObject.position.y = -bottomY + floorThickness + 0.001;
+
 
             console.log("3D model positioned at:", furnitureObject.position);
 

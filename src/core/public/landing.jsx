@@ -54,7 +54,7 @@ function LandingPage() {
                         and designers create 3D models while they communicate and update each other.
                     </p>
                     <button onClick={() => navigate("/search")}>
-                        Find Designers
+                        Edit rooms
                     </button>
                 </div>
 

@@ -235,6 +235,62 @@ export default function SearchDesignersPage() {
         return Math.round((score / 100) * 100);
     };
 
+    useEffect(() => {
+        const searchParams = new URLSearchParams(location.search);
+        const styleParam = searchParams.get('style');
+        const queryParam = searchParams.get('query');
+
+        if (styleParam) {
+            handleStyleClick(styleParam);
+        } else if (queryParam) {
+            handleSearchQuery(queryParam);
+        } else {
+            fetchAllDesigners();
+        }
+    }, [isLoggedIn, userId, userRole, location.search]);
+
+
+    const handleSearchQuery = async (query) => {
+        try {
+            setLoading(true);
+            console.log(`Searching designers for query: ${query}`);
+            const res = await axios.get(`http://localhost:2005/api/user/search/${query}`);
+            const searchedDesigners = res.data.designers;
+
+            const designersWithPrimaryImage = await Promise.all(
+                searchedDesigners.map(async (designer) => {
+                    try {
+                        const postRes = await axios.get(`http://localhost:2005/api/portfolio/posts/${designer._id}`);
+                        const posts = postRes.data.posts;
+
+                        const firstPost = posts[0];
+                        let primaryImage = null;
+
+                        if (firstPost && firstPost.images && firstPost.images.length > 0) {
+                            const primary = firstPost.images.find(img => img.is_primary);
+                            primaryImage = primary ? primary.url : firstPost.images[0].url;
+                        }
+
+                        return { ...designer, primaryImage };
+                    } catch (err) {
+                        console.error(`Error fetching portfolio for ${designer.full_name}:`, err);
+                        return { ...designer, primaryImage: null };
+                    }
+                })
+            );
+
+            setDesigners(designersWithPrimaryImage);
+            setIsQuizBased(false);
+            setIsStyleFiltered(false);
+        } catch (error) {
+            console.error("Error searching designers:", error);
+            setDesigners([]);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+
     const getCompatibilityBadgeClass = (score) => {
         if (score >= 80) return "compatibility-badge high";
         if (score >= 50) return "compatibility-badge medium";

@@ -63,7 +63,7 @@ const PaymentPage = ({ projectId, amount, paymentType, onSuccess, onClose, userI
     };
 
     const calculateAmount = () => {
-        const basePrice = 50000;
+        const basePrice = 10000;
         let totalAmount = basePrice;
 
         const currentProject = projectData || project;
@@ -324,7 +324,7 @@ const PaymentPage = ({ projectId, amount, paymentType, onSuccess, onClose, userI
                                     <span style={styles.optionTitle}>Half Payment (50%)</span>
                                 </div>
                                 <div style={styles.optionAmount}>
-                                    Rs. {Math.round((50000 + (currentProject?.room_dimensions ?
+                                    Rs. {Math.round((10000 + (currentProject?.room_dimensions ?
                                         (currentProject.room_dimensions.length || 10) * (currentProject.room_dimensions.width || 10) * 500 : 0)) * 0.5).toLocaleString()}
                                 </div>
                                 <div style={styles.optionDescription}>
@@ -349,7 +349,7 @@ const PaymentPage = ({ projectId, amount, paymentType, onSuccess, onClose, userI
                                     <span style={styles.optionTitle}>Full Payment</span>
                                 </div>
                                 <div style={styles.optionAmount}>
-                                    Rs. {Math.round((50000 + (currentProject?.room_dimensions ?
+                                    Rs. {Math.round((10000 + (currentProject?.room_dimensions ?
                                         (currentProject.room_dimensions.length || 10) * (currentProject.room_dimensions.width || 10) * 500 : 0)) * 0.95).toLocaleString()}
                                 </div>
                                 <div style={styles.optionDescription}>
@@ -478,7 +478,7 @@ const PaymentPage = ({ projectId, amount, paymentType, onSuccess, onClose, userI
                                 disabled={loading}
                                 style={{
                                     ...styles.payButton,
-                                    backgroundColor: loading ? '#ccc' : '#635bff',
+                                    backgroundColor: loading ? '#ccc' : '#A75B2A',
                                     cursor: loading ? 'not-allowed' : 'pointer'
                                 }}
                             >
@@ -534,7 +534,7 @@ const styles = {
     invoiceTitle: {
         fontSize: '28px',
         fontWeight: '700',
-        color: '#1a1a1a',
+        color: '#A75B2A',
         margin: 0
     },
     invoiceNumber: {
@@ -731,7 +731,7 @@ const styles = {
     stripeLogo: {
         fontSize: '24px',
         fontWeight: 'bold',
-        color: '#635bff',
+        color: '#A75B2A',
         fontFamily: 'arial, sans-serif'
     },
     paymentAmount: {
@@ -793,7 +793,7 @@ const styles = {
         padding: '12px 16px'
     },
     payButton: {
-        backgroundColor: '#635bff',
+        backgroundColor: '#A75B2A',
         color: 'white',
         border: 'none',
         borderRadius: '6px',

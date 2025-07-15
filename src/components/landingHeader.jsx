@@ -2,9 +2,7 @@ import { Search, X } from 'lucide-react';
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../provider/authcontext";
-import ChatIconWithWidget from "./chatIcon";
 import "./landingHeader.css";
-import NotificationComponent from "./notification";
 import ProfileMenu from "./ProfileMenu";
 
 const LandingHeader = ({ onGetStartedClick }) => {
@@ -85,7 +83,6 @@ const LandingHeader = ({ onGetStartedClick }) => {
                         {searchActive ? <X size={20} /> : <Search size={20} />}
                     </button>
                     {/* <NotificationComponent userId={userId} /> */}
-                    <ChatIconWithWidget />
                     <ProfileMenu />
                 </div>
             ) : (
