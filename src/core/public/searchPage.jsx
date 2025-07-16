@@ -11,6 +11,7 @@ import Header from "../../components/header.jsx";
 import { useAuth } from "../../provider/authcontext.jsx";
 import "../style/searchPage.css";
 import AuthPopup from "./authComponent.jsx";
+import Footer from "../../components/footer.jsx";
 
 export default function SearchDesignersPage() {
     const [designers, setDesigners] = useState([]);
@@ -490,6 +491,8 @@ export default function SearchDesignersPage() {
             </main>
 
             {showAuth && <AuthPopup onClose={() => setShowAuth(false)} />}
+                            <Footer />
+
         </div>
     );
 }

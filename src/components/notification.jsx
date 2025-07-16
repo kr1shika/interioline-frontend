@@ -436,38 +436,13 @@ const NotificationComponent = ({ userId }) => {
                                 >
                                     Try again
                                 </button>
-                                <button
-                                    onClick={createTestNotification}
-                                    style={{
-                                        fontSize: '12px',
-                                        color: '#10b981',
-                                        background: 'none',
-                                        border: 'none',
-                                        cursor: 'pointer',
-                                        textDecoration: 'underline'
-                                    }}
-                                >
-                                    Create Test
-                                </button>
+
                             </div>
                         ) : notifications.length === 0 ? (
                             <div style={{ padding: '32px', textAlign: 'center', color: '#B86A45' }}>
                                 <FaBell style={{ fontSize: '32px', color: '#B86A45', marginBottom: '8px' }} />
                                 <p style={{ marginBottom: '16px' }}>No notifications yet</p>
-                                <button
-                                    onClick={createTestNotification}
-                                    style={{
-                                        fontSize: '12px',
-                                        color: '#3b82f6',
-                                        background: 'none',
-                                        border: '1px solid #3b82f6',
-                                        padding: '8px 16px',
-                                        borderRadius: '4px',
-                                        cursor: 'pointer'
-                                    }}
-                                >
-                                    Create Test Notification
-                                </button>
+
                             </div>
                         ) : (
                             <div>

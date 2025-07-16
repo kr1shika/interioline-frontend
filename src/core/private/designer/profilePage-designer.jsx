@@ -7,6 +7,7 @@ import ConfirmationModal from "../../../components/ConfirmationModal.jsx"; // Ad
 import Header from "../../../components/header.jsx";
 import PortfolioPostViewer from "../../../components/PortfolioPostViewer.jsx";
 import { useAuth } from "../../../provider/authcontext";
+import Footer from "../../../components/footer.jsx";
 import "../../style/profile.css";
 import EditProfileForm from "./EditProfileForm.jsx";
 
@@ -414,6 +415,8 @@ export default function ProfilePage() {
                 cancelText="Cancel"
                 isLoading={isDeleting}
             />
+            <Footer />
+
         </div>
     );
 }

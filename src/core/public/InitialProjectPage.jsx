@@ -4,6 +4,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import match from "../../assets/images/contact.png";
 import img2 from "../../assets/images/meow.png";
 import img3 from "../../assets/images/meow101.png";
+import Footer from "../../components/footer.jsx";
 import Header from "../../components/header.jsx";
 import "../style/initiatizeProject.css";
 import UploadRoomDataModal from "./../../components/project-detail-form.jsx";
@@ -123,15 +124,15 @@ export default function InitialProjectPage() {
                     You've selected&nbsp;
                     <strong>"{designer.full_name}"</strong>
                     &nbsp;for your project -
-                  <div className={`project-title-input-wrapper ${title ? 'hide-cursor' : ''}`}>
-    <input
-        type="text"
-        className="project-title-input"
-        placeholder={placeholder}
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-    />
-</div>
+                    <div className={`project-title-input-wrapper ${title ? 'hide-cursor' : ''}`}>
+                        <input
+                            type="text"
+                            className="project-title-input"
+                            placeholder={placeholder}
+                            value={title}
+                            onChange={(e) => setTitle(e.target.value)}
+                        />
+                    </div>
 
                 </p>
             </div>
@@ -169,6 +170,8 @@ export default function InitialProjectPage() {
                     projectId={createdProjectId}
                 />
             )}
+            <Footer />
+
         </div>
     );
 }

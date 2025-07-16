@@ -1,4 +1,5 @@
 import { useState } from "react";
+import Footer from "../../components/footer.jsx";
 import Header from "../../components/header.jsx";
 import "../style/HelpCenter.css";
 
@@ -83,6 +84,7 @@ export default function HelpCenter() {
                     </div>
                 ))}
             </div>
+            <Footer />
 
         </div>
     );

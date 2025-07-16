@@ -12,6 +12,7 @@ import EditProfileForm from "../private/designer/EditProfileForm.jsx";
 import "../style/myprj.css";
 import { getRoomConfigurationByProjectId } from "./editingRoom/components/room-designer/furniture-Catalog";
 import PaymentPage from "./PaymentPage.jsx";
+import Footer from "../../components/footer.jsx";
 
 export default function MyProjectsPage() {
     const [projects, setProjects] = useState([]);
@@ -866,6 +867,7 @@ export default function MyProjectsPage() {
                     />
                 </div>
             )}
+                <Footer />
 
         </div>
     );

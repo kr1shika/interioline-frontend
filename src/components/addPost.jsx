@@ -2,8 +2,11 @@ import axios from "axios";
 import { useState } from "react";
 import { useAuth } from "../provider/authcontext";
 import "./addpost.css";
-
+import Toast from "./toastMessage.jsx";
+import { AnimatePresence } from "framer-motion"; 
 export default function AddPortfolioModal({ onClose }) {
+    const [toast, setToast] = useState(null);
+
     const [newPost, setNewPost] = useState({
         title: "",
         room_type: "",
@@ -133,7 +136,6 @@ export default function AddPortfolioModal({ onClose }) {
         });
 
         try {
-            // 🔐 Use secure API call with token
             const token = getToken();
             const config = {
                 headers: {
@@ -144,8 +146,8 @@ export default function AddPortfolioModal({ onClose }) {
 
             await axios.post("http://localhost:2005/api/portfolio/create", formData, config);
 
-            console.log("✅ Portfolio post uploaded successfully");
-            alert("Portfolio post uploaded successfully!");
+           setToast({ message: "Post uploaded successfully!", type: "success" });
+
             onClose();
         } catch (error) {
             console.error("❌ Upload failed:", error);
@@ -161,8 +163,6 @@ export default function AddPortfolioModal({ onClose }) {
             setLoading(false);
         }
     };
-
-    // 🔐 Show error if userId not available
     if (!isUserIdAvailable()) {
         return (
             <div className="portfolio-overlay">
@@ -227,18 +227,7 @@ export default function AddPortfolioModal({ onClose }) {
                                     disabled={loading}
                                 />
                             </div>
-                            <div className="form-group-half">
-                                <label className="form-label-compact">Room Type</label>
-                                <input
-                                    type="text"
-                                    placeholder="e.g. Living Room"
-                                    value={newPost.room_type}
-                                    onChange={(e) => setNewPost({ ...newPost, room_type: e.target.value })}
-                                    required
-                                    className="form-input-compact"
-                                    disabled={loading}
-                                />
-                            </div>
+
                         </div>
 
                         <div className="form-group-full">
@@ -379,6 +368,10 @@ export default function AddPortfolioModal({ onClose }) {
                     </div>
                 </form>
             </div>
+            <AnimatePresence>
+    {toast && <Toast message={toast.message} type={toast.type} />}
+</AnimatePresence>
+
         </div>
     );
 }

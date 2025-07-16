@@ -17,7 +17,6 @@ export default function EditProfileForm({ designer, onClose }) {
   const [quizCompleted, setQuizCompleted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-
   const { userId, userRole, updateUserProfile, isUserIdAvailable, getToken } = useAuth();
   const isClient = userRole === 'client';
   const isDesigner = userRole === 'designer';
@@ -32,7 +31,6 @@ export default function EditProfileForm({ designer, onClose }) {
       setPreferredTones(designer.preferredTones || []);
       setApproach(designer.approach || "Balanced");
 
-      // Check if quiz data exists to determine if quiz is completed (only for designers)
       if (isDesigner) {
         const hasQuizData = designer.preferredTones?.length > 0 ||
           designer.approach !== "Balanced" ||
@@ -43,16 +41,12 @@ export default function EditProfileForm({ designer, onClose }) {
   }, [designer, isDesigner]);
 
   const handleQuizComplete = (quizData) => {
-    // Immediately update all state variables
     setPreferredTones(quizData.preferredTones);
     setApproach(quizData.approach);
     setSpecialization(quizData.specialization);
     setQuizCompleted(true);
     setShowQuiz(false);
-
-    // Force a re-render to show updated data immediately
     setTimeout(() => {
-      // This ensures the UI updates are reflected
     }, 0);
   };
 

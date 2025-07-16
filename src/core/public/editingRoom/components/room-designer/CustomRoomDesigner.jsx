@@ -22,6 +22,7 @@ import { useLocation } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
 import Header from "../../../../../components/header.jsx";
 import { useAuth } from "../../../../../provider/authcontext";
+import Footer from "../../../../../components/footer.jsx";
 import "./CustomRoomDesigner.css";
 import Sidebar from "./sidebar.jsx";
 
@@ -1184,6 +1185,7 @@ const CustomRoomDesigner = () => {
       {showAuthPopup && <AuthPopup onClose={() => setShowAuthPopup(false)} />}
 
 
+      <Footer />
 
 
     </div>

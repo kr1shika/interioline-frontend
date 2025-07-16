@@ -2,6 +2,7 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import AuthPromptModal from "../../components/AuthPromptModal";
+import Footer from "../../components/footer.jsx";
 import Header from "../../components/header.jsx";
 import PortfolioPostViewer from "../../components/PortfolioPostViewer.jsx";
 import { useAuth } from "../../provider/authcontext.jsx";
@@ -214,6 +215,7 @@ export default function PublicProfilePage() {
                     onClose={() => setShowAuthModal(false)}
                 />
             )}
+            <Footer />
 
         </div>
     );
