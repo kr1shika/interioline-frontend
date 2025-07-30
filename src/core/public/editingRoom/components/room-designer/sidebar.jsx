@@ -206,6 +206,9 @@ const Sidebar = ({
                                         type="color"
                                         value={wallColor}
                                         onChange={(e) => setWallColor(e.target.value)}
+                                        onMouseDown={(e) => e.stopPropagation()}
+                                        onFocus={(e) => e.stopPropagation()}
+                                        onClick={(e) => e.stopPropagation()}
                                         className="color-input"
                                     />
                                 </div>
@@ -217,8 +220,14 @@ const Sidebar = ({
                                         type="color"
                                         value={floorColor}
                                         onChange={(e) => setFloorColor(e.target.value)}
+                                        onMouseDown={(e) => e.stopPropagation()}
+                                        onMouseUp={(e) => e.stopPropagation()}
+                                        onClick={(e) => e.stopPropagation()}
+                                        onFocus={(e) => e.stopPropagation()}
+                                        onBlur={(e) => e.stopPropagation()} // <== Add this
                                         className="color-input"
                                     />
+
                                 </div>
                             </div>
                         </CollapsibleSection>

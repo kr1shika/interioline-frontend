@@ -263,7 +263,8 @@
     display: flex;
     flex-direction: column;
     min-width: 0;
-    /* Prevents overflow */
+    height: 200px;
+    /* Add this line for consistent card height */
 }
 
 .furniture-item-card:hover {
@@ -281,7 +282,8 @@
 .item-image-container {
     position: relative;
     width: 100%;
-    height: 96px;
+    height: 130px;
+    /* Change from 96px to 120px for more space */
     background: white;
     border-radius: 6px;
     overflow: hidden;
@@ -292,9 +294,10 @@
 }
 
 .item-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+    min-width: 170px;
+    min-height: 100%;
+    object-fit: contain;
+    object-position: center;
     transition: transform 0.3s;
 }
 

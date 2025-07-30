@@ -569,7 +569,6 @@ export const addPlacementToExistingItems = () => {
     return placementMap;
 };
 
-// Enhanced helper functions with proper filtering
 export const getFurnitureByCategory = (category) => {
     console.log(`Filtering by category: ${category}`);
     const filtered = furnitureCatalog.filter(item => item.category === category);

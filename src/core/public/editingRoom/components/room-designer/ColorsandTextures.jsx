@@ -36,22 +36,85 @@ export const wallColors = [
     { name: "Midnight Blue", value: "#191970", category: "deep" },
 ];
 
+
 export const floorColors = [
     {
-        name: "Parquet Wood",
-        value: "#d8a75e",
+        name: "Natural Oak",
+        value: "#deb887",
         category: "wood",
-        texture: "parquet"
+        texture: "natural-oak",
+    },
+    { name: "Birch", value: "#f5deb3", category: "wood", texture: "birch" },
+    { name: "Maple", value: "#e8d5b7", category: "wood", texture: "maple" },
+    { name: "Pine", value: "#ffeaa7", category: "wood", texture: "pine" },
+    { name: "Bamboo", value: "#d4b896", category: "wood", texture: "bamboo" },
+
+    { name: "Cherry", value: "#a0522d", category: "wood", texture: "cherry" },
+    { name: "Walnut", value: "#8b4513", category: "wood", texture: "walnut" },
+    { name: "Teak", value: "#b8860b", category: "wood", texture: "teak" },
+    { name: "Mahogany", value: "#c04000", category: "wood", texture: "mahogany" },
+
+    { name: "Ebony", value: "#3c3c3c", category: "wood", texture: "ebony" },
+    {
+        name: "Dark Walnut",
+        value: "#5d4037",
+        category: "wood",
+        texture: "dark-walnut",
+    },
+    { name: "Espresso", value: "#362d1e", category: "wood", texture: "espresso" },
+
+    {
+        name: "Marble White",
+        value: "#f8f8ff",
+        category: "stone",
+        texture: "marble-white",
     },
     {
-        name: "Mosaic Tile",
-        value: "#e8dcc6",
-        category: "tile",
-        texture: "mosaic"
+        name: "Marble Gray",
+        value: "#d3d3d3",
+        category: "stone",
+        texture: "marble-gray",
     },
-    // existing floor colors...
-];
+    {
+        name: "Marble Black",
+        value: "#2f2f2f",
+        category: "stone",
+        texture: "marble-black",
+    },
+    {
+        name: "Limestone",
+        value: "#e6ddd4",
+        category: "stone",
+        texture: "limestone",
+    },
+    { name: "Slate Gray", value: "#708090", category: "stone", texture: "slate" },
+    {
+        name: "Travertine",
+        value: "#e8dcc6",
+        category: "stone",
+        texture: "travertine",
+    },
 
+    {
+        name: "Polished Concrete",
+        value: "#a8a8a8",
+        category: "modern",
+        texture: "concrete",
+    },
+    {
+        name: "Industrial Gray",
+        value: "#6d6d6d",
+        category: "modern",
+        texture: "industrial",
+    },
+    {
+        name: "White Epoxy",
+        value: "#f5f5f5",
+        category: "modern",
+        texture: "epoxy",
+    },
+
+];
 
 export const carpets = [
     {
@@ -258,52 +321,17 @@ export const carpets = [
     },
 ];
 
+// ColorsandTextures.jsx
 export const wallTextures = [
+    { id: "smooth", name: "Smooth Plaster", description: "Basic smooth finish" },
+    { id: "brick", name: "Brick Wall", description: "Classic red brick" },
+    { id: "concrete", name: "Concrete", description: "Raw industrial look" },
+];
 
-        { id: "parquet", name: "Parquet Pattern", description: "Wood style texture" },
-    { id: "mosaic", name: "Mosaic Pattern", description: "Tile pattern texture" },
-    { name: "Smooth Paint", id: "smooth", description: "Clean, modern finish" },
-    {
-        name: "Orange Peel",
-        id: "orange-peel",
-        description: "Subtle texture with small bumps",
-    },
-    {
-        name: "Knockdown",
-        id: "knockdown",
-        description: "Textured finish with flattened peaks",
-    },
-    {
-        name: "Popcorn",
-        id: "popcorn",
-        description: "Heavily textured ceiling-style finish",
-    },
-    {
-        name: "Exposed Brick",
-        id: "brick",
-        description: "Classic brick wall appearance",
-    },
-    { name: "Natural Stone", id: "stone", description: "Rustic stone texture" },
-    {
-        name: "Wood Paneling",
-        id: "wood-panel",
-        description: "Traditional wood panel finish",
-    },
-    {
-        name: "Venetian Plaster",
-        id: "venetian",
-        description: "Smooth, polished plaster finish",
-    },
-    {
-        name: "Grasscloth",
-        id: "grasscloth",
-        description: "Natural fiber wallcovering",
-    },
-    {
-        name: "Beadboard",
-        id: "beadboard",
-        description: "Traditional vertical wood panels",
-    },
+export const floorTextures = [
+    { id: "parquet", name: "Parquet Wood", description: "Elegant wood parquet" },
+    { id: "mosaic", name: "Mosaic Tile", description: "Colorful mosaic tiles" },
+    { id: "marble", name: "Marble", description: "Polished marble stone" },
 ];
 
 export const lightingOptions = [

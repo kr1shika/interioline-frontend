@@ -54,8 +54,7 @@ function LandingPage() {
                         and designers create 3D models while they communicate and update each other.
                     </p>
                     <button onClick={() => navigate("/search")}>
-                        Edit rooms
-                    </button>
+                        Find designer and create room of your dream                    </button>
                 </div>
 
                 <div className="canvas-section">
@@ -150,13 +149,13 @@ function LandingPage() {
 
                     {/* Final showcase image */}
                     <div className="final-showcase">
-                        <div className="showcase-image">
+                        {/* <div className="showcase-image">
                             <div className="room-showcase">
                                 <div className="showcase-placeholder">
                                     <p>image placeholder for now</p>
                                 </div>
                             </div>
-                        </div>
+                        </div> */}
                     </div>
                 </div>
 

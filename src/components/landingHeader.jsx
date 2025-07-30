@@ -56,6 +56,7 @@ const LandingHeader = ({ onGetStartedClick }) => {
     return (
         <div className="landnavbar">
             <div className="landnavbar-left landnavbar-title">
+
                 <Link to="/Home">
                     <span>InterioLine</span>
                 </Link>

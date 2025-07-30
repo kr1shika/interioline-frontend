@@ -1,3 +1,4 @@
+
 import { AnimatePresence, motion } from "framer-motion";
 import { useState } from "react";
 import illustration from "../../assets/images/authIllustration.png";
@@ -6,7 +7,6 @@ import ChangePasswordModal from "../../components/changePassword"; // Add this i
 import Toast from "../../components/toastMessage";
 import { useAuth } from "../../provider/authcontext";
 
-// Password strength calculation
 const calculatePasswordStrength = (password) => {
     let score = 0;
     let feedback = [];
@@ -32,7 +32,6 @@ const calculatePasswordStrength = (password) => {
     if (/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) score += 20;
     else feedback.push("Add special characters (!@#$%^&*)");
 
-    // Complexity bonus
     const uniqueChars = new Set(password).size;
     if (uniqueChars >= password.length * 0.7) score += 10;
 
@@ -205,7 +204,7 @@ export default function AuthPopup({ onClose }) {
     return (
         <>
             <div style={{ backgroundColor: "rgba(0, 0, 0, 0.2)", }} className="fixed inset-0 bg-opacity-60 flex items-center justify-center z-50 px-4">
-                <div style={{ padding: "10px" }} className="bg-[#FCFCEC] border border-[#C2805A] rounded-xl shadow-[0_0_35px_rgba(0,0,0,0.3)] w-180 h-120 flex flex-col md:flex-row overflow-hidden relative items-center justify-center">
+                <div style={{ padding: "10px" }} className="bg-[#FCFCEC] border border-[#C2805A] rounded-xl shadow-[0_0_35px_rgba(0,0,0,0.3)] w-200 h-120 flex flex-col md:flex-row overflow-hidden relative items-center justify-center">
 
                     {/* Close Button */}
                     <button
@@ -221,24 +220,21 @@ export default function AuthPopup({ onClose }) {
                             src={illustration}
                             alt="Background"
                             className="w-200 object-contain"
-                            style={{ maxHeight: "510px", marginLeft: "20px", marginRight: "0px" }}
+                            style={{ maxHeight: "510px", marginLeft: "40px", marginRight: "0px", padding: "20px" }}
                         />
                     </div>
 
                     {/* Right Auth Content */}
-                    <div className="w-full md:w-[60%] p-8 flex flex-col items-center justify-center">
-                        <div className="">
-                            <img
-                                src={logo}
-                                alt="Background"
-                                className="w-50 object-contain"
-                                style={{ maxHeight: "30px", marginBottom: "5px" }}
-                            />
-                        </div>
+                    <div className="w-full md:w-[60%] p-10 flex flex-col items-center justify-center" style={{ paddingTop: "25px" }}>
 
-                        {/* Enhanced Toggle Buttons */}
+                        {/* Enhanced Toggle Buttons with Sliding Indicator */}
                         <div className="auth-tab-container">
                             <div className="auth-tab-list">
+                                <motion.div
+                                    className="auth-tab-indicator"
+                                    animate={{ x: isLogin ? 0 : '100%' }}
+                                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                                />
                                 <button
                                     className={`auth-tab ${isLogin ? 'auth-tab-active' : 'auth-tab-inactive'}`}
                                     onClick={() => setIsLogin(true)}
@@ -254,89 +250,107 @@ export default function AuthPopup({ onClose }) {
                             </div>
                         </div>
 
-                        {/* Form Content */}
-                        <div className="w-full max-w-sm min-h-[270px] flex flex-col justify-center items-center">
+                        {/* Form Content with Fixed Height */}
+                        <div className="w-full max-w-sm form-container">
                             <AnimatePresence mode="wait">
                                 {isLogin ? (
                                     <motion.div
                                         key="login"
-                                        initial={{ x: 100, opacity: 0 }}
-                                        animate={{ x: 0, opacity: 1 }}
-                                        exit={{ x: -100, opacity: 0 }}
-                                        transition={{ duration: 0.3 }}
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 1 }}
+                                        exit={{ opacity: 0 }}
+                                        transition={{ duration: 0.2, ease: "easeInOut" }}
+                                        className="form-content"
                                     >
-                                        <form onSubmit={handleLogin} className="flex flex-col gap-6 justify-center items-center">
-                                            <input
-                                                type="email"
-                                                value={email}
-                                                onChange={(e) => setEmail(e.target.value)}
-                                                style={{ padding: "5px 12px", marginTop: "-30px", width: "290px" }}
-                                                placeholder="E-mail"
-                                                className="text-[#BE7B5D] rounded-md border border-gray-300 bg-[#f7f0e9]"
-                                                disabled={loading}
-                                            />
-                                            <input
-                                                style={{ padding: "5px 12px", width: "290px" }}
-                                                type="password"
-                                                value={password}
-                                                onChange={(e) => setPassword(e.target.value)}
-                                                placeholder="Password"
-                                                className="text-[#BE7B5D] p-3 rounded-md border border-gray-300 bg-[#f7f0e9]"
-                                                disabled={loading}
-                                            />
-                                            <button
-                                                style={{ padding: "4px 12px", width: "130px" }}
-                                                type="submit"
-                                                className="bg-[#C2805A] text-white py-2 rounded-md font-semibold disabled:opacity-50"
-                                                disabled={loading}
-                                            >
-                                                {loading ? "LOGGING IN..." : "LOGIN"}
-                                            </button>
-                                            <p
-                                                className="text-sm text-center mt-1 text-[#C2805A] cursor-pointer hover:underline transition-colors duration-200"
-                                                onClick={handleForgotPassword}
-                                            >
-                                                Forgot Password?
-                                            </p>
-                                        </form>
-                                    </motion.div>
-                                ) : (
-                                    <motion.div
-                                        key="signup"
-                                        initial={{ x: -100, opacity: 0 }}
-                                        animate={{ x: 0, opacity: 1 }}
-                                        exit={{ x: 100, opacity: 0 }}
-                                        transition={{ duration: 0.3 }}
-                                    >
-                                        <form onSubmit={handleSignup} className="flex flex-col gap-6 justify-center items-center">
-                                            <input
-                                                style={{ padding: "4px 12px", marginTop: "-40px", width: "305px" }}
-                                                type="email"
-                                                value={email}
-                                                onChange={(e) => setEmail(e.target.value)}
-                                                placeholder="E-mail"
-                                                className="text-[#BE7B5D] p-3 rounded-md border border-gray-300 bg-[#f7f0e9]"
-                                                disabled={loading}
-                                            />
-                                            <input
-                                                style={{ padding: "4px 12px", width: "305px" }}
-                                                type="text"
-                                                value={fullName}
-                                                onChange={(e) => setFullName(e.target.value)}
-                                                placeholder="Full Name"
-                                                className="text-[#BE7B5D] p-3 rounded-md border border-gray-300 bg-[#f7f0e9]"
-                                                disabled={loading}
-                                            />
+                                        <form onSubmit={handleLogin} className="form-fields">
+                                            <div className="input-group">
+                                                <input
+                                                    type="email"
+                                                    value={email}
+                                                    onChange={(e) => setEmail(e.target.value)}
+                                                    placeholder="E-mail"
+                                                    style={{ padding: "6px 12px", width: "290px" }}
+                                                    className="text-[#BE7B5D] rounded-md border border-gray-300 bg-[#f7f0e9]"
+                                                    disabled={loading}
+                                                />
+                                            </div>
 
-                                            {/* Password with strength indicator */}
-                                            <div className="password-field-container">
+                                            <div className="input-group">
                                                 <input
                                                     type="password"
                                                     value={password}
                                                     onChange={(e) => setPassword(e.target.value)}
                                                     placeholder="Password"
-                                                    className="text-[#BE7B5D] p-3 rounded-md border border-gray-300 bg-[#f7f0e9]"
-                                                    style={{ padding: "4px 12px", width: "305px" }}
+                                                    style={{ padding: "6px 12px", width: "290px" }}
+                                                    className="text-[#BE7B5D] rounded-md border border-gray-300 bg-[#f7f0e9]"
+                                                    disabled={loading}
+                                                />
+                                            </div>
+
+                                            <div className="button-group">
+                                                <button
+                                                    type="submit"
+                                                    style={{ padding: "6px 12px", width: "130px" }}
+                                                    className="bg-[#C2805A] text-white py-2 rounded-md font-semibold disabled:opacity-50"
+                                                    disabled={loading}
+                                                >
+                                                    {loading ? "LOGGING IN..." : "LOGIN"}
+                                                </button>
+                                            </div>
+
+                                            <div className="forgot-password">
+                                                <p
+                                                    className="forgot-password-link"
+                                                    onClick={handleForgotPassword}
+                                                >
+                                                    Forgot Password?
+                                                </p>
+                                            </div>
+                                        </form>
+                                    </motion.div>
+                                ) : (
+                                    <motion.div
+                                        key="signup"
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 1 }}
+                                        exit={{ opacity: 0 }}
+                                        transition={{ duration: 0.2, ease: "easeInOut" }}
+                                        className="form-content"
+                                    >
+                                        <form onSubmit={handleSignup} className="form-fields">
+                                            <div className="input-group">
+                                                <input
+                                                    type="email"
+                                                    value={email}
+                                                    onChange={(e) => setEmail(e.target.value)}
+                                                    placeholder="E-mail"
+                                                    style={{ padding: "6px 12px", width: "290px" }}
+                                                    className="text-[#BE7B5D] rounded-md border border-gray-300 bg-[#f7f0e9]"
+                                                    disabled={loading}
+                                                />
+                                            </div>
+
+                                            <div className="input-group">
+                                                <input
+                                                    type="text"
+                                                    value={fullName}
+                                                    onChange={(e) => setFullName(e.target.value)}
+                                                    placeholder="Full Name"
+                                                    style={{ padding: "6px 12px", width: "290px" }}
+                                                    className="text-[#BE7B5D] rounded-md border border-gray-300 bg-[#f7f0e9]"
+                                                    disabled={loading}
+                                                />
+                                            </div>
+
+                                            {/* Password with strength indicator */}
+                                            <div className="input-group password-input-group">
+                                                <input
+                                                    type="password"
+                                                    value={password}
+                                                    onChange={(e) => setPassword(e.target.value)}
+                                                    placeholder="Password"
+                                                    style={{ padding: "6px 12px", width: "290px" }}
+                                                    className="text-[#BE7B5D] rounded-md border border-gray-300 bg-[#f7f0e9]"
                                                     disabled={loading}
                                                 />
 
@@ -344,12 +358,12 @@ export default function AuthPopup({ onClose }) {
                                                 {password && (
                                                     <div className="password-strength-container">
                                                         <div className="strength-bar-bg">
-                                                            <div
+                                                            <motion.div
                                                                 className="strength-bar-fill"
-                                                                style={{
-                                                                    width: `${passwordStrength.score}%`,
-                                                                    backgroundColor: passwordStrength.color
-                                                                }}
+                                                                initial={{ width: 0 }}
+                                                                animate={{ width: `${passwordStrength.score}%` }}
+                                                                transition={{ duration: 0.3 }}
+                                                                style={{ backgroundColor: passwordStrength.color }}
                                                             />
                                                         </div>
                                                         <div className="strength-info">
@@ -371,24 +385,28 @@ export default function AuthPopup({ onClose }) {
                                                 )}
                                             </div>
 
-                                            <input
-                                                type="password"
-                                                value={confirmPassword}
-                                                onChange={(e) => setConfirmPassword(e.target.value)}
-                                                placeholder="Confirm Password"
-                                                className="text-[#BE7B5D] p-3 rounded-md border border-gray-300 bg-[#f7f0e9]"
-                                                style={{ padding: "4px 12px", width: "305px" }}
-                                                disabled={loading}
-                                            />
+                                            <div className="input-group">
+                                                <input
+                                                    type="password"
+                                                    value={confirmPassword}
+                                                    onChange={(e) => setConfirmPassword(e.target.value)}
+                                                    placeholder="Confirm Password"
+                                                    style={{ padding: "6px 12px", width: "290px" }}
+                                                    className="text-[#BE7B5D] rounded-md border border-gray-300 bg-[#f7f0e9]"
+                                                    disabled={loading}
+                                                />
+                                            </div>
 
-                                            <button
-                                                style={{ padding: "4px 12px", width: "180px" }}
-                                                type="submit"
-                                                className="bg-[#C2805A] text-white py-2 rounded-md font-semibold disabled:opacity-50"
-                                                disabled={loading || (password && passwordStrength.score < 50)}
-                                            >
-                                                {loading ? "SIGNING UP..." : "SIGN UP"}
-                                            </button>
+                                            <div className="button-group">
+                                                <button
+                                                    type="submit"
+                                                    style={{ padding: "6px 12px", width: "180px" }}
+                                                    className="bg-[#C2805A] text-white py-2 rounded-md font-semibold disabled:opacity-50"
+                                                    disabled={loading || (password && passwordStrength.score < 50)}
+                                                >
+                                                    {loading ? "SIGNING UP..." : "SIGN UP"}
+                                                </button>
+                                            </div>
                                         </form>
                                     </motion.div>
                                 )}
@@ -414,46 +432,56 @@ export default function AuthPopup({ onClose }) {
                     .auth-tab-container {
                         display: flex;
                         justify-content: center;
-                        margin-bottom: 24px;
-                        padding: 12px;
+                        padding: 0;
                     }
 
                     .auth-tab-list {
                         background: #f3f4f6;
-                        border-radius: 8px;
-                        padding: 4px;
+                        border-radius: 12px;
+                        padding: 2px;
                         display: flex;
-                        gap: 2px;
-                        min-width: 200px;
+                        position: relative;
+                        min-width: 290px;
+                        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+                    }
+
+                    .auth-tab-indicator {
+                        position: absolute;
+                        top: 4px;
+                        left: 4px;
+                        width: calc(50% - 4px);
+                        height: calc(100% - 8px);
+                        background: #C2805A;
+                        border-radius: 8px;
+                        box-shadow: 0 2px 8px rgba(194, 128, 90, 0.3);
+                        z-index: 1;
                     }
 
                     .auth-tab {
                         flex: 1;
-                        padding: 8px 16px;
-                        border-radius: 6px;
+                        padding: 12px 20px;
+                        border-radius: 8px;
                         border: none;
-                        font-size: 14px;
-                        font-weight: 500;
+                        font-size: 15px;
+                        font-weight: 600;
                         cursor: pointer;
-                        transition: all 0.2s ease;
+                        transition: all 0.3s ease;
                         white-space: nowrap;
                         font-family: inherit;
+                        position: relative;
+                        z-index: 2;
+                        background: transparent;
                     }
 
                     .auth-tab-active {
-                        background: #C2805A !important;
                         color: white !important;
-                        box-shadow: 0 2px 4px rgba(194, 128, 90, 0.25);
-                        transform: translateY(-1px);
                     }
 
                     .auth-tab-inactive {
-                        background: transparent;
                         color: #6b7280;
                     }
 
                     .auth-tab-inactive:hover {
-                        background: #e5e7eb;
                         color: #374151;
                     }
 
@@ -461,39 +489,155 @@ export default function AuthPopup({ onClose }) {
                         outline: none;
                     }
 
-                    .password-field-container {
-                        width: 305px;
+                    .form-container {
+                        min-height: 260px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                    }
+
+                    .form-content {
+                        width: 100%;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                    }
+
+                    .form-fields {
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        gap: 20px;
+                        margin: 30px;
+                    }
+
+                    .input-group {
+                        width: 100%;
+                        max-width: 320px;
+                        display: flex;
+                        flex-direction: column;
+                    }
+
+                    .password-input-group {
+                        gap: 12px;
+                    }
+
+                    .form-input {
+                        width: 100%;
+                        padding: 14px 16px;
+                        border-radius: 10px;
+                        border: 2px solid #e5e7eb;
+                        background: #fafafa;
+                        color: #BE7B5D;
+                        font-size: 15px;
+                        font-weight: 500;
+                        transition: all 0.3s ease;
+                        box-sizing: border-box;
+                    }
+
+                    .form-input:focus {
+                        outline: none;
+                        border-color: #C2805A;
+                        background: #ffffff;
+                        box-shadow: 0 0 0 3px rgba(194, 128, 90, 0.1);
+                    }
+
+                    .form-input:disabled {
+                        opacity: 0.6;
+                        cursor: not-allowed;
+                    }
+
+                    .form-input::placeholder {
+                        color: #9ca3af;
+                        font-weight: 400;
+                    }
+
+                    .button-group {
+                        width: 100%;
+                        max-width: 320px;
+                        display: flex;
+                        justify-content: center;
+                        margin-top: 8px;
+                    }
+
+                    .form-button {
+                        background: #C2805A;
+                        color: white;
+                        border: none;
+                        border-radius: 10px;
+                        padding: 14px 32px;
+                        font-size: 15px;
+                        font-weight: 600;
+                        cursor: pointer;
+                        min-width: 160px;
+                        transition: all 0.3s ease;
+                        text-transform: uppercase;
+                        letter-spacing: 0.5px;
+                    }
+
+                    .form-button:hover:not(:disabled) {
+                        background: #a66a4a;
+                        transform: translateY(-1px);
+                        box-shadow: 0 6px 12px rgba(194, 128, 90, 0.4);
+                    }
+
+                    .form-button:disabled {
+                        opacity: 0.6;
+                        cursor: not-allowed;
+                        transform: none;
+                        box-shadow: none;
+                    }
+
+                    .forgot-password {
+                        width: 100%;
+                        max-width: 320px;
+                        display: flex;
+                        justify-content: center;
+                        margin-top: 4px;
+                    }
+
+                    .forgot-password-link {
+                        color: #C2805A;
+                        font-size: 14px;
+                        font-weight: 500;
+                        cursor: pointer;
+                        transition: all 0.2s ease;
+                        text-align: center;
+                    }
+
+                    .forgot-password-link:hover {
+                        text-decoration: underline;
+                        color: #a66a4a;
                     }
 
                     .password-strength-container {
-                        margin-top: 8px;
                         width: 100%;
                     }
 
                     .strength-bar-bg {
                         width: 100%;
-                        height: 4px;
+                        height: 6px;
                         background-color: #e5e7eb;
-                        border-radius: 2px;
+                        border-radius: 3px;
                         overflow: hidden;
+                        margin-bottom: 8px;
                     }
 
                     .strength-bar-fill {
                         height: 100%;
-                        transition: all 0.3s ease;
-                        border-radius: 2px;
+                        border-radius: 3px;
                     }
 
                     .strength-info {
                         display: flex;
                         justify-content: space-between;
-                        align-items: center;
-                        margin-top: 4px;
+                        align-items: flex-start;
                         font-size: 12px;
                     }
 
                     .strength-label {
                         font-weight: 600;
+                        font-size: 13px;
                     }
 
                     .strength-feedback {
@@ -501,12 +645,14 @@ export default function AuthPopup({ onClose }) {
                         flex-direction: column;
                         align-items: flex-end;
                         gap: 2px;
+                        max-width: 60%;
                     }
 
                     .feedback-tip {
                         color: #6b7280;
-                        font-size: 10px;
+                        font-size: 11px;
                         text-align: right;
+                        line-height: 1.3;
                     }
                 `}</style>
             </div>
